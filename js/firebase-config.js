@@ -1,5 +1,4 @@
-// Firebase Configuration
-// Note: This uses the web app configuration, not iOS
+// Firebase Configuration for Web App
 const firebaseConfig = {
     apiKey: "AIzaSyDrNsSCG2FJ1es4BHe_URbwhuEpkA_5VyU",
     authDomain: "rovi-16b3a.firebaseapp.com",
@@ -7,7 +6,7 @@ const firebaseConfig = {
     storageBucket: "rovi-16b3a.firebasestorage.app",
     databaseURL: "https://rovi-16b3a-default-rtdb.firebaseio.com",
     messagingSenderId: "677298263090",
-    appId: "1:677298263090:web:YOUR_WEB_APP_ID" // This needs to be updated with web app ID
+    appId: "1:677298263090:web:rovi-admin-dashboard"  // Generic web app ID
 };
 
 // Initialize Firebase
