@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROVI Admin Dashboard (Simple Auth)</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <h1>🏃 ROVI Admin</h1>
+            <p>Super Admin Dashboard</p>
+            <p style="font-size: 0.875rem; color: #718096; margin: 1rem 0;">
+                Test Mode - Use email: vinh2711@googlemail.com
+            </p>
+            <button id="loginBtn" class="btn-primary">Sign in with Email</button>
+            <div id="loginError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="dashboard-container" style="display: none;">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>ROVI Admin</h2>
+                <span id="lastRefresh" class="last-refresh">Never</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-page="overview">
+                    <span class="icon">📊</span> Overview
+                </li>
+                <li class="nav-item" data-page="users">
+                    <span class="icon">👥</span> Users
+                </li>
+                <li class="nav-item" data-page="activity">
+                    <span class="icon">🏃</span> Activity
+                </li>
+                <li class="nav-item" data-page="nutrition">
+                    <span class="icon">🍎</span> Nutrition
+                </li>
+                <li class="nav-item" data-page="insights">
+                    <span class="icon">💡</span> Insights
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="refreshBtn" class="btn-refresh">🔄 Refresh Data</button>
+                <button id="logoutBtn" class="btn-logout">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1 id="pageTitle">Dashboard Overview</h1>
+                <div class="header-controls">
+                    <select id="timeFilter" class="time-filter">
+                        <option value="all">All Time</option>
+                        <option value="30">Last 30 Days</option>
+                        <option value="7">Last 7 Days</option>
+                        <option value="1">Today</option>
+                    </select>
+                    <button id="exportBtn" class="btn-export">📥 Export</button>
+                </div>
+            </header>
+
+            <!-- Overview Page -->
+            <div id="overviewPage" class="page-content">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3>Total Users</h3>
+                            <p class="stat-value" id="totalUsers">7</p>
+                            <span class="stat-change positive">+2 this month</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏃</div>
+                        <div class="stat-content">
+                            <h3>Avg Daily Steps</h3>
+                            <p class="stat-value" id="avgSteps">8,543</p>
+                            <span class="stat-change positive">+12%</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-content">
+                            <h3>Avg Calories Burned</h3>
+                            <p class="stat-value" id="avgCaloriesBurned">425</p>
+                            <span class="stat-change negative">-5%</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🍎</div>
+                        <div class="stat-content">
+                            <h3>Foods Logged Today</h3>
+                            <p class="stat-value" id="foodsLogged">34</p>
+                            <span class="stat-change positive">+8%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div style="background: #fef5e7; border: 1px solid #f39c12; padding: 1rem; border-radius: 8px; margin: 2rem 0;">
+                    <h3 style="color: #f39c12; margin-bottom: 0.5rem;">⚠️ Test Mode Active</h3>
+                    <p style="color: #856404;">
+                        This is a simplified version for testing. Firebase connection is disabled.
+                        To enable real data, follow the setup guide to configure Firebase authentication.
+                    </p>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>User Activity Trend</h3>
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Top Performers (Sample Data)</h3>
+                        <div id="topPerformers" class="leaderboard">
+                            <div class="leaderboard-item">
+                                <span class="leaderboard-rank">#1</span>
+                                <span class="leaderboard-user">User: byoth...0p1</span>
+                                <span class="leaderboard-value">11,000 steps</span>
+                            </div>
+                            <div class="leaderboard-item">
+                                <span class="leaderboard-rank">#2</span>
+                                <span class="leaderboard-user">User: 4JeqG...FS2</span>
+                                <span class="leaderboard-value">10,000 steps</span>
+                            </div>
+                            <div class="leaderboard-item">
+                                <span class="leaderboard-rank">#3</span>
+                                <span class="leaderboard-user">User: 9scuP...sq1</span>
+                                <span class="leaderboard-value">8,500 steps</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Page -->
+            <div id="usersPage" class="page-content" style="display: none;">
+                <div class="users-grid">
+                    <div class="users-table-card">
+                        <h3>All Users (Sample Data)</h3>
+                        <table id="usersTable" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Created</th>
+                                    <th>Last Active</th>
+                                    <th>Steps Goal</th>
+                                    <th>Calories Goal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>byoth...0p1</td>
+                                    <td>Dec 29, 2024</td>
+                                    <td>Today</td>
+                                    <td>11,000</td>
+                                    <td>2,000</td>
+                                </tr>
+                                <tr>
+                                    <td>4JeqG...FS2</td>
+                                    <td>Jun 26, 2025</td>
+                                    <td>Yesterday</td>
+                                    <td>10,000</td>
+                                    <td>2,500</td>
+                                </tr>
+                                <tr>
+                                    <td>9scuP...sq1</td>
+                                    <td>Jun 26, 2025</td>
+                                    <td>2 days ago</td>
+                                    <td>10,000</td>
+                                    <td>1,700</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other pages remain the same -->
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/cache-manager.js"></script>
+    <!-- Use simple auth instead of regular auth -->
+    <script src="js/auth-simple.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
