@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROVI Admin Dashboard</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <h1>🏃 ROVI Admin</h1>
+            <p>Super Admin Dashboard</p>
+            <button id="loginBtn" class="btn-primary">Sign in with Firebase</button>
+            <div id="loginError" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="dashboard-container" style="display: none;">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>ROVI Admin</h2>
+                <span id="lastRefresh" class="last-refresh">Never</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-page="overview">
+                    <span class="icon">📊</span> Overview
+                </li>
+                <li class="nav-item" data-page="users">
+                    <span class="icon">👥</span> Users
+                </li>
+                <li class="nav-item" data-page="activity">
+                    <span class="icon">🏃</span> Activity
+                </li>
+                <li class="nav-item" data-page="nutrition">
+                    <span class="icon">🍎</span> Nutrition
+                </li>
+                <li class="nav-item" data-page="insights">
+                    <span class="icon">💡</span> Insights
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="refreshBtn" class="btn-refresh">🔄 Refresh Data</button>
+                <button id="logoutBtn" class="btn-logout">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1 id="pageTitle">Dashboard Overview</h1>
+                <div class="header-controls">
+                    <select id="timeFilter" class="time-filter">
+                        <option value="all">All Time</option>
+                        <option value="30">Last 30 Days</option>
+                        <option value="7">Last 7 Days</option>
+                        <option value="1">Today</option>
+                    </select>
+                    <button id="exportBtn" class="btn-export">📥 Export</button>
+                </div>
+            </header>
+
+            <!-- Overview Page -->
+            <div id="overviewPage" class="page-content">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3>Total Users</h3>
+                            <p class="stat-value" id="totalUsers">-</p>
+                            <span class="stat-change" id="userGrowth">-</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏃</div>
+                        <div class="stat-content">
+                            <h3>Avg Daily Steps</h3>
+                            <p class="stat-value" id="avgSteps">-</p>
+                            <span class="stat-change" id="stepsChange">-</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-content">
+                            <h3>Avg Calories Burned</h3>
+                            <p class="stat-value" id="avgCaloriesBurned">-</p>
+                            <span class="stat-change" id="caloriesChange">-</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🍎</div>
+                        <div class="stat-content">
+                            <h3>Foods Logged Today</h3>
+                            <p class="stat-value" id="foodsLogged">-</p>
+                            <span class="stat-change" id="foodsChange">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>User Activity Trend</h3>
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Top Performers</h3>
+                        <div id="topPerformers" class="leaderboard"></div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="recent-activity-card">
+                    <h3>Recent User Activity</h3>
+                    <div id="recentActivity" class="activity-list"></div>
+                </div>
+            </div>
+
+            <!-- Users Page -->
+            <div id="usersPage" class="page-content" style="display: none;">
+                <div class="users-grid">
+                    <div class="users-table-card">
+                        <h3>All Users</h3>
+                        <table id="usersTable" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Created</th>
+                                    <th>Last Active</th>
+                                    <th>Steps Goal</th>
+                                    <th>Calories Goal</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Page -->
+            <div id="activityPage" class="page-content" style="display: none;">
+                <div class="activity-stats">
+                    <div class="chart-card">
+                        <h3>Steps Distribution</h3>
+                        <canvas id="stepsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Exercise Minutes</h3>
+                        <canvas id="exerciseChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Most Active Days</h3>
+                        <canvas id="activeDaysChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Activity Heatmap</h3>
+                        <div id="activityHeatmap" class="heatmap"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nutrition Page -->
+            <div id="nutritionPage" class="page-content" style="display: none;">
+                <div class="nutrition-stats">
+                    <div class="chart-card">
+                        <h3>Most Logged Foods</h3>
+                        <div id="topFoods" class="food-list"></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Meal Distribution</h3>
+                        <canvas id="mealChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Macro Breakdown</h3>
+                        <canvas id="macroChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Calorie Trends</h3>
+                        <canvas id="calorieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights Page -->
+            <div id="insightsPage" class="page-content" style="display: none;">
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <h3>User Retention</h3>
+                        <div id="retentionMetrics"></div>
+                    </div>
+                    <div class="insight-card">
+                        <h3>Feature Adoption</h3>
+                        <div id="featureAdoption"></div>
+                    </div>
+                    <div class="insight-card">
+                        <h3>Peak Usage Times</h3>
+                        <canvas id="usageHeatmap"></canvas>
+                    </div>
+                    <div class="insight-card">
+                        <h3>Goal Achievement Rates</h3>
+                        <div id="goalAchievement"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- User Detail Modal -->
+    <div id="userModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>User Details</h2>
+            <div id="userDetails"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/cache-manager.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
