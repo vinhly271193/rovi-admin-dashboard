@@ -267,13 +267,17 @@
                     <div class="chart-card">
                         <h3>📊 Daily Steps Trend (7 Days)</h3>
                         <div class="chart-container">
-                            <canvas id="stepsChart"></canvas>
+                            <div style="position: absolute; width: 100%; height: 300px; overflow: hidden;">
+                                <canvas id="stepsChart" style="position: absolute; width: 100% !important; height: 300px !important;"></canvas>
+                            </div>
                         </div>
                     </div>
                     <div class="chart-card">
                         <h3>🏃 Activity Distribution</h3>
                         <div class="chart-container">
-                            <canvas id="activityChart"></canvas>
+                            <div style="position: absolute; width: 100%; height: 300px; overflow: hidden;">
+                                <canvas id="activityChart" style="position: absolute; width: 100% !important; height: 300px !important;"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -395,6 +399,38 @@
         let stepsChartInstance = null;
         let activityChartInstance = null;
 
+        // Prevent chart expansion with MutationObserver
+        function preventChartExpansion() {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const target = mutation.target;
+                        if (target.id === 'stepsChart' || target.id === 'activityChart') {
+                            if (parseInt(target.style.height) > 300) {
+                                target.style.height = '300px';
+                                target.style.maxHeight = '300px';
+                                target.height = 300;
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Observe both chart canvases
+            const stepsChart = document.getElementById('stepsChart');
+            const activityChart = document.getElementById('activityChart');
+            
+            if (stepsChart) {
+                observer.observe(stepsChart, { attributes: true, attributeFilter: ['style'] });
+            }
+            if (activityChart) {
+                observer.observe(activityChart, { attributes: true, attributeFilter: ['style'] });
+            }
+        }
+        
+        // Start monitoring after DOM is ready
+        document.addEventListener('DOMContentLoaded', preventChartExpansion);
+        
         // Auth State Observer
         auth.onAuthStateChanged(async (user) => {
             if (user) {
@@ -647,13 +683,23 @@
             // Destroy existing chart if it exists
             if (stepsChartInstance) {
                 stepsChartInstance.destroy();
+                stepsChartInstance = null;
             }
             
-            // Create new chart with fixed height
-            const ctx = document.getElementById('stepsChart').getContext('2d');
-            ctx.canvas.height = 300;
-            ctx.canvas.style.height = '300px';
-            ctx.canvas.style.maxHeight = '300px';
+            // Force canvas to exact size before creating chart
+            const canvas = document.getElementById('stepsChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear any existing content
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Force exact dimensions
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 300;
+            canvas.style.width = '100%';
+            canvas.style.height = '300px';
+            canvas.style.maxHeight = '300px';
+            canvas.style.position = 'absolute';
             
             stepsChartInstance = new Chart(ctx, {
                 type: 'line',
@@ -669,9 +715,11 @@
                     }]
                 },
                 options: {
-                    responsive: true,
+                    responsive: false,  // DISABLE responsive to prevent growth
                     maintainAspectRatio: false,
-                    aspectRatio: 2,
+                    animation: {
+                        duration: 0  // Disable animation to prevent flickering
+                    },
                     layout: {
                         padding: 0
                     },
@@ -687,6 +735,14 @@
                                 }
                             }
                         }
+                    },
+                    onResize: function(chart, size) {
+                        // Prevent any resize beyond 300px
+                        if (size.height > 300) {
+                            chart.canvas.height = 300;
+                            chart.canvas.style.height = '300px';
+                            return false;
+                        }
                     }
                 }
             });
@@ -694,12 +750,20 @@
             // Activity distribution chart
             if (activityChartInstance) {
                 activityChartInstance.destroy();
+                activityChartInstance = null;
             }
             
-            const activityCtx = document.getElementById('activityChart').getContext('2d');
-            activityCtx.canvas.height = 300;
-            activityCtx.canvas.style.height = '300px';
-            activityCtx.canvas.style.maxHeight = '300px';
+            const activityCanvas = document.getElementById('activityChart');
+            const activityCtx = activityCanvas.getContext('2d');
+            
+            // Clear and force dimensions
+            activityCtx.clearRect(0, 0, activityCanvas.width, activityCanvas.height);
+            activityCanvas.width = activityCanvas.offsetWidth;
+            activityCanvas.height = 300;
+            activityCanvas.style.width = '100%';
+            activityCanvas.style.height = '300px';
+            activityCanvas.style.maxHeight = '300px';
+            activityCanvas.style.position = 'absolute';
             
             const activeUsers = Object.values(dataCache.todaySteps || {}).filter(s => s > 0).length;
             const inactiveUsers = dataCache.users.length - activeUsers;
@@ -714,11 +778,20 @@
                     }]
                 },
                 options: {
-                    responsive: true,
+                    responsive: false,  // DISABLE responsive
                     maintainAspectRatio: false,
-                    aspectRatio: 1,
+                    animation: {
+                        duration: 0
+                    },
                     layout: {
                         padding: 0
+                    },
+                    onResize: function(chart, size) {
+                        if (size.height > 300) {
+                            chart.canvas.height = 300;
+                            chart.canvas.style.height = '300px';
+                            return false;
+                        }
                     }
                 }
             });
