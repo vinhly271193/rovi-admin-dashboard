@@ -6,12 +6,14 @@
     <title>ROVI Admin Dashboard - Optimized</title>
     <link rel="stylesheet" href="css/dashboard.css">
     <style>
-        /* Fixed chart heights */
+        /* Fixed chart heights - STRICT enforcement */
         .chart-container {
             position: relative;
             height: 300px !important;
             max-height: 300px !important;
+            min-height: 300px !important;
             width: 100%;
+            overflow: hidden !important;
         }
         
         .chart-card {
@@ -20,10 +22,19 @@
             padding: 1.5rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             margin: 1rem 0;
+            overflow: hidden !important;
         }
         
         .chart-card canvas {
             max-height: 300px !important;
+            height: 300px !important;
+            display: block !important;
+        }
+        
+        /* Prevent chart.js from overriding styles */
+        #stepsChart, #activityChart {
+            max-height: 300px !important;
+            height: 100% !important;
         }
         
         .insights-grid {
@@ -640,6 +651,10 @@
             
             // Create new chart with fixed height
             const ctx = document.getElementById('stepsChart').getContext('2d');
+            ctx.canvas.height = 300;
+            ctx.canvas.style.height = '300px';
+            ctx.canvas.style.maxHeight = '300px';
+            
             stepsChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -656,6 +671,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    aspectRatio: 2,
+                    layout: {
+                        padding: 0
+                    },
                     plugins: {
                         legend: { display: false }
                     },
@@ -678,6 +697,10 @@
             }
             
             const activityCtx = document.getElementById('activityChart').getContext('2d');
+            activityCtx.canvas.height = 300;
+            activityCtx.canvas.style.height = '300px';
+            activityCtx.canvas.style.maxHeight = '300px';
+            
             const activeUsers = Object.values(dataCache.todaySteps || {}).filter(s => s > 0).length;
             const inactiveUsers = dataCache.users.length - activeUsers;
             
@@ -692,7 +715,11 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false
+                    maintainAspectRatio: false,
+                    aspectRatio: 1,
+                    layout: {
+                        padding: 0
+                    }
                 }
             });
         }
