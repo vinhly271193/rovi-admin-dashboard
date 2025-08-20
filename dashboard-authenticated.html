@@ -294,7 +294,7 @@
 
                 let activeToday = 0;
                 let totalStepsToday = 0;
-                const today = new Date().toISOString().split('T')[0].replace(/-/g, '_');
+                const today = new Date().toISOString().split('T')[0]; // Use YYYY-MM-DD format
                 const userActivityData = [];
 
                 // Process each user
@@ -442,7 +442,7 @@
                     const userId = doc.id;
                     
                     // Get user's latest stats
-                    const today = new Date().toISOString().split('T')[0].replace(/-/g, '_');
+                    const today = new Date().toISOString().split('T')[0]; // Use YYYY-MM-DD format
                     let todaySteps = 0;
                     let lastActive = 'Never';
                     
@@ -538,7 +538,7 @@
                     for (let i = 0; i < 7; i++) {
                         const date = new Date();
                         date.setDate(date.getDate() - i);
-                        const dateStr = date.toISOString().split('T')[0].replace(/-/g, '_');
+                        const dateStr = date.toISOString().split('T')[0]; // Use YYYY-MM-DD format
                         
                         try {
                             const entriesSnapshot = await db.collection('users').doc(userId)
@@ -621,7 +621,7 @@
                 let foodItems = [];
                 
                 const usersSnapshot = await db.collection('users').get();
-                const today = new Date().toISOString().split('T')[0].replace(/-/g, '_');
+                const today = new Date().toISOString().split('T')[0]; // Use YYYY-MM-DD format
                 
                 // Get today's food logs for all users
                 for (const userDoc of usersSnapshot.docs) {
