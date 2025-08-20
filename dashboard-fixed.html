@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROVI Admin Dashboard - Fixed</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        /* Fixed chart heights */
+        .chart-container {
+            position: relative;
+            height: 300px !important;
+            max-height: 300px !important;
+            width: 100%;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 1rem 0;
+        }
+        
+        .chart-card canvas {
+            max-height: 300px !important;
+        }
+        
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .leaderboard-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            transition: all 0.2s;
+        }
+        
+        .leaderboard-item:hover {
+            background: #edf2f7;
+            transform: translateX(5px);
+        }
+        
+        .leaderboard-rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            width: 40px;
+            text-align: center;
+        }
+        
+        .leaderboard-rank.gold { color: #ffd700; }
+        .leaderboard-rank.silver { color: #c0c0c0; }
+        .leaderboard-rank.bronze { color: #cd7f32; }
+        
+        .foods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .food-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .food-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .food-emoji {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .food-name {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.25rem;
+        }
+        
+        .food-stats {
+            font-size: 0.875rem;
+            color: #718096;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            color: #718096;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        
+        .tab-button.active {
+            color: #4299e1;
+            border-bottom-color: #4299e1;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #4299e1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <h1>🏃 ROVI Admin Dashboard</h1>
+            <p>Complete Analytics & Real Data</p>
+            <button id="googleSignInBtn" class="btn-primary">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width: 20px; margin-right: 8px;">
+                Sign in with Google
+            </button>
+            <div id="loginError" class="error-message" style="margin-top: 1rem; color: red;"></div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard-container" style="display: none;">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>ROVI Analytics</h2>
+                <span id="userEmail" style="font-size: 0.75rem; color: #718096;"></span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-page="overview">
+                    <span class="icon">📊</span> Overview
+                </li>
+                <li class="nav-item" data-page="leaderboards">
+                    <span class="icon">🏆</span> Leaderboards
+                </li>
+                <li class="nav-item" data-page="foods">
+                    <span class="icon">🍎</span> Food Database
+                </li>
+                <li class="nav-item" data-page="activities">
+                    <span class="icon">🏃</span> Activities
+                </li>
+                <li class="nav-item" data-page="users">
+                    <span class="icon">👥</span> Users
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="refreshBtn" class="btn-refresh">🔄 Refresh</button>
+                <button id="signOutBtn" class="btn-logout">Sign Out</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1 id="pageTitle">Dashboard Overview</h1>
+                <span id="lastUpdate" style="font-size: 0.875rem; color: #718096;"></span>
+            </header>
+
+            <!-- Overview Page -->
+            <div id="overviewPage" class="page-content">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3>Total Users</h3>
+                            <p class="stat-value" id="totalUsers">-</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👣</div>
+                        <div class="stat-content">
+                            <h3>Steps Today</h3>
+                            <p class="stat-value" id="totalStepsToday">-</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🍎</div>
+                        <div class="stat-content">
+                            <h3>Foods in Database</h3>
+                            <p class="stat-value" id="totalFoods">-</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-content">
+                            <h3>Active Today</h3>
+                            <p class="stat-value" id="activeToday">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="insights-grid">
+                    <div class="chart-card">
+                        <h3>📊 Daily Steps Trend (7 Days)</h3>
+                        <div class="chart-container">
+                            <canvas id="stepsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>🏃 Activity Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Leaderboard -->
+                <div class="chart-card">
+                    <h3>🏆 Today's Top Performers</h3>
+                    <div id="quickLeaderboard">
+                        <div class="loading-spinner"></div> Loading...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboards Page -->
+            <div id="leaderboardsPage" class="page-content" style="display: none;">
+                <div class="tab-buttons">
+                    <button class="tab-button active" data-tab="steps">👣 Steps</button>
+                    <button class="tab-button" data-tab="calories">🔥 Calories</button>
+                    <button class="tab-button" data-tab="activities">🏃 Activities</button>
+                    <button class="tab-button" data-tab="consistency">📅 Consistency</button>
+                </div>
+
+                <div id="leaderboardContent">
+                    <div class="loading-spinner"></div> Loading leaderboards...
+                </div>
+            </div>
+
+            <!-- Foods Page -->
+            <div id="foodsPage" class="page-content" style="display: none;">
+                <div class="chart-card">
+                    <h3>🍎 Food Database Statistics</h3>
+                    <div id="foodStats">
+                        <p>Total Unique Foods: <strong id="uniqueFoodsCount">-</strong></p>
+                        <p>Categories: <strong id="categoriesCount">-</strong></p>
+                        <p>Most Popular Category: <strong id="topCategory">-</strong></p>
+                    </div>
+                </div>
+
+                <div class="tab-buttons">
+                    <button class="tab-button active" data-tab="popular">🔥 Most Popular</button>
+                    <button class="tab-button" data-tab="recent">🕐 Recently Added</button>
+                    <button class="tab-button" data-tab="all">📚 All Foods</button>
+                    <button class="tab-button" data-tab="search">🔍 Search</button>
+                </div>
+
+                <div id="foodsContent">
+                    <div class="loading-spinner"></div> Loading food database...
+                </div>
+            </div>
+
+            <!-- Activities Page -->
+            <div id="activitiesPage" class="page-content" style="display: none;">
+                <div class="chart-card">
+                    <h3>🏃 Recent Activities</h3>
+                    <div id="activitiesContent">
+                        <div class="loading-spinner"></div> Loading activities...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Page -->
+            <div id="usersPage" class="page-content" style="display: none;">
+                <div class="chart-card">
+                    <h3>👥 All Users</h3>
+                    <div id="usersContent">
+                        <div class="loading-spinner"></div> Loading users...
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrNsSCG2FJ1es4BHe_URbwhuEpkA_5VyU",
+            authDomain: "rovi-16b3a.firebaseapp.com",
+            projectId: "rovi-16b3a",
+            storageBucket: "rovi-16b3a.firebasestorage.app",
+            databaseURL: "https://rovi-16b3a-default-rtdb.firebaseio.com"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const ADMIN_UID = 'byothLpU8SdS5SYpxlUFTOpGT0p1';
+        
+        let currentUser = null;
+        let dashboardData = {
+            users: [],
+            foods: [],
+            activities: [],
+            steps: {}
+        };
+        
+        // Charts instances (to destroy on refresh)
+        let stepsChartInstance = null;
+        let activityChartInstance = null;
+
+        // Auth State Observer
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                console.log('User signed in:', user.email);
+                currentUser = user;
+                
+                if (user.uid === ADMIN_UID || user.email === 'vinh2711@googlemail.com') {
+                    showDashboard(user);
+                    await loadDashboardData();
+                } else {
+                    showError('Access denied. Admin only.');
+                    auth.signOut();
+                }
+            } else {
+                showLogin();
+                currentUser = null;
+            }
+        });
+
+        // Sign In
+        document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
+                await auth.signInWithPopup(provider);
+            } catch (error) {
+                showError(error.message);
+            }
+        });
+
+        // Sign Out
+        document.getElementById('signOutBtn').addEventListener('click', () => auth.signOut());
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                
+                const page = this.dataset.page;
+                document.querySelectorAll('.page-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                const pageElement = document.getElementById(page + 'Page');
+                if (pageElement) {
+                    pageElement.style.display = 'block';
+                    document.getElementById('pageTitle').textContent = this.textContent.trim();
+                    
+                    // Load page-specific data
+                    switch(page) {
+                        case 'leaderboards':
+                            loadLeaderboards();
+                            break;
+                        case 'foods':
+                            loadFoodDatabase();
+                            break;
+                        case 'activities':
+                            loadActivities();
+                            break;
+                        case 'users':
+                            loadUsersPage();
+                            break;
+                    }
+                }
+            });
+        });
+
+        // Tab functionality for leaderboards and foods
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('tab-button')) {
+                const parent = e.target.parentElement;
+                parent.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                const tab = e.target.dataset.tab;
+                const page = document.querySelector('.page-content:not([style*="display: none"])').id;
+                
+                if (page === 'leaderboardsPage') {
+                    loadLeaderboardTab(tab);
+                } else if (page === 'foodsPage') {
+                    loadFoodTab(tab);
+                }
+            }
+        });
+
+        // Refresh Button
+        document.getElementById('refreshBtn').addEventListener('click', () => loadDashboardData());
+
+        function showLogin() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+
+        function showDashboard(user) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+            document.getElementById('userEmail').textContent = user.email;
+        }
+
+        function showError(message) {
+            document.getElementById('loginError').textContent = message;
+        }
+
+        // Main data loading function
+        async function loadDashboardData() {
+            console.log('Loading dashboard data...');
+            document.getElementById('lastUpdate').textContent = 'Updating...';
+            
+            try {
+                // Load Users
+                const usersSnapshot = await db.collection('users').get();
+                dashboardData.users = usersSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                document.getElementById('totalUsers').textContent = dashboardData.users.length;
+                
+                // Load today's steps for all users
+                const today = new Date().toISOString().split('T')[0];
+                let totalStepsToday = 0;
+                let activeUsersToday = 0;
+                const dailySteps = {};
+                
+                for (const user of dashboardData.users) {
+                    try {
+                        // Get today's steps
+                        const stepsDoc = await db.collection('users').doc(user.id)
+                            .collection('stepsData').doc(today).get();
+                        
+                        if (stepsDoc.exists) {
+                            const steps = stepsDoc.data().steps || 0;
+                            dailySteps[user.id] = steps;
+                            totalStepsToday += steps;
+                            if (steps > 0) activeUsersToday++;
+                        }
+                    } catch (e) {
+                        console.log(`No steps for user ${user.id}`);
+                    }
+                }
+                
+                dashboardData.steps = dailySteps;
+                document.getElementById('totalStepsToday').textContent = totalStepsToday.toLocaleString();
+                document.getElementById('activeToday').textContent = activeUsersToday;
+                
+                // Load Food Database count
+                const foodSnapshot = await db.collection('foodDatabase').get();
+                dashboardData.foods = foodSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                document.getElementById('totalFoods').textContent = dashboardData.foods.length;
+                
+                // Update charts
+                await updateCharts();
+                
+                // Update quick leaderboard
+                updateQuickLeaderboard();
+                
+                document.getElementById('lastUpdate').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('lastUpdate').textContent = 'Error loading data';
+            }
+        }
+
+        async function updateCharts() {
+            // Get last 7 days of steps
+            const last7Days = [];
+            const stepsData = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayName = date.toLocaleDateString('en', { weekday: 'short' });
+                last7Days.push(dayName);
+                
+                let dayTotal = 0;
+                for (const user of dashboardData.users) {
+                    try {
+                        const stepsDoc = await db.collection('users').doc(user.id)
+                            .collection('stepsData').doc(dateStr).get();
+                        if (stepsDoc.exists) {
+                            dayTotal += stepsDoc.data().steps || 0;
+                        }
+                    } catch (e) {}
+                }
+                stepsData.push(dayTotal);
+            }
+            
+            // Destroy existing chart if it exists
+            if (stepsChartInstance) {
+                stepsChartInstance.destroy();
+            }
+            
+            // Create new chart with fixed height
+            const ctx = document.getElementById('stepsChart').getContext('2d');
+            stepsChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last7Days,
+                    datasets: [{
+                        label: 'Total Steps',
+                        data: stepsData,
+                        borderColor: '#4299e1',
+                        backgroundColor: 'rgba(66, 153, 225, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Activity distribution chart
+            if (activityChartInstance) {
+                activityChartInstance.destroy();
+            }
+            
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            const activityCounts = {};
+            
+            // Count activities by type (simplified)
+            const userActivity = dashboardData.users.map(u => ({
+                name: u.email || u.id.substring(0, 8),
+                steps: dashboardData.steps[u.id] || 0
+            }));
+            
+            const activeUsers = userActivity.filter(u => u.steps > 0).length;
+            const inactiveUsers = userActivity.filter(u => u.steps === 0).length;
+            
+            activityChartInstance = new Chart(activityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Active Today', 'Inactive Today'],
+                    datasets: [{
+                        data: [activeUsers, inactiveUsers],
+                        backgroundColor: ['#48bb78', '#e2e8f0']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function updateQuickLeaderboard() {
+            const sorted = Object.entries(dashboardData.steps)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            let html = '';
+            sorted.forEach(([userId, steps], index) => {
+                const user = dashboardData.users.find(u => u.id === userId);
+                const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+                html += `
+                    <div class="leaderboard-item">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span class="leaderboard-rank ${rankClass}">${index + 1}</span>
+                            <div>
+                                <strong>${user?.email || userId.substring(0, 8) + '...'}</strong>
+                                <div style="color: #718096; font-size: 0.875rem;">
+                                    ${steps.toLocaleString()} steps today
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('quickLeaderboard').innerHTML = html || '<p>No activity data today</p>';
+        }
+
+        async function loadLeaderboards() {
+            loadLeaderboardTab('steps');
+        }
+
+        async function loadLeaderboardTab(tab) {
+            const content = document.getElementById('leaderboardContent');
+            content.innerHTML = '<div class="loading-spinner"></div> Loading...';
+            
+            let html = '';
+            
+            switch(tab) {
+                case 'steps':
+                    const stepsLeaders = Object.entries(dashboardData.steps)
+                        .sort((a, b) => b[1] - a[1]);
+                    
+                    html = '<h3>Today\'s Step Leaders</h3>';
+                    stepsLeaders.forEach(([userId, steps], index) => {
+                        const user = dashboardData.users.find(u => u.id === userId);
+                        const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+                        html += `
+                            <div class="leaderboard-item">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <span class="leaderboard-rank ${rankClass}">${index + 1}</span>
+                                    <div style="flex: 1;">
+                                        <strong>${user?.name || user?.email || userId.substring(0, 8) + '...'}</strong>
+                                        <div style="color: #718096; font-size: 0.875rem;">
+                                            ${steps.toLocaleString()} steps
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    break;
+                    
+                case 'calories':
+                    html = '<h3>Calories Burned Leaders</h3>';
+                    html += '<p>Loading calories data...</p>';
+                    // Would load actual calories data here
+                    break;
+                    
+                case 'activities':
+                    html = '<h3>Most Active Users</h3>';
+                    html += '<p>Loading activity data...</p>';
+                    break;
+                    
+                case 'consistency':
+                    html = '<h3>Most Consistent Users</h3>';
+                    html += '<p>Analyzing consistency...</p>';
+                    break;
+            }
+            
+            content.innerHTML = html;
+        }
+
+        async function loadFoodDatabase() {
+            loadFoodTab('popular');
+        }
+
+        async function loadFoodTab(tab) {
+            const content = document.getElementById('foodsContent');
+            content.innerHTML = '<div class="loading-spinner"></div> Loading...';
+            
+            // Update stats
+            document.getElementById('uniqueFoodsCount').textContent = dashboardData.foods.length;
+            
+            // Count categories
+            const categories = {};
+            dashboardData.foods.forEach(food => {
+                const category = food.category || 'Uncategorized';
+                categories[category] = (categories[category] || 0) + 1;
+            });
+            
+            document.getElementById('categoriesCount').textContent = Object.keys(categories).length;
+            
+            const topCategory = Object.entries(categories)
+                .sort((a, b) => b[1] - a[1])[0];
+            document.getElementById('topCategory').textContent = topCategory ? `${topCategory[0]} (${topCategory[1]} items)` : 'N/A';
+            
+            let html = '';
+            let foods = [];
+            
+            switch(tab) {
+                case 'popular':
+                    // Sort by popularity
+                    foods = dashboardData.foods
+                        .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+                        .slice(0, 20);
+                    
+                    html = '<h4>Top 20 Most Popular Foods</h4><div class="foods-grid">';
+                    foods.forEach((food, index) => {
+                        html += `
+                            <div class="food-item">
+                                <div class="food-emoji">${food.emoji || '🍽️'}</div>
+                                <div class="food-name">${food.name}</div>
+                                <div class="food-stats">
+                                    ${food.caloriesPerServing || 0} cal<br>
+                                    Popularity: ${food.popularity || 0}
+                                </div>
+                                <div style="color: #4299e1; font-weight: bold;">#${index + 1}</div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    break;
+                    
+                case 'recent':
+                    html = '<h4>Recently Added Foods</h4><div class="foods-grid">';
+                    // Would sort by date if available
+                    foods = dashboardData.foods.slice(0, 20);
+                    foods.forEach(food => {
+                        html += `
+                            <div class="food-item">
+                                <div class="food-emoji">${food.emoji || '🍽️'}</div>
+                                <div class="food-name">${food.name}</div>
+                                <div class="food-stats">${food.caloriesPerServing || 0} cal</div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    break;
+                    
+                case 'all':
+                    html = `<h4>All Foods (${dashboardData.foods.length} items)</h4>`;
+                    html += '<div style="max-height: 600px; overflow-y: auto;">';
+                    html += '<table class="data-table"><thead><tr><th>Name</th><th>Category</th><th>Calories</th><th>Popularity</th></tr></thead><tbody>';
+                    
+                    dashboardData.foods.forEach(food => {
+                        html += `
+                            <tr>
+                                <td>${food.emoji || ''} ${food.name}</td>
+                                <td>${food.category || 'N/A'}</td>
+                                <td>${food.caloriesPerServing || 0}</td>
+                                <td>${food.popularity || 0}</td>
+                            </tr>
+                        `;
+                    });
+                    html += '</tbody></table></div>';
+                    break;
+                    
+                case 'search':
+                    html = `
+                        <div style="margin: 1rem 0;">
+                            <input type="text" id="foodSearch" placeholder="Search foods..." style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 6px;">
+                        </div>
+                        <div id="searchResults"></div>
+                    `;
+                    setTimeout(() => {
+                        document.getElementById('foodSearch')?.addEventListener('input', (e) => {
+                            const query = e.target.value.toLowerCase();
+                            const filtered = dashboardData.foods.filter(f => 
+                                f.name.toLowerCase().includes(query)
+                            );
+                            
+                            let resultsHtml = `<p>Found ${filtered.length} items</p><div class="foods-grid">`;
+                            filtered.slice(0, 20).forEach(food => {
+                                resultsHtml += `
+                                    <div class="food-item">
+                                        <div class="food-emoji">${food.emoji || '🍽️'}</div>
+                                        <div class="food-name">${food.name}</div>
+                                        <div class="food-stats">${food.caloriesPerServing || 0} cal</div>
+                                    </div>
+                                `;
+                            });
+                            resultsHtml += '</div>';
+                            document.getElementById('searchResults').innerHTML = resultsHtml;
+                        });
+                    }, 100);
+                    break;
+            }
+            
+            content.innerHTML = html;
+        }
+
+        async function loadActivities() {
+            const content = document.getElementById('activitiesContent');
+            content.innerHTML = '<div class="loading-spinner"></div> Loading...';
+            
+            const today = new Date().toISOString().split('T')[0];
+            let allActivities = [];
+            
+            for (const user of dashboardData.users) {
+                try {
+                    const activitiesSnapshot = await db.collection('users').doc(user.id)
+                        .collection('activityLog').doc(today)
+                        .collection('entries').get();
+                    
+                    activitiesSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        allActivities.push({
+                            user: user.email || user.id.substring(0, 8),
+                            ...data
+                        });
+                    });
+                } catch (e) {}
+            }
+            
+            let html = `<h4>Today's Activities (${allActivities.length} total)</h4>`;
+            if (allActivities.length === 0) {
+                html += '<p>No activities logged today</p>';
+            } else {
+                html += '<div style="max-height: 600px; overflow-y: auto;">';
+                allActivities.forEach(activity => {
+                    html += `
+                        <div class="leaderboard-item">
+                            <div>
+                                <strong>${activity.name || 'Activity'}</strong>
+                                <div style="color: #718096; font-size: 0.875rem;">
+                                    by ${activity.user} • ${activity.duration || 0} min • ${activity.caloriesBurned || 0} cal
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            
+            content.innerHTML = html;
+        }
+
+        async function loadUsersPage() {
+            const content = document.getElementById('usersContent');
+            content.innerHTML = '<div class="loading-spinner"></div> Loading...';
+            
+            let html = '<div style="overflow-x: auto;"><table class="data-table">';
+            html += '<thead><tr><th>User ID</th><th>Email</th><th>Name</th><th>Today\'s Steps</th><th>Created</th></tr></thead><tbody>';
+            
+            for (const user of dashboardData.users) {
+                const steps = dashboardData.steps[user.id] || 0;
+                const created = user.createdAt ? new Date(user.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+                
+                html += `
+                    <tr>
+                        <td>${user.id.substring(0, 12)}...</td>
+                        <td>${user.email || 'N/A'}</td>
+                        <td>${user.name || 'N/A'}</td>
+                        <td>${steps.toLocaleString()}</td>
+                        <td>${created}</td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table></div>';
+            content.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
