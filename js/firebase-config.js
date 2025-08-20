@@ -18,7 +18,7 @@ const db = firebase.firestore();
 
 // Admin UID - Only this user can access the dashboard
 // This is your UID from the screenshots - vinh2711@googlemail.com
-const ADMIN_UID = "byothLpU8SdS5SYpx1UFT0pGT0p1";
+const ADMIN_UID = "byothLpU8SdS5SYpxlUFTOpGT0p1"; // Fixed typo: lowercase 'l' and 'O'
 
 // Collections
 const COLLECTIONS = {
