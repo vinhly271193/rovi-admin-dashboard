@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROVI Admin Dashboard - Web Only</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        .error-banner {
+            background: #fed7d7;
+            color: #742a2a;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        .success-banner {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <h1>🏃 ROVI Admin Dashboard</h1>
+            <p>Web-Only Authentication Version</p>
+            
+            <div class="error-banner">
+                <strong>iOS Client Error Fix</strong><br>
+                This version uses web-only authentication to bypass iOS restrictions.
+            </div>
+            
+            <!-- Email/Password Login -->
+            <div style="margin-top: 2rem;">
+                <h3>Sign In with Email</h3>
+                <input type="email" id="emailInput" placeholder="vinh2711@googlemail.com" value="vinh2711@googlemail.com" style="width: 100%; padding: 0.75rem; margin: 0.5rem 0; border: 1px solid #e2e8f0; border-radius: 0.25rem;">
+                <input type="password" id="passwordInput" placeholder="Enter your password" style="width: 100%; padding: 0.75rem; margin: 0.5rem 0; border: 1px solid #e2e8f0; border-radius: 0.25rem;">
+                <button id="emailSignInBtn" class="btn-primary" style="width: 100%; margin-top: 0.5rem;">Sign In</button>
+            </div>
+
+            <!-- Alternative: Anonymous Access -->
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
+                <h3>Or Access Without Sign-In</h3>
+                <p style="font-size: 0.875rem; color: #718096;">
+                    View dashboard with limited functionality
+                </p>
+                <button id="anonymousBtn" class="btn-primary" style="width: 100%; background: #718096;">Anonymous Access</button>
+            </div>
+
+            <div id="loginStatus" style="margin-top: 1rem;"></div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard-container" style="display: none;">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>ROVI Admin</h2>
+                <span id="userInfo" style="font-size: 0.75rem; color: #718096;"></span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-page="overview">
+                    <span class="icon">📊</span> Overview
+                </li>
+                <li class="nav-item" data-page="users">
+                    <span class="icon">👥</span> Users
+                </li>
+                <li class="nav-item" data-page="debug">
+                    <span class="icon">🔧</span> Debug Info
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="signOutBtn" class="btn-logout">Sign Out</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1 id="pageTitle">Dashboard Overview</h1>
+            </header>
+
+            <!-- Overview Page -->
+            <div id="overviewPage" class="page-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3>Total Users</h3>
+                            <p class="stat-value" id="totalUsers">-</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔐</div>
+                        <div class="stat-content">
+                            <h3>Auth Status</h3>
+                            <p class="stat-value" id="authStatus">-</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📡</div>
+                        <div class="stat-content">
+                            <h3>Connection</h3>
+                            <p class="stat-value" id="connectionStatus">-</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔑</div>
+                        <div class="stat-content">
+                            <h3>API Key</h3>
+                            <p class="stat-value" id="apiKeyStatus">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="chart-card" style="margin-top: 2rem;">
+                    <h3>Users Data</h3>
+                    <div id="usersData" style="padding: 1rem;">
+                        <div>Waiting for authentication...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Page -->
+            <div id="usersPage" class="page-content" style="display: none;">
+                <div class="chart-card">
+                    <h3>All Users</h3>
+                    <div id="allUsersList"></div>
+                </div>
+            </div>
+
+            <!-- Debug Page -->
+            <div id="debugPage" class="page-content" style="display: none;">
+                <div class="chart-card">
+                    <h3>Debug Information</h3>
+                    <div id="debugInfo" style="font-family: monospace; padding: 1rem; background: #f7fafc; border-radius: 0.5rem;">
+                        Loading debug info...
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase Configuration - Web App specific
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrNsSCG2FJ1es4BHe_URbwhuEpkA_5VyU",
+            authDomain: "rovi-16b3a.firebaseapp.com",
+            projectId: "rovi-16b3a",
+            storageBucket: "rovi-16b3a.firebasestorage.app",
+            databaseURL: "https://rovi-16b3a-default-rtdb.firebaseio.com",
+            // Remove messaging and app IDs that might trigger iOS checks
+        };
+
+        // Initialize Firebase with web-only settings
+        firebase.initializeApp(firebaseConfig);
+        
+        // Configure auth settings for web
+        const auth = firebase.auth();
+        auth.useDeviceLanguage();
+        
+        // Disable app verification for web
+        auth.settings.appVerificationDisabledForTesting = true;
+        
+        const db = firebase.firestore();
+
+        const ADMIN_UID = 'byothLpU8SdS5SYpx1UFT0pGT0p1';
+        const ADMIN_EMAIL = 'vinh2711@googlemail.com';
+
+        // Debug info
+        function updateDebugInfo(message) {
+            const debugDiv = document.getElementById('debugInfo');
+            const timestamp = new Date().toLocaleTimeString();
+            debugDiv.innerHTML = `${timestamp}: ${message}<br>` + debugDiv.innerHTML;
+        }
+
+        // Email Sign In
+        document.getElementById('emailSignInBtn').addEventListener('click', async () => {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            const status = document.getElementById('loginStatus');
+            
+            if (!password) {
+                status.innerHTML = '<div class="error-banner">Please enter a password</div>';
+                return;
+            }
+            
+            status.innerHTML = '<div class="success-banner">Attempting email sign in...</div>';
+            
+            try {
+                // Try to sign in
+                const result = await auth.signInWithEmailAndPassword(email, password);
+                console.log('Email sign in successful:', result.user.email);
+                status.innerHTML = '<div class="success-banner">Sign in successful!</div>';
+                
+            } catch (error) {
+                console.error('Sign in error:', error);
+                
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    // Try to create account if it doesn't exist
+                    try {
+                        status.innerHTML = '<div class="success-banner">Creating account...</div>';
+                        const result = await auth.createUserWithEmailAndPassword(email, password);
+                        console.log('Account created:', result.user.email);
+                        status.innerHTML = '<div class="success-banner">Account created successfully!</div>';
+                    } catch (createError) {
+                        status.innerHTML = `<div class="error-banner">Error: ${createError.message}</div>`;
+                    }
+                } else {
+                    status.innerHTML = `<div class="error-banner">Error: ${error.message}</div>`;
+                }
+            }
+        });
+
+        // Anonymous Sign In
+        document.getElementById('anonymousBtn').addEventListener('click', async () => {
+            const status = document.getElementById('loginStatus');
+            status.innerHTML = '<div class="success-banner">Signing in anonymously...</div>';
+            
+            try {
+                const result = await auth.signInAnonymously();
+                console.log('Anonymous sign in successful');
+                status.innerHTML = '<div class="success-banner">Anonymous access granted!</div>';
+            } catch (error) {
+                console.error('Anonymous sign in error:', error);
+                status.innerHTML = `<div class="error-banner">Error: ${error.message}</div>`;
+            }
+        });
+
+        // Auth State Observer
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                console.log('User authenticated:', user.uid, user.email || 'Anonymous');
+                showDashboard(user);
+                await loadDashboardData(user);
+            } else {
+                console.log('No user authenticated');
+                showLogin();
+            }
+        });
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                
+                const page = this.dataset.page;
+                document.querySelectorAll('.page-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                document.getElementById(page + 'Page').style.display = 'block';
+                document.getElementById('pageTitle').textContent = this.textContent.trim();
+            });
+        });
+
+        // Sign Out
+        document.getElementById('signOutBtn').addEventListener('click', () => {
+            auth.signOut();
+        });
+
+        function showLogin() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+
+        function showDashboard(user) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+            
+            const userInfo = user.isAnonymous ? 'Anonymous User' : (user.email || user.uid);
+            document.getElementById('userInfo').textContent = userInfo;
+            
+            // Update status cards
+            document.getElementById('authStatus').textContent = user.isAnonymous ? 'Anonymous' : 'Authenticated';
+            document.getElementById('connectionStatus').textContent = 'Connected';
+            document.getElementById('apiKeyStatus').textContent = 'Valid';
+        }
+
+        async function loadDashboardData(user) {
+            updateDebugInfo(`Loading data for user: ${user.uid}`);
+            
+            // Check if admin
+            const isAdmin = user.uid === ADMIN_UID || user.email === ADMIN_EMAIL;
+            
+            try {
+                if (isAdmin || user.isAnonymous) {
+                    // Try to load users
+                    updateDebugInfo('Attempting to load users collection...');
+                    const usersSnapshot = await db.collection('users').get();
+                    
+                    document.getElementById('totalUsers').textContent = usersSnapshot.size;
+                    updateDebugInfo(`Successfully loaded ${usersSnapshot.size} users`);
+                    
+                    // Display users
+                    let html = '<table class="data-table"><thead><tr><th>User ID</th><th>Email</th><th>Created</th></tr></thead><tbody>';
+                    
+                    usersSnapshot.forEach(doc => {
+                        const data = doc.data();
+                        html += `
+                            <tr>
+                                <td>${doc.id.substring(0, 12)}...</td>
+                                <td>${data.email || 'N/A'}</td>
+                                <td>${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += '</tbody></table>';
+                    document.getElementById('usersData').innerHTML = html;
+                    document.getElementById('allUsersList').innerHTML = html;
+                    
+                } else {
+                    document.getElementById('usersData').innerHTML = '<div class="error-banner">Not authorized to view user data</div>';
+                    updateDebugInfo('User is not admin');
+                }
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                updateDebugInfo(`Error: ${error.message}`);
+                
+                // Show detailed error info
+                const errorHtml = `
+                    <div class="error-banner">
+                        <strong>Error loading data:</strong><br>
+                        ${error.message}<br>
+                        <br>
+                        <strong>Troubleshooting:</strong><br>
+                        1. Check Firebase Console > Authentication > Sign-in method<br>
+                        2. Enable Email/Password authentication<br>
+                        3. Check Firestore rules allow admin access<br>
+                        4. Verify API key settings in Google Cloud Console
+                    </div>
+                `;
+                document.getElementById('usersData').innerHTML = errorHtml;
+            }
+            
+            // Update debug page
+            const debugHtml = `
+                <strong>Current User:</strong><br>
+                UID: ${user.uid}<br>
+                Email: ${user.email || 'None'}<br>
+                Anonymous: ${user.isAnonymous}<br>
+                <br>
+                <strong>Admin Check:</strong><br>
+                Expected UID: ${ADMIN_UID}<br>
+                Is Admin: ${user.uid === ADMIN_UID}<br>
+                <br>
+                <strong>Firebase Config:</strong><br>
+                Project ID: ${firebaseConfig.projectId}<br>
+                Auth Domain: ${firebaseConfig.authDomain}<br>
+                API Key: ${firebaseConfig.apiKey.substring(0, 10)}...<br>
+                <br>
+                <strong>Browser:</strong><br>
+                User Agent: ${navigator.userAgent}<br>
+                Platform: ${navigator.platform}<br>
+            `;
+            document.getElementById('debugInfo').innerHTML = debugHtml;
+        }
+    </script>
+</body>
+</html>
