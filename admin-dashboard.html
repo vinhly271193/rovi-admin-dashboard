@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROVI Admin Dashboard - Direct Access</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Direct Dashboard (No Login Required) -->
+    <div id="dashboard" class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>ROVI Admin</h2>
+                <span id="lastRefresh" class="last-refresh">Loading...</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-page="overview">
+                    <span class="icon">📊</span> Overview
+                </li>
+                <li class="nav-item" data-page="users">
+                    <span class="icon">👥</span> Users
+                </li>
+                <li class="nav-item" data-page="activity">
+                    <span class="icon">🏃</span> Activity
+                </li>
+                <li class="nav-item" data-page="nutrition">
+                    <span class="icon">🍎</span> Nutrition
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="refreshBtn" class="btn-refresh">🔄 Refresh Data</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1 id="pageTitle">Dashboard Overview</h1>
+                <div class="header-controls">
+                    <button id="loadDataBtn" class="btn-primary">Load Firebase Data</button>
+                </div>
+            </header>
+
+            <!-- Overview Page -->
+            <div id="overviewPage" class="page-content">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3>Total Users</h3>
+                            <p class="stat-value" id="totalUsers">7</p>
+                            <span class="stat-change positive">Your Users</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏃</div>
+                        <div class="stat-content">
+                            <h3>Most Active User</h3>
+                            <p class="stat-value" id="mostActiveUser">Loading...</p>
+                            <span class="stat-change" id="mostActiveSteps">-</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-content">
+                            <h3>Total Activities</h3>
+                            <p class="stat-value" id="totalActivities">Loading...</p>
+                            <span class="stat-change">All Time</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🍎</div>
+                        <div class="stat-content">
+                            <h3>Foods in Database</h3>
+                            <p class="stat-value" id="totalFoods">Loading...</p>
+                            <span class="stat-change">Unique Items</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User List -->
+                <div class="chart-card" style="margin-top: 2rem;">
+                    <h3>User Overview</h3>
+                    <div id="usersList" style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Email</th>
+                                    <th>Name</th>
+                                    <th>Created</th>
+                                    <th>Goals</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr><td colspan="5">Click "Load Firebase Data" to fetch users</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="recent-activity-card" style="margin-top: 2rem;">
+                    <h3>Food Database Sample</h3>
+                    <div id="foodList" class="activity-list">
+                        <div class="activity-item">Click "Load Firebase Data" to see food items</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Firebase Configuration (No Auth Required for Read)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrNsSCG2FJ1es4BHe_URbwhuEpkA_5VyU",
+            authDomain: "rovi-16b3a.firebaseapp.com",
+            projectId: "rovi-16b3a",
+            storageBucket: "rovi-16b3a.firebasestorage.app",
+            databaseURL: "https://rovi-16b3a-default-rtdb.firebaseio.com",
+            messagingSenderId: "677298263090",
+            appId: "1:677298263090:web:rovi-admin-dashboard"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Known User IDs from your screenshots
+        const knownUserIds = [
+            'byothLpU8SdS5SYpx1UFT0pGT0p1',
+            '4JeqGJE5RuV2MPKQPpahV4tHqFS2',
+            '9scuPWvSwlfI3rdNWNU6FVEe0sq1',
+            'de7LNu8cmjN8ogzC0pDh54xYVpp2',
+            'pppz0XEsYIN4RlR6qze4euShJHz2',
+            'prXcIk4vUde9T44HfTeCWl3uvkN2',
+            'veDfNhyf0EXon0Fq7TEGQMK9OmV2'
+        ];
+
+        // Dashboard Functions
+        async function loadDashboardData() {
+            console.log('Loading dashboard data...');
+            document.getElementById('loadDataBtn').disabled = true;
+            document.getElementById('loadDataBtn').textContent = 'Loading...';
+            
+            try {
+                // Load Users
+                await loadUsers();
+                
+                // Load Food Database
+                await loadFoodDatabase();
+                
+                // Load Activity Stats
+                await loadActivityStats();
+                
+                // Update refresh time
+                document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
+                
+                document.getElementById('loadDataBtn').textContent = 'Refresh Data';
+                document.getElementById('loadDataBtn').disabled = false;
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Error loading data: ' + error.message);
+                document.getElementById('loadDataBtn').textContent = 'Retry';
+                document.getElementById('loadDataBtn').disabled = false;
+            }
+        }
+
+        async function loadUsers() {
+            console.log('Loading users...');
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '<tr><td colspan="5">Loading users...</td></tr>';
+            
+            let usersHTML = '';
+            let userCount = 0;
+            
+            for (const userId of knownUserIds) {
+                try {
+                    const userDoc = await db.collection('users').doc(userId).get();
+                    
+                    if (userDoc.exists) {
+                        const data = userDoc.data();
+                        userCount++;
+                        
+                        const createdAt = data.createdAt ? 
+                            (data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt)) : 
+                            new Date();
+                        
+                        usersHTML += `
+                            <tr>
+                                <td>${userId.substring(0, 8)}...</td>
+                                <td>${data.email || 'N/A'}</td>
+                                <td>${data.name || 'N/A'}</td>
+                                <td>${createdAt.toLocaleDateString()}</td>
+                                <td>
+                                    Steps: ${data.goalSteps || 10000}<br>
+                                    Cal: ${data.goalCaloriesConsumed || 2000}
+                                </td>
+                            </tr>
+                        `;
+                    }
+                } catch (error) {
+                    console.error(`Error loading user ${userId}:`, error);
+                }
+            }
+            
+            tbody.innerHTML = usersHTML || '<tr><td colspan="5">No users found</td></tr>';
+            document.getElementById('totalUsers').textContent = userCount;
+        }
+
+        async function loadFoodDatabase() {
+            console.log('Loading food database...');
+            const foodList = document.getElementById('foodList');
+            foodList.innerHTML = '<div class="activity-item">Loading foods...</div>';
+            
+            try {
+                const foodSnapshot = await db.collection('foodDatabase').limit(10).get();
+                
+                let foodHTML = '';
+                foodSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    foodHTML += `
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: #48bb7820; color: #48bb78">🍎</div>
+                            <div class="activity-content">
+                                <div class="activity-title">${data.name || doc.id}</div>
+                                <div class="activity-time">
+                                    ${data.caloriesPerServing || 0} cal | 
+                                    Popularity: ${data.popularity || 0}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                foodList.innerHTML = foodHTML || '<div class="activity-item">No food items found</div>';
+                document.getElementById('totalFoods').textContent = foodSnapshot.size;
+                
+            } catch (error) {
+                console.error('Error loading food database:', error);
+                foodList.innerHTML = '<div class="activity-item">Error loading foods</div>';
+            }
+        }
+
+        async function loadActivityStats() {
+            console.log('Loading activity stats...');
+            
+            let totalActivities = 0;
+            let mostActiveUser = '';
+            let maxSteps = 0;
+            
+            for (const userId of knownUserIds) {
+                try {
+                    // Get recent steps data
+                    const stepsSnapshot = await db.collection('users')
+                        .doc(userId)
+                        .collection('stepsData')
+                        .orderBy('date', 'desc')
+                        .limit(1)
+                        .get();
+                    
+                    if (!stepsSnapshot.empty) {
+                        const stepsData = stepsSnapshot.docs[0].data();
+                        if (stepsData.steps > maxSteps) {
+                            maxSteps = stepsData.steps;
+                            mostActiveUser = userId.substring(0, 8) + '...';
+                        }
+                    }
+                    
+                    // Count activities
+                    const activitySnapshot = await db.collection('users')
+                        .doc(userId)
+                        .collection('activityLog')
+                        .limit(1)
+                        .get();
+                    
+                    if (!activitySnapshot.empty) {
+                        totalActivities++;
+                    }
+                    
+                } catch (error) {
+                    console.error(`Error loading stats for ${userId}:`, error);
+                }
+            }
+            
+            document.getElementById('mostActiveUser').textContent = mostActiveUser || 'N/A';
+            document.getElementById('mostActiveSteps').textContent = maxSteps ? `${maxSteps.toLocaleString()} steps` : 'No data';
+            document.getElementById('totalActivities').textContent = totalActivities;
+        }
+
+        // Event Listeners
+        document.getElementById('loadDataBtn').addEventListener('click', loadDashboardData);
+        document.getElementById('refreshBtn').addEventListener('click', loadDashboardData);
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('pageTitle').textContent = this.textContent.trim();
+            });
+        });
+
+        // Auto-load on page load
+        window.addEventListener('load', () => {
+            console.log('Dashboard loaded. Click "Load Firebase Data" to fetch data.');
+        });
+    </script>
+</body>
+</html>

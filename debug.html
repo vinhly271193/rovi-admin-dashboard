@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 0;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Firebase Authentication Debug</h1>
+    
+    <div id="status"></div>
+    
+    <h2>Step 1: Check Firebase Configuration</h2>
+    <div id="configCheck" class="status info">Checking configuration...</div>
+    
+    <h2>Step 2: Test Authentication</h2>
+    <button onclick="testGoogleAuth()">Test Google Sign-In</button>
+    <button onclick="testEmailAuth()">Test Email Sign-In</button>
+    <div id="authResult"></div>
+    
+    <h2>Step 3: Check User Permissions</h2>
+    <div id="userCheck" class="status info">Not signed in yet</div>
+    
+    <h2>Step 4: Test Firestore Access</h2>
+    <button onclick="testFirestore()" disabled id="firestoreBtn">Test Firestore Read</button>
+    <div id="firestoreResult"></div>
+    
+    <h2>Debug Console</h2>
+    <pre id="console"></pre>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script>
+        const log = (message, type = 'info') => {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            console.innerHTML += `[${timestamp}] ${message}\n`;
+            console.scrollTop = console.scrollHeight;
+        };
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrNsSCG2FJ1es4BHe_URbwhuEpkA_5VyU",
+            authDomain: "rovi-16b3a.firebaseapp.com",
+            projectId: "rovi-16b3a",
+            storageBucket: "rovi-16b3a.firebasestorage.app",
+            databaseURL: "https://rovi-16b3a-default-rtdb.firebaseio.com",
+            messagingSenderId: "677298263090",
+            appId: "1:677298263090:web:rovi-admin-dashboard"
+        };
+
+        // Initialize Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+            const db = firebase.firestore();
+            
+            document.getElementById('configCheck').className = 'status success';
+            document.getElementById('configCheck').innerHTML = '✅ Firebase initialized successfully!';
+            log('Firebase initialized with project: ' + firebaseConfig.projectId);
+            
+            // Check current auth state
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    log('User signed in: ' + user.email);
+                    document.getElementById('userCheck').className = 'status success';
+                    document.getElementById('userCheck').innerHTML = `
+                        ✅ Signed in as: ${user.email}<br>
+                        UID: ${user.uid}<br>
+                        Admin UID Expected: byothLpU8SdS5SYpx1UFT0pGT0p1<br>
+                        Is Admin: ${user.uid === 'byothLpU8SdS5SYpx1UFT0pGT0p1' ? 'YES ✅' : 'NO ❌'}
+                    `;
+                    document.getElementById('firestoreBtn').disabled = false;
+                } else {
+                    log('No user signed in');
+                    document.getElementById('userCheck').className = 'status info';
+                    document.getElementById('userCheck').innerHTML = 'Not signed in';
+                    document.getElementById('firestoreBtn').disabled = true;
+                }
+            });
+            
+        } catch (error) {
+            document.getElementById('configCheck').className = 'status error';
+            document.getElementById('configCheck').innerHTML = '❌ Error: ' + error.message;
+            log('Firebase init error: ' + error.message, 'error');
+        }
+
+        // Test Google Authentication
+        async function testGoogleAuth() {
+            const resultDiv = document.getElementById('authResult');
+            resultDiv.className = 'status info';
+            resultDiv.innerHTML = 'Attempting Google sign-in...';
+            log('Starting Google sign-in...');
+            
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await firebase.auth().signInWithPopup(provider);
+                
+                resultDiv.className = 'status success';
+                resultDiv.innerHTML = `✅ Signed in successfully!<br>
+                    Email: ${result.user.email}<br>
+                    UID: ${result.user.uid}`;
+                log('Google sign-in successful: ' + result.user.email);
+                
+            } catch (error) {
+                resultDiv.className = 'status error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}<br>
+                    Code: ${error.code}`;
+                log('Google sign-in error: ' + error.code + ' - ' + error.message, 'error');
+                
+                // Provide specific solutions
+                if (error.code === 'auth/unauthorized-domain') {
+                    resultDiv.innerHTML += '<br><br>📝 Solution: Add this domain to Firebase authorized domains';
+                } else if (error.code === 'auth/popup-blocked') {
+                    resultDiv.innerHTML += '<br><br>📝 Solution: Allow popups for this site';
+                }
+            }
+        }
+
+        // Test Email Authentication (Simple)
+        async function testEmailAuth() {
+            const resultDiv = document.getElementById('authResult');
+            const email = prompt('Enter your email (vinh2711@googlemail.com):');
+            const password = prompt('Enter any password (for testing):');
+            
+            if (!email || !password) {
+                resultDiv.className = 'status error';
+                resultDiv.innerHTML = '❌ Email and password required';
+                return;
+            }
+            
+            resultDiv.className = 'status info';
+            resultDiv.innerHTML = 'Attempting email sign-in...';
+            log('Starting email sign-in with: ' + email);
+            
+            try {
+                // Try to sign in first
+                const result = await firebase.auth().signInWithEmailAndPassword(email, password);
+                
+                resultDiv.className = 'status success';
+                resultDiv.innerHTML = `✅ Signed in successfully!<br>
+                    Email: ${result.user.email}<br>
+                    UID: ${result.user.uid}`;
+                log('Email sign-in successful');
+                
+            } catch (error) {
+                if (error.code === 'auth/user-not-found') {
+                    // Try to create account
+                    try {
+                        const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                        resultDiv.className = 'status success';
+                        resultDiv.innerHTML = `✅ Account created and signed in!<br>
+                            Email: ${result.user.email}<br>
+                            UID: ${result.user.uid}`;
+                        log('Account created successfully');
+                    } catch (createError) {
+                        resultDiv.className = 'status error';
+                        resultDiv.innerHTML = `❌ Error: ${createError.message}`;
+                        log('Create account error: ' + createError.message, 'error');
+                    }
+                } else {
+                    resultDiv.className = 'status error';
+                    resultDiv.innerHTML = `❌ Error: ${error.message}`;
+                    log('Email sign-in error: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Test Firestore Access
+        async function testFirestore() {
+            const resultDiv = document.getElementById('firestoreResult');
+            resultDiv.className = 'status info';
+            resultDiv.innerHTML = 'Testing Firestore access...';
+            log('Testing Firestore read access...');
+            
+            try {
+                // Try to read users collection
+                const usersSnapshot = await firebase.firestore().collection('users').limit(5).get();
+                
+                resultDiv.className = 'status success';
+                resultDiv.innerHTML = `✅ Firestore access successful!<br>
+                    Found ${usersSnapshot.size} users<br>
+                    User IDs: ${usersSnapshot.docs.map(doc => doc.id.substring(0, 5) + '...').join(', ')}`;
+                log(`Firestore read successful: ${usersSnapshot.size} users found`);
+                
+            } catch (error) {
+                resultDiv.className = 'status error';
+                resultDiv.innerHTML = `❌ Firestore Error: ${error.message}<br>
+                    Code: ${error.code}`;
+                log('Firestore error: ' + error.message, 'error');
+                
+                if (error.code === 'permission-denied') {
+                    resultDiv.innerHTML += '<br><br>📝 Solution: Check Firestore rules - admin UID might not match';
+                }
+            }
+        }
+
+        // Add sign out button
+        function signOut() {
+            firebase.auth().signOut().then(() => {
+                log('Signed out successfully');
+                location.reload();
+            });
+        }
+    </script>
+    
+    <hr>
+    <button onclick="signOut()" style="background: #dc3545;">Sign Out</button>
+    <button onclick="location.reload()" style="background: #28a745;">Refresh Page</button>
+</body>
+</html>

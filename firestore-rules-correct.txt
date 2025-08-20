@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Admin UID - your Google account
+    function isAdmin() {
+      return request.auth != null && 
+        request.auth.uid == 'byothLpU8SdS5SYpx1UFT0pGT0p1';
+    }
+    
+    // Helper function to check if user owns the document
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Admin can read all users, users can read/write their own data
+      allow read: if isAdmin() || isOwner(userId);
+      allow write: if isOwner(userId);
+      
+      // Subcollections under users (stepsData, activityLog, foodLog, etc.)
+      match /stepsData/{document=**} {
+        allow read: if isAdmin() || isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+      
+      match /activityLog/{document=**} {
+        allow read: if isAdmin() || isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+      
+      match /foodLog/{document=**} {
+        allow read: if isAdmin() || isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+      
+      // Allow any other subcollections
+      match /{subcollection=**} {
+        allow read: if isAdmin() || isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+    }
+    
+    // Food Database - everyone can read, admin can write
+    match /foodDatabase/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    // Usernames collection (for unique username checking)
+    match /usernames/{username} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // Friend requests
+    match /friendRequests/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+  }
+}

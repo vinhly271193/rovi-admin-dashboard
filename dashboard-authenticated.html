@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROVI Admin Dashboard</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <h1>🏃 ROVI Admin Dashboard</h1>
+            <p>Sign in to access analytics</p>
+            
+            <button id="googleSignInBtn" class="btn-primary">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width: 20px; margin-right: 8px;">
+                Sign in with Google
+            </button>
+            
+            <div id="loginError" class="error-message" style="margin-top: 1rem; color: red;"></div>
+            
+            <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                <p style="font-size: 0.875rem; color: #718096;">Admin Email: vinh2711@googlemail.com</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard-container" style="display: none;">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>ROVI Admin</h2>
+                <span id="userEmail" style="font-size: 0.75rem; color: #718096;"></span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-page="overview">
+                    <span class="icon">📊</span> Overview
+                </li>
+                <li class="nav-item" data-page="users">
+                    <span class="icon">👥</span> Users
+                </li>
+                <li class="nav-item" data-page="activity">
+                    <span class="icon">🏃</span> Activity
+                </li>
+                <li class="nav-item" data-page="nutrition">
+                    <span class="icon">🍎</span> Nutrition
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="refreshBtn" class="btn-refresh">🔄 Refresh</button>
+                <button id="signOutBtn" class="btn-logout">Sign Out</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1 id="pageTitle">Dashboard Overview</h1>
+                <span id="lastUpdate" style="font-size: 0.875rem; color: #718096;"></span>
+            </header>
+
+            <!-- Overview Page -->
+            <div id="overviewPage" class="page-content">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3>Total Users</h3>
+                            <p class="stat-value" id="totalUsers">-</p>
+                            <span class="stat-change">All Time</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏃</div>
+                        <div class="stat-content">
+                            <h3>Active Today</h3>
+                            <p class="stat-value" id="activeToday">-</p>
+                            <span class="stat-change">Users with data</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-content">
+                            <h3>Total Steps Today</h3>
+                            <p class="stat-value" id="totalStepsToday">-</p>
+                            <span class="stat-change">Combined</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🍎</div>
+                        <div class="stat-content">
+                            <h3>Foods in Database</h3>
+                            <p class="stat-value" id="totalFoods">-</p>
+                            <span class="stat-change">Unique items</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Activity Table -->
+                <div class="chart-card" style="margin-top: 2rem;">
+                    <h3>User Activity Summary</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Email</th>
+                                    <th>Today's Steps</th>
+                                    <th>Activities</th>
+                                    <th>Foods Logged</th>
+                                    <th>Last Active</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userActivityTable">
+                                <tr><td colspan="6" style="text-align: center;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Food Database Sample -->
+                <div class="chart-card" style="margin-top: 2rem;">
+                    <h3>Popular Foods (Top 10)</h3>
+                    <div id="popularFoods" style="display: grid; gap: 0.5rem;">
+                        <div style="padding: 1rem; text-align: center; color: #718096;">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Page -->
+            <div id="usersPage" class="page-content" style="display: none;">
+                <div class="chart-card">
+                    <h3>All Users</h3>
+                    <div id="allUsersList"></div>
+                </div>
+            </div>
+
+            <!-- Activity Page -->
+            <div id="activityPage" class="page-content" style="display: none;">
+                <div class="chart-card">
+                    <h3>Recent Activities</h3>
+                    <div id="recentActivities"></div>
+                </div>
+            </div>
+
+            <!-- Nutrition Page -->
+            <div id="nutritionPage" class="page-content" style="display: none;">
+                <div class="chart-card">
+                    <h3>Food Log Analysis</h3>
+                    <div id="foodAnalysis"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrNsSCG2FJ1es4BHe_URbwhuEpkA_5VyU",
+            authDomain: "rovi-16b3a.firebaseapp.com",
+            projectId: "rovi-16b3a",
+            storageBucket: "rovi-16b3a.firebasestorage.app",
+            databaseURL: "https://rovi-16b3a-default-rtdb.firebaseio.com"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Your admin UID
+        const ADMIN_UID = 'byothLpU8SdS5SYpx1UFT0pGT0p1';
+        
+        // Current user
+        let currentUser = null;
+
+        // Auth State Observer
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                console.log('User signed in:', user.email, 'UID:', user.uid);
+                currentUser = user;
+                
+                // Check if user is admin
+                if (user.uid === ADMIN_UID || user.email === 'vinh2711@googlemail.com') {
+                    showDashboard(user);
+                    await loadDashboardData();
+                } else {
+                    showError(`Access denied. Not an admin account. Your UID: ${user.uid}`);
+                    auth.signOut();
+                }
+            } else {
+                showLogin();
+                currentUser = null;
+            }
+        });
+
+        // Sign In
+        document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('googleSignInBtn');
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+            
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
+                
+                const result = await auth.signInWithPopup(provider);
+                console.log('Sign in successful:', result.user.email);
+            } catch (error) {
+                console.error('Sign in error:', error);
+                showError(error.message);
+                btn.disabled = false;
+                btn.textContent = 'Sign in with Google';
+            }
+        });
+
+        // Sign Out
+        document.getElementById('signOutBtn').addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                console.log('Signed out');
+            } catch (error) {
+                console.error('Sign out error:', error);
+            }
+        });
+
+        // Refresh Button
+        document.getElementById('refreshBtn').addEventListener('click', loadDashboardData);
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Update active nav
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update page title
+                document.getElementById('pageTitle').textContent = this.textContent.trim();
+                
+                // Show corresponding page
+                const page = this.dataset.page;
+                document.querySelectorAll('.page-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                document.getElementById(page + 'Page').style.display = 'block';
+                
+                // Load page-specific data
+                if (page === 'users') loadUsersPage();
+                if (page === 'activity') loadActivityPage();
+                if (page === 'nutrition') loadNutritionPage();
+            });
+        });
+
+        // Show/Hide Functions
+        function showLogin() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+
+        function showDashboard(user) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+            document.getElementById('userEmail').textContent = user.email;
+        }
+
+        function showError(message) {
+            document.getElementById('loginError').textContent = message;
+        }
+
+        // Load Dashboard Data
+        async function loadDashboardData() {
+            if (!currentUser) {
+                console.error('No user logged in');
+                return;
+            }
+
+            console.log('Loading dashboard data for admin:', currentUser.email);
+            document.getElementById('lastUpdate').textContent = 'Updating...';
+
+            try {
+                // Get all users
+                const usersSnapshot = await db.collection('users').get();
+                const totalUsers = usersSnapshot.size;
+                document.getElementById('totalUsers').textContent = totalUsers;
+
+                let activeToday = 0;
+                let totalStepsToday = 0;
+                const today = new Date().toISOString().split('T')[0].replace(/-/g, '_');
+                const userActivityData = [];
+
+                // Process each user
+                for (const userDoc of usersSnapshot.docs) {
+                    const userId = userDoc.id;
+                    const userData = userDoc.data();
+                    
+                    // Get today's steps
+                    let todaySteps = 0;
+                    try {
+                        const stepsDoc = await db.collection('users').doc(userId)
+                            .collection('stepsData').doc(today).get();
+                        if (stepsDoc.exists) {
+                            todaySteps = stepsDoc.data().steps || 0;
+                            if (todaySteps > 0) activeToday++;
+                            totalStepsToday += todaySteps;
+                        }
+                    } catch (e) {
+                        console.log(`No steps data for user ${userId}`);
+                    }
+
+                    // Get today's activities count
+                    let activitiesCount = 0;
+                    try {
+                        const activitiesSnapshot = await db.collection('users').doc(userId)
+                            .collection('activityLog').doc(today)
+                            .collection('entries').get();
+                        activitiesCount = activitiesSnapshot.size;
+                    } catch (e) {
+                        console.log(`No activities for user ${userId}`);
+                    }
+
+                    // Get today's food entries count
+                    let foodsCount = 0;
+                    try {
+                        const foodSnapshot = await db.collection('users').doc(userId)
+                            .collection('foodLog').doc(today)
+                            .collection('entries').get();
+                        foodsCount = foodSnapshot.size;
+                    } catch (e) {
+                        console.log(`No food logs for user ${userId}`);
+                    }
+
+                    // Add to user activity data
+                    userActivityData.push({
+                        userId: userId.substring(0, 8) + '...',
+                        email: userData.email || 'N/A',
+                        steps: todaySteps,
+                        activities: activitiesCount,
+                        foods: foodsCount,
+                        lastActive: userData.lastActive ? new Date(userData.lastActive.seconds * 1000).toLocaleDateString() : 'N/A'
+                    });
+                }
+
+                // Update stats
+                document.getElementById('activeToday').textContent = activeToday;
+                document.getElementById('totalStepsToday').textContent = totalStepsToday.toLocaleString();
+
+                // Update user activity table
+                const tableBody = document.getElementById('userActivityTable');
+                tableBody.innerHTML = userActivityData.map(user => `
+                    <tr>
+                        <td>${user.userId}</td>
+                        <td>${user.email}</td>
+                        <td>${user.steps.toLocaleString()}</td>
+                        <td>${user.activities}</td>
+                        <td>${user.foods}</td>
+                        <td>${user.lastActive}</td>
+                    </tr>
+                `).join('');
+
+                // Load food database
+                const foodSnapshot = await db.collection('foodDatabase')
+                    .orderBy('popularity', 'desc')
+                    .limit(10).get();
+                
+                document.getElementById('totalFoods').textContent = foodSnapshot.size;
+                
+                const foodsHtml = foodSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return `
+                        <div style="padding: 0.75rem; background: #f7fafc; border-radius: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${data.name || doc.id}</strong>
+                                <span style="color: #718096; margin-left: 1rem;">${data.caloriesPerServing || 0} cal</span>
+                            </div>
+                            <span style="color: #4299e1;">Popularity: ${data.popularity || 0}</span>
+                        </div>
+                    `;
+                }).join('');
+                
+                document.getElementById('popularFoods').innerHTML = foodsHtml || '<div style="padding: 1rem; text-align: center; color: #718096;">No foods found</div>';
+
+                // Update last update time
+                document.getElementById('lastUpdate').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                alert('Error loading data: ' + error.message);
+            }
+        }
+
+        // Load Users Page
+        async function loadUsersPage() {
+            const usersSnapshot = await db.collection('users').get();
+            const usersList = document.getElementById('allUsersList');
+            
+            const html = usersSnapshot.docs.map(doc => {
+                const data = doc.data();
+                return `
+                    <div style="padding: 1rem; border-bottom: 1px solid #e2e8f0;">
+                        <strong>ID:</strong> ${doc.id}<br>
+                        <strong>Email:</strong> ${data.email || 'N/A'}<br>
+                        <strong>Goals:</strong> Steps: ${data.goalSteps || 10000}, Calories: ${data.goalCaloriesConsumed || 2000}
+                    </div>
+                `;
+            }).join('');
+            
+            usersList.innerHTML = html;
+        }
+
+        // Load Activity Page
+        async function loadActivityPage() {
+            const activitiesDiv = document.getElementById('recentActivities');
+            activitiesDiv.innerHTML = '<div>Loading activities...</div>';
+            
+            let allActivities = [];
+            const usersSnapshot = await db.collection('users').get();
+            
+            for (const userDoc of usersSnapshot.docs) {
+                const userId = userDoc.id;
+                // Get last 7 days of activities
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    const dateStr = date.toISOString().split('T')[0].replace(/-/g, '_');
+                    
+                    try {
+                        const entriesSnapshot = await db.collection('users').doc(userId)
+                            .collection('activityLog').doc(dateStr)
+                            .collection('entries').get();
+                        
+                        entriesSnapshot.docs.forEach(doc => {
+                            const data = doc.data();
+                            allActivities.push({
+                                user: userId.substring(0, 8) + '...',
+                                name: data.name || 'Activity',
+                                duration: data.duration || 0,
+                                calories: data.caloriesBurned || 0,
+                                date: dateStr.replace(/_/g, '-')
+                            });
+                        });
+                    } catch (e) {
+                        // No activities for this date
+                    }
+                }
+            }
+            
+            // Sort by date and show recent
+            allActivities.sort((a, b) => b.date.localeCompare(a.date));
+            const recentHtml = allActivities.slice(0, 20).map(act => `
+                <div style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">
+                    <strong>${act.name}</strong> by ${act.user}<br>
+                    <span style="color: #718096;">${act.duration} min | ${act.calories} cal | ${act.date}</span>
+                </div>
+            `).join('');
+            
+            activitiesDiv.innerHTML = recentHtml || '<div>No recent activities</div>';
+        }
+
+        // Load Nutrition Page
+        async function loadNutritionPage() {
+            const nutritionDiv = document.getElementById('foodAnalysis');
+            nutritionDiv.innerHTML = '<div>Analyzing food logs...</div>';
+            
+            let mealCounts = { Breakfast: 0, Lunch: 0, Dinner: 0, Snacks: 0 };
+            let totalCalories = 0;
+            
+            const usersSnapshot = await db.collection('users').get();
+            const today = new Date().toISOString().split('T')[0].replace(/-/g, '_');
+            
+            for (const userDoc of usersSnapshot.docs) {
+                try {
+                    const foodSnapshot = await db.collection('users').doc(userDoc.id)
+                        .collection('foodLog').doc(today)
+                        .collection('entries').get();
+                    
+                    foodSnapshot.docs.forEach(doc => {
+                        const data = doc.data();
+                        const mealType = data.mealType || 'Snacks';
+                        mealCounts[mealType] = (mealCounts[mealType] || 0) + 1;
+                        totalCalories += data.calories || 0;
+                    });
+                } catch (e) {
+                    // No food logs
+                }
+            }
+            
+            const html = `
+                <div style="padding: 1rem;">
+                    <h4>Today's Food Log Summary</h4>
+                    <div style="margin-top: 1rem;">
+                        <div>Breakfast: ${mealCounts.Breakfast} entries</div>
+                        <div>Lunch: ${mealCounts.Lunch} entries</div>
+                        <div>Dinner: ${mealCounts.Dinner} entries</div>
+                        <div>Snacks: ${mealCounts.Snacks} entries</div>
+                        <div style="margin-top: 1rem; font-weight: bold;">
+                            Total Calories Logged: ${totalCalories.toLocaleString()}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            nutritionDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
