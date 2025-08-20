@@ -25,6 +25,33 @@
             overflow: hidden !important;
         }
         
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        
+        .chart-description {
+            background: #f7fafc;
+            border-left: 4px solid #4299e1;
+            padding: 0.75rem;
+            margin: 0.75rem 0;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+        
+        .data-scope {
+            display: inline-block;
+            background: #edf2f7;
+            color: #2d3748;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
         .chart-card canvas {
             max-height: 300px !important;
             height: 300px !important;
@@ -235,33 +262,45 @@
                     <div class="stat-card">
                         <div class="stat-icon">👥</div>
                         <div class="stat-content">
-                            <h3>Total Users</h3>
+                            <h3>Total Registered Users</h3>
                             <p class="stat-value" id="totalUsers">-</p>
-                            <p style="font-size: 0.75rem; color: #718096; margin-top: 0.25rem;">All registered users</p>
+                            <div style="background: #f7fafc; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">
+                                <strong style="font-size: 0.75rem; color: #4a5568;">DATA SOURCE:</strong>
+                                <span style="font-size: 0.75rem; color: #718096;">All users in database</span>
+                            </div>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">👣</div>
                         <div class="stat-content">
-                            <h3>Community Steps Today</h3>
+                            <h3>Total Steps Today</h3>
                             <p class="stat-value" id="totalStepsToday">-</p>
-                            <p style="font-size: 0.75rem; color: #718096; margin-top: 0.25rem;">Combined from all users</p>
+                            <div style="background: #f7fafc; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">
+                                <strong style="font-size: 0.75rem; color: #4a5568;">DATA SOURCE:</strong>
+                                <span style="font-size: 0.75rem; color: #718096;">Sum of ALL users' steps today</span>
+                            </div>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">🍎</div>
                         <div class="stat-content">
-                            <h3>Food Database Size</h3>
+                            <h3>Food Database Items</h3>
                             <p class="stat-value" id="totalFoods">-</p>
-                            <p style="font-size: 0.75rem; color: #718096; margin-top: 0.25rem;">Unique food items</p>
+                            <div style="background: #f7fafc; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">
+                                <strong style="font-size: 0.75rem; color: #4a5568;">DATA SOURCE:</strong>
+                                <span style="font-size: 0.75rem; color: #718096;">Actual count from foodDatabase</span>
+                            </div>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">🔥</div>
                         <div class="stat-content">
-                            <h3>Active Users Today</h3>
+                            <h3>Active Users Count</h3>
                             <p class="stat-value" id="activeToday">-</p>
-                            <p style="font-size: 0.75rem; color: #718096; margin-top: 0.25rem;">Users with steps > 0</p>
+                            <div style="background: #f7fafc; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">
+                                <strong style="font-size: 0.75rem; color: #4a5568;">DATA SOURCE:</strong>
+                                <span style="font-size: 0.75rem; color: #718096;">Users who logged steps > 0 today</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -269,13 +308,17 @@
                 <!-- Charts -->
                 <div class="insights-grid">
                     <div class="chart-card">
-                        <h3>📊 Community Steps Trend</h3>
-                        <p style="color: #718096; font-size: 0.875rem; margin: 0.5rem 0;">
-                            Total steps from ALL USERS combined over the last 7 days
-                        </p>
-                        <div style="margin: 1rem 0;">
-                            <label style="font-size: 0.875rem; color: #4a5568;">
-                                <input type="checkbox" id="showTopUsersOnly" checked> Show top 10 users only
+                        <div class="chart-title">
+                            📊 Daily Steps Trend
+                            <span class="data-scope">ALL USERS COMBINED</span>
+                        </div>
+                        <div class="chart-description">
+                            <strong>What this shows:</strong> The total number of steps recorded by your entire community over the past week. Each point represents the sum of ALL users' steps for that day.
+                        </div>
+                        <div style="margin: 1rem 0; padding: 0.75rem; background: #fff5f5; border-radius: 8px;">
+                            <label style="font-size: 0.875rem; color: #4a5568; cursor: pointer;">
+                                <input type="checkbox" id="showTopUsersOnly" checked style="margin-right: 0.5rem;"> 
+                                <strong>Filter:</strong> Show top 10 most active users only (uncheck to see ALL users)
                             </label>
                         </div>
                         <div class="chart-container">
@@ -285,10 +328,13 @@
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3>🏃 Today's User Activity Status</h3>
-                        <p style="color: #718096; font-size: 0.875rem; margin: 0.5rem 0;">
-                            Breakdown of ALL USERS by activity status today
-                        </p>
+                        <div class="chart-title">
+                            🏃 Activity Distribution
+                            <span class="data-scope">TODAY ONLY</span>
+                        </div>
+                        <div class="chart-description">
+                            <strong>What this shows:</strong> A pie chart showing how many users have logged steps today (Active) versus how many haven't logged any activity yet (Inactive). Based on ALL registered users.
+                        </div>
                         <div class="chart-container">
                             <div style="position: absolute; width: 100%; height: 300px; overflow: hidden;">
                                 <canvas id="activityChart" style="position: absolute; width: 100% !important; height: 300px !important;"></canvas>
@@ -299,7 +345,13 @@
 
                 <!-- Quick Leaderboard -->
                 <div class="chart-card">
-                    <h3>🏆 Today's Top Performers</h3>
+                    <div class="chart-title">
+                        🏆 Today's Top Performers
+                        <span class="data-scope">INDIVIDUAL USERS</span>
+                    </div>
+                    <div class="chart-description">
+                        <strong>What this shows:</strong> The top 5 individual users ranked by their step count today. Shows each user's email and their total steps.
+                    </div>
                     <div id="quickLeaderboard">
                         <div class="loading-spinner"></div> Loading...
                     </div>
