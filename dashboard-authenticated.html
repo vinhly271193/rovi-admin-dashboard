@@ -311,9 +311,27 @@
                             todaySteps = stepsDoc.data().steps || 0;
                             if (todaySteps > 0) activeToday++;
                             totalStepsToday += todaySteps;
+                        } else {
+                            // Try alternative date formats
+                            const altDates = [
+                                new Date().toISOString().split('T')[0], // 2025-08-20
+                                `steps_${today}`, // steps_2025_08_20
+                                today.replace(/_/g, '-') // 2025-08-20
+                            ];
+                            
+                            for (const dateFormat of altDates) {
+                                const altDoc = await db.collection('users').doc(userId)
+                                    .collection('stepsData').doc(dateFormat).get();
+                                if (altDoc.exists) {
+                                    todaySteps = altDoc.data().steps || 0;
+                                    if (todaySteps > 0) activeToday++;
+                                    totalStepsToday += todaySteps;
+                                    break;
+                                }
+                            }
                         }
                     } catch (e) {
-                        console.log(`No steps data for user ${userId}`);
+                        console.log(`No steps data for user ${userId}:`, e);
                     }
 
                     // Get today's activities count
@@ -429,13 +447,31 @@
                     let lastActive = 'Never';
                     
                     try {
+                        // Try to get today's steps
                         const stepsDoc = await db.collection('users').doc(userId)
                             .collection('stepsData').doc(today).get();
                         if (stepsDoc.exists) {
                             todaySteps = stepsDoc.data().steps || 0;
+                        } else {
+                            // If not found, try to get the most recent steps
+                            const recentSteps = await db.collection('users').doc(userId)
+                                .collection('stepsData')
+                                .orderBy('date', 'desc')
+                                .limit(1)
+                                .get();
+                            
+                            if (!recentSteps.empty) {
+                                const latestDoc = recentSteps.docs[0];
+                                const docDate = latestDoc.id;
+                                // Check if it's today's data
+                                if (docDate === today || docDate === today.replace(/_/g, '-')) {
+                                    todaySteps = latestDoc.data().steps || 0;
+                                }
+                                console.log(`Latest steps for ${userId}: ${latestDoc.data().steps} on ${docDate}`);
+                            }
                         }
                     } catch (e) {
-                        console.log('No steps for', userId);
+                        console.log('Error getting steps for', userId, e);
                     }
                     
                     if (data.lastActive) {

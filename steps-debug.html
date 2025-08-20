@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROVI Steps Data Debug</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f7fafc;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #3182ce;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .data-table th, .data-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .data-table th {
+            background: #f7fafc;
+            font-weight: 600;
+        }
+        .success {
+            color: #48bb78;
+        }
+        .error {
+            color: #f56565;
+        }
+        .info {
+            background: #bee3f8;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #2d3748;
+            color: #f7fafc;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 ROVI Steps Data Debug Tool</h1>
+    
+    <div class="card">
+        <h2>Authentication</h2>
+        <button id="signInBtn">Sign in with Google</button>
+        <button id="signOutBtn" style="display:none;">Sign Out</button>
+        <div id="authStatus"></div>
+    </div>
+
+    <div class="card" id="dataCard" style="display:none;">
+        <h2>Steps Data Analysis</h2>
+        <button id="checkStepsBtn">Check All Users' Steps</button>
+        <button id="checkMyStepsBtn">Check My Steps Only</button>
+        <div id="results"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrNsSCG2FJ1es4BHe_URbwhuEpkA_5VyU",
+            authDomain: "rovi-16b3a.firebaseapp.com",
+            projectId: "rovi-16b3a",
+            storageBucket: "rovi-16b3a.firebasestorage.app",
+            databaseURL: "https://rovi-16b3a-default-rtdb.firebaseio.com"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        const ADMIN_UID = 'byothLpU8SdS5SYpxlUFTOpGT0p1';
+        let currentUser = null;
+
+        // Auth
+        document.getElementById('signInBtn').addEventListener('click', async () => {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
+                await auth.signInWithPopup(provider);
+            } catch (error) {
+                alert('Sign in error: ' + error.message);
+            }
+        });
+
+        document.getElementById('signOutBtn').addEventListener('click', () => {
+            auth.signOut();
+        });
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('authStatus').innerHTML = `
+                    <div class="info">
+                        Signed in as: ${user.email}<br>
+                        UID: ${user.uid}<br>
+                        Is Admin: ${user.uid === ADMIN_UID ? 'Yes ✅' : 'No ❌'}
+                    </div>
+                `;
+                document.getElementById('signInBtn').style.display = 'none';
+                document.getElementById('signOutBtn').style.display = 'inline-block';
+                document.getElementById('dataCard').style.display = 'block';
+            } else {
+                currentUser = null;
+                document.getElementById('authStatus').innerHTML = '';
+                document.getElementById('signInBtn').style.display = 'inline-block';
+                document.getElementById('signOutBtn').style.display = 'none';
+                document.getElementById('dataCard').style.display = 'none';
+            }
+        });
+
+        // Check all users' steps
+        document.getElementById('checkStepsBtn').addEventListener('click', async () => {
+            if (!currentUser || currentUser.uid !== ADMIN_UID) {
+                alert('Admin access required');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const usersSnapshot = await db.collection('users').get();
+                let html = '<h3>Steps Data for All Users</h3>';
+                
+                const today = new Date().toISOString().split('T')[0];
+                const todayUnderscore = today.replace(/-/g, '_');
+                
+                html += `<div class="info">
+                    Today's date: ${today}<br>
+                    Checking formats: ${today}, ${todayUnderscore}, and recent documents
+                </div>`;
+
+                html += '<table class="data-table"><thead><tr><th>User</th><th>Today\'s Steps</th><th>Latest Steps</th><th>Document IDs Found</th></tr></thead><tbody>';
+
+                for (const userDoc of usersSnapshot.docs) {
+                    const userId = userDoc.id;
+                    const userData = userDoc.data();
+                    
+                    let todaySteps = 'Not found';
+                    let latestSteps = 'None';
+                    let docIds = [];
+
+                    // Check different date formats for today
+                    const dateFormats = [today, todayUnderscore, `steps_${today}`, `steps_${todayUnderscore}`];
+                    
+                    for (const format of dateFormats) {
+                        try {
+                            const doc = await db.collection('users').doc(userId)
+                                .collection('stepsData').doc(format).get();
+                            if (doc.exists) {
+                                todaySteps = doc.data().steps || 0;
+                                docIds.push(`✅ ${format}`);
+                                break;
+                            }
+                        } catch (e) {}
+                    }
+
+                    // Get recent steps documents
+                    try {
+                        const recentDocs = await db.collection('users').doc(userId)
+                            .collection('stepsData')
+                            .orderBy('date', 'desc')
+                            .limit(5)
+                            .get();
+                        
+                        if (!recentDocs.empty) {
+                            const latest = recentDocs.docs[0];
+                            latestSteps = `${latest.data().steps} (${latest.id})`;
+                            recentDocs.docs.forEach(doc => {
+                                docIds.push(doc.id);
+                            });
+                        }
+                    } catch (e) {
+                        // Try without orderBy
+                        try {
+                            const allDocs = await db.collection('users').doc(userId)
+                                .collection('stepsData')
+                                .limit(10)
+                                .get();
+                            
+                            if (!allDocs.empty) {
+                                allDocs.docs.forEach(doc => {
+                                    docIds.push(`${doc.id}: ${doc.data().steps} steps`);
+                                });
+                            }
+                        } catch (e2) {
+                            docIds.push('Error: ' + e2.message);
+                        }
+                    }
+
+                    html += `<tr>
+                        <td>${userData.email || userId.substring(0, 8) + '...'}</td>
+                        <td class="${todaySteps !== 'Not found' ? 'success' : 'error'}">${todaySteps}</td>
+                        <td>${latestSteps}</td>
+                        <td style="font-size: 0.875rem;">${docIds.join('<br>') || 'No documents'}</td>
+                    </tr>`;
+                }
+
+                html += '</tbody></table>';
+                resultsDiv.innerHTML = html;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+
+        // Check my steps only
+        document.getElementById('checkMyStepsBtn').addEventListener('click', async () => {
+            if (!currentUser) {
+                alert('Please sign in first');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Loading your steps data...</p>';
+
+            try {
+                const userId = currentUser.uid;
+                let html = `<h3>Your Steps Data (${currentUser.email})</h3>`;
+
+                // Get all steps documents
+                const stepsSnapshot = await db.collection('users').doc(userId)
+                    .collection('stepsData')
+                    .get();
+
+                if (stepsSnapshot.empty) {
+                    html += '<p class="error">No steps data found</p>';
+                } else {
+                    html += '<table class="data-table"><thead><tr><th>Document ID</th><th>Steps</th><th>Date Field</th><th>Raw Data</th></tr></thead><tbody>';
+                    
+                    stepsSnapshot.docs.forEach(doc => {
+                        const data = doc.data();
+                        html += `<tr>
+                            <td>${doc.id}</td>
+                            <td class="success">${data.steps || 0}</td>
+                            <td>${data.date ? new Date(data.date.seconds * 1000).toLocaleDateString() : 'No date'}</td>
+                            <td><pre>${JSON.stringify(data, null, 2)}</pre></td>
+                        </tr>`;
+                    });
+                    
+                    html += '</tbody></table>';
+                }
+
+                // Also check what today's document ID should be
+                const today = new Date().toISOString().split('T')[0];
+                const todayUnderscore = today.replace(/-/g, '_');
+                
+                html += `<div class="info" style="margin-top: 20px;">
+                    <strong>Debug Info:</strong><br>
+                    Today's date formats to try:<br>
+                    - ${today}<br>
+                    - ${todayUnderscore}<br>
+                    - steps_${today}<br>
+                    - steps_${todayUnderscore}<br>
+                    <br>
+                    Your UID: ${userId}
+                </div>`;
+
+                resultsDiv.innerHTML = html;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>
