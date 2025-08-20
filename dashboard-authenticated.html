@@ -399,116 +399,286 @@
 
         // Load Users Page
         async function loadUsersPage() {
-            const usersSnapshot = await db.collection('users').get();
+            console.log('Loading users page...');
             const usersList = document.getElementById('allUsersList');
             
-            const html = usersSnapshot.docs.map(doc => {
-                const data = doc.data();
-                return `
-                    <div style="padding: 1rem; border-bottom: 1px solid #e2e8f0;">
-                        <strong>ID:</strong> ${doc.id}<br>
-                        <strong>Email:</strong> ${data.email || 'N/A'}<br>
-                        <strong>Goals:</strong> Steps: ${data.goalSteps || 10000}, Calories: ${data.goalCaloriesConsumed || 2000}
-                    </div>
-                `;
-            }).join('');
+            if (!usersList) {
+                console.error('allUsersList element not found');
+                return;
+            }
             
-            usersList.innerHTML = html;
+            usersList.innerHTML = '<div style="padding: 1rem;">Loading users...</div>';
+            
+            try {
+                const usersSnapshot = await db.collection('users').get();
+                
+                if (usersSnapshot.empty) {
+                    usersList.innerHTML = '<div style="padding: 1rem;">No users found</div>';
+                    return;
+                }
+                
+                let html = '<div style="display: grid; gap: 1rem;">';
+                
+                for (const doc of usersSnapshot.docs) {
+                    const data = doc.data();
+                    const userId = doc.id;
+                    
+                    // Get user's latest stats
+                    const today = new Date().toISOString().split('T')[0].replace(/-/g, '_');
+                    let todaySteps = 0;
+                    let lastActive = 'Never';
+                    
+                    try {
+                        const stepsDoc = await db.collection('users').doc(userId)
+                            .collection('stepsData').doc(today).get();
+                        if (stepsDoc.exists) {
+                            todaySteps = stepsDoc.data().steps || 0;
+                        }
+                    } catch (e) {
+                        console.log('No steps for', userId);
+                    }
+                    
+                    if (data.lastActive) {
+                        const date = data.lastActive.toDate ? data.lastActive.toDate() : new Date(data.lastActive);
+                        lastActive = date.toLocaleDateString();
+                    }
+                    
+                    html += `
+                        <div style="padding: 1.5rem; background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <h4 style="margin: 0 0 0.5rem 0; color: #2d3748;">${data.name || 'Anonymous User'}</h4>
+                                    <div style="color: #718096; font-size: 0.875rem;">
+                                        <div><strong>ID:</strong> ${userId.substring(0, 12)}...</div>
+                                        <div><strong>Email:</strong> ${data.email || 'Not provided'}</div>
+                                        <div><strong>Created:</strong> ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}</div>
+                                        <div><strong>Last Active:</strong> ${lastActive}</div>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: #4299e1;">${todaySteps.toLocaleString()}</div>
+                                    <div style="font-size: 0.75rem; color: #718096;">steps today</div>
+                                    <div style="margin-top: 1rem;">
+                                        <div style="font-size: 0.875rem;"><strong>Goals:</strong></div>
+                                        <div style="font-size: 0.75rem; color: #718096;">Steps: ${(data.goalSteps || 10000).toLocaleString()}</div>
+                                        <div style="font-size: 0.75rem; color: #718096;">Calories: ${(data.goalCaloriesConsumed || 2000).toLocaleString()}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+                usersList.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                usersList.innerHTML = `<div style="padding: 1rem; color: red;">Error loading users: ${error.message}</div>`;
+            }
         }
 
         // Load Activity Page
         async function loadActivityPage() {
+            console.log('Loading activity page...');
             const activitiesDiv = document.getElementById('recentActivities');
-            activitiesDiv.innerHTML = '<div>Loading activities...</div>';
             
-            let allActivities = [];
-            const usersSnapshot = await db.collection('users').get();
-            
-            for (const userDoc of usersSnapshot.docs) {
-                const userId = userDoc.id;
-                // Get last 7 days of activities
-                for (let i = 0; i < 7; i++) {
-                    const date = new Date();
-                    date.setDate(date.getDate() - i);
-                    const dateStr = date.toISOString().split('T')[0].replace(/-/g, '_');
-                    
-                    try {
-                        const entriesSnapshot = await db.collection('users').doc(userId)
-                            .collection('activityLog').doc(dateStr)
-                            .collection('entries').get();
-                        
-                        entriesSnapshot.docs.forEach(doc => {
-                            const data = doc.data();
-                            allActivities.push({
-                                user: userId.substring(0, 8) + '...',
-                                name: data.name || 'Activity',
-                                duration: data.duration || 0,
-                                calories: data.caloriesBurned || 0,
-                                date: dateStr.replace(/_/g, '-')
-                            });
-                        });
-                    } catch (e) {
-                        // No activities for this date
-                    }
-                }
+            if (!activitiesDiv) {
+                console.error('recentActivities element not found');
+                return;
             }
             
-            // Sort by date and show recent
-            allActivities.sort((a, b) => b.date.localeCompare(a.date));
-            const recentHtml = allActivities.slice(0, 20).map(act => `
-                <div style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">
-                    <strong>${act.name}</strong> by ${act.user}<br>
-                    <span style="color: #718096;">${act.duration} min | ${act.calories} cal | ${act.date}</span>
-                </div>
-            `).join('');
+            activitiesDiv.innerHTML = '<div style="padding: 1rem;">Loading activities...</div>';
             
-            activitiesDiv.innerHTML = recentHtml || '<div>No recent activities</div>';
+            try {
+                let allActivities = [];
+                const usersSnapshot = await db.collection('users').get();
+                
+                // Get last 7 days of activities for all users
+                for (const userDoc of usersSnapshot.docs) {
+                    const userId = userDoc.id;
+                    const userData = userDoc.data();
+                    
+                    for (let i = 0; i < 7; i++) {
+                        const date = new Date();
+                        date.setDate(date.getDate() - i);
+                        const dateStr = date.toISOString().split('T')[0].replace(/-/g, '_');
+                        
+                        try {
+                            const entriesSnapshot = await db.collection('users').doc(userId)
+                                .collection('activityLog').doc(dateStr)
+                                .collection('entries').get();
+                            
+                            entriesSnapshot.docs.forEach(doc => {
+                                const data = doc.data();
+                                allActivities.push({
+                                    user: userData.name || userData.email || userId.substring(0, 8) + '...',
+                                    name: data.name || 'Activity',
+                                    duration: data.duration || 0,
+                                    calories: data.caloriesBurned || 0,
+                                    date: dateStr.replace(/_/g, '-'),
+                                    timestamp: data.dateCreated
+                                });
+                            });
+                        } catch (e) {
+                            // No activities for this date
+                        }
+                    }
+                }
+                
+                if (allActivities.length === 0) {
+                    activitiesDiv.innerHTML = '<div style="padding: 1rem; text-align: center; color: #718096;">No activities recorded in the last 7 days</div>';
+                    return;
+                }
+                
+                // Sort by date (most recent first)
+                allActivities.sort((a, b) => b.date.localeCompare(a.date));
+                
+                const recentHtml = allActivities.slice(0, 50).map(act => `
+                    <div style="padding: 1rem; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: #2d3748;">${act.name}</strong>
+                            <div style="font-size: 0.875rem; color: #718096; margin-top: 0.25rem;">
+                                by ${act.user} • ${act.date}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: bold; color: #48bb78;">${act.calories} cal</div>
+                            <div style="font-size: 0.75rem; color: #718096;">${act.duration} min</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                activitiesDiv.innerHTML = `
+                    <div style="background: #f7fafc; border-radius: 0.5rem; overflow: hidden;">
+                        <div style="padding: 1rem; background: white; border-bottom: 2px solid #e2e8f0;">
+                            <h4 style="margin: 0;">Recent Activities (Last 7 Days)</h4>
+                            <div style="font-size: 0.875rem; color: #718096; margin-top: 0.25rem;">
+                                Total: ${allActivities.length} activities
+                            </div>
+                        </div>
+                        ${recentHtml}
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Error loading activities:', error);
+                activitiesDiv.innerHTML = `<div style="padding: 1rem; color: red;">Error loading activities: ${error.message}</div>`;
+            }
         }
 
         // Load Nutrition Page
         async function loadNutritionPage() {
+            console.log('Loading nutrition page...');
             const nutritionDiv = document.getElementById('foodAnalysis');
-            nutritionDiv.innerHTML = '<div>Analyzing food logs...</div>';
             
-            let mealCounts = { Breakfast: 0, Lunch: 0, Dinner: 0, Snacks: 0 };
-            let totalCalories = 0;
-            
-            const usersSnapshot = await db.collection('users').get();
-            const today = new Date().toISOString().split('T')[0].replace(/-/g, '_');
-            
-            for (const userDoc of usersSnapshot.docs) {
-                try {
-                    const foodSnapshot = await db.collection('users').doc(userDoc.id)
-                        .collection('foodLog').doc(today)
-                        .collection('entries').get();
-                    
-                    foodSnapshot.docs.forEach(doc => {
-                        const data = doc.data();
-                        const mealType = data.mealType || 'Snacks';
-                        mealCounts[mealType] = (mealCounts[mealType] || 0) + 1;
-                        totalCalories += data.calories || 0;
-                    });
-                } catch (e) {
-                    // No food logs
-                }
+            if (!nutritionDiv) {
+                console.error('foodAnalysis element not found');
+                return;
             }
             
-            const html = `
-                <div style="padding: 1rem;">
-                    <h4>Today's Food Log Summary</h4>
-                    <div style="margin-top: 1rem;">
-                        <div>Breakfast: ${mealCounts.Breakfast} entries</div>
-                        <div>Lunch: ${mealCounts.Lunch} entries</div>
-                        <div>Dinner: ${mealCounts.Dinner} entries</div>
-                        <div>Snacks: ${mealCounts.Snacks} entries</div>
-                        <div style="margin-top: 1rem; font-weight: bold;">
-                            Total Calories Logged: ${totalCalories.toLocaleString()}
+            nutritionDiv.innerHTML = '<div style="padding: 1rem;">Analyzing food logs...</div>';
+            
+            try {
+                let mealCounts = { Breakfast: 0, Lunch: 0, Dinner: 0, Snacks: 0 };
+                let totalCalories = 0;
+                let foodItems = [];
+                
+                const usersSnapshot = await db.collection('users').get();
+                const today = new Date().toISOString().split('T')[0].replace(/-/g, '_');
+                
+                // Get today's food logs for all users
+                for (const userDoc of usersSnapshot.docs) {
+                    const userId = userDoc.id;
+                    const userData = userDoc.data();
+                    
+                    try {
+                        const foodSnapshot = await db.collection('users').doc(userId)
+                            .collection('foodLog').doc(today)
+                            .collection('entries').get();
+                        
+                        foodSnapshot.docs.forEach(doc => {
+                            const data = doc.data();
+                            const mealType = data.mealType || 'Snacks';
+                            mealCounts[mealType] = (mealCounts[mealType] || 0) + 1;
+                            totalCalories += data.calories || 0;
+                            
+                            foodItems.push({
+                                user: userData.name || userData.email || userId.substring(0, 8) + '...',
+                                name: data.name,
+                                calories: data.calories || 0,
+                                mealType: mealType,
+                                protein: data.protein || 0,
+                                carbs: data.carbs || 0,
+                                fat: data.fat || 0
+                            });
+                        });
+                    } catch (e) {
+                        // No food logs for this user today
+                    }
+                }
+                
+                // Create food items list
+                const foodListHtml = foodItems.length > 0 ? foodItems.map(item => `
+                    <div style="padding: 0.75rem; border-bottom: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>
+                                <strong>${item.name}</strong> (${item.mealType})
+                                <div style="font-size: 0.75rem; color: #718096;">by ${item.user}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold; color: #e53e3e;">${item.calories} cal</div>
+                                <div style="font-size: 0.625rem; color: #718096;">
+                                    P: ${item.protein}g | C: ${item.carbs}g | F: ${item.fat}g
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-            
-            nutritionDiv.innerHTML = html;
+                `).join('') : '<div style="padding: 1rem; text-align: center; color: #718096;">No food logged today</div>';
+                
+                const html = `
+                    <div style="display: grid; gap: 1rem;">
+                        <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                            <h4 style="margin: 0 0 1rem 0;">Today's Food Log Summary</h4>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                                <div style="padding: 1rem; background: #f7fafc; border-radius: 0.25rem;">
+                                    <div style="font-size: 0.875rem; color: #718096;">Breakfast</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold;">${mealCounts.Breakfast}</div>
+                                </div>
+                                <div style="padding: 1rem; background: #f7fafc; border-radius: 0.25rem;">
+                                    <div style="font-size: 0.875rem; color: #718096;">Lunch</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold;">${mealCounts.Lunch}</div>
+                                </div>
+                                <div style="padding: 1rem; background: #f7fafc; border-radius: 0.25rem;">
+                                    <div style="font-size: 0.875rem; color: #718096;">Dinner</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold;">${mealCounts.Dinner}</div>
+                                </div>
+                                <div style="padding: 1rem; background: #f7fafc; border-radius: 0.25rem;">
+                                    <div style="font-size: 0.875rem; color: #718096;">Snacks</div>
+                                    <div style="font-size: 1.5rem; font-weight: bold;">${mealCounts.Snacks}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 1rem; padding: 1rem; background: #fed7d7; border-radius: 0.25rem; text-align: center;">
+                                <div style="font-size: 0.875rem; color: #742a2a;">Total Calories Today</div>
+                                <div style="font-size: 2rem; font-weight: bold; color: #e53e3e;">${totalCalories.toLocaleString()}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; border-radius: 0.5rem; border: 1px solid #e2e8f0; overflow: hidden;">
+                            <div style="padding: 1rem; background: #f7fafc; border-bottom: 1px solid #e2e8f0;">
+                                <h4 style="margin: 0;">Today's Food Items</h4>
+                            </div>
+                            ${foodListHtml}
+                        </div>
+                    </div>
+                `;
+                
+                nutritionDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading nutrition data:', error);
+                nutritionDiv.innerHTML = `<div style="padding: 1rem; color: red;">Error loading nutrition data: ${error.message}</div>`;
+            }
         }
     </script>
 </body>
