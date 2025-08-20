@@ -237,27 +237,31 @@
                         <div class="stat-content">
                             <h3>Total Users</h3>
                             <p class="stat-value" id="totalUsers">-</p>
+                            <p style="font-size: 0.75rem; color: #718096; margin-top: 0.25rem;">All registered users</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">👣</div>
                         <div class="stat-content">
-                            <h3>Steps Today</h3>
+                            <h3>Community Steps Today</h3>
                             <p class="stat-value" id="totalStepsToday">-</p>
+                            <p style="font-size: 0.75rem; color: #718096; margin-top: 0.25rem;">Combined from all users</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">🍎</div>
                         <div class="stat-content">
-                            <h3>Foods in Database</h3>
+                            <h3>Food Database Size</h3>
                             <p class="stat-value" id="totalFoods">-</p>
+                            <p style="font-size: 0.75rem; color: #718096; margin-top: 0.25rem;">Unique food items</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">🔥</div>
                         <div class="stat-content">
-                            <h3>Active Today</h3>
+                            <h3>Active Users Today</h3>
                             <p class="stat-value" id="activeToday">-</p>
+                            <p style="font-size: 0.75rem; color: #718096; margin-top: 0.25rem;">Users with steps > 0</p>
                         </div>
                     </div>
                 </div>
@@ -265,7 +269,15 @@
                 <!-- Charts -->
                 <div class="insights-grid">
                     <div class="chart-card">
-                        <h3>📊 Daily Steps Trend (7 Days)</h3>
+                        <h3>📊 Community Steps Trend</h3>
+                        <p style="color: #718096; font-size: 0.875rem; margin: 0.5rem 0;">
+                            Total steps from ALL USERS combined over the last 7 days
+                        </p>
+                        <div style="margin: 1rem 0;">
+                            <label style="font-size: 0.875rem; color: #4a5568;">
+                                <input type="checkbox" id="showTopUsersOnly" checked> Show top 10 users only
+                            </label>
+                        </div>
                         <div class="chart-container">
                             <div style="position: absolute; width: 100%; height: 300px; overflow: hidden;">
                                 <canvas id="stepsChart" style="position: absolute; width: 100% !important; height: 300px !important;"></canvas>
@@ -273,7 +285,10 @@
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h3>🏃 Activity Distribution</h3>
+                        <h3>🏃 Today's User Activity Status</h3>
+                        <p style="color: #718096; font-size: 0.875rem; margin: 0.5rem 0;">
+                            Breakdown of ALL USERS by activity status today
+                        </p>
                         <div class="chart-container">
                             <div style="position: absolute; width: 100%; height: 300px; overflow: hidden;">
                                 <canvas id="activityChart" style="position: absolute; width: 100% !important; height: 300px !important;"></canvas>
@@ -429,7 +444,17 @@
         }
         
         // Start monitoring after DOM is ready
-        document.addEventListener('DOMContentLoaded', preventChartExpansion);
+        document.addEventListener('DOMContentLoaded', () => {
+            preventChartExpansion();
+            
+            // Add event listener for the toggle
+            const toggle = document.getElementById('showTopUsersOnly');
+            if (toggle) {
+                toggle.addEventListener('change', () => {
+                    updateCharts();
+                });
+            }
+        });
         
         // Auth State Observer
         auth.onAuthStateChanged(async (user) => {
@@ -603,16 +628,23 @@
                 document.getElementById('totalStepsToday').textContent = totalStepsToday.toLocaleString();
                 document.getElementById('activeToday').textContent = activeUsersToday;
                 
-                // Load Food Database count (cached)
+                // Load Food Database count (cached) - get ALL foods, not limited
                 if (!dataCache.foods) {
-                    const foodSnapshot = await db.collection('foodDatabase').limit(1000).get();
+                    // First get the actual count
+                    const foodCountSnapshot = await db.collection('foodDatabase').get();
+                    const actualFoodCount = foodCountSnapshot.size;
+                    console.log(`Actual food database size: ${actualFoodCount} items`);
+                    
+                    // Load a reasonable subset for display (500 for performance)
+                    const foodSnapshot = await db.collection('foodDatabase').limit(500).get();
                     dataCache.foods = foodSnapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data()
                     }));
+                    dataCache.totalFoodCount = actualFoodCount;
                 }
                 
-                document.getElementById('totalFoods').textContent = dataCache.foods.length;
+                document.getElementById('totalFoods').textContent = dataCache.totalFoodCount || dataCache.foods.length;
                 
                 // Update cache timestamp
                 dataCache.lastFetch = Date.now();
@@ -648,6 +680,12 @@
         }
 
         async function updateCharts() {
+            // Check if we should show all users or just top users
+            const showTopOnly = document.getElementById('showTopUsersOnly')?.checked ?? true;
+            const usersToShow = showTopOnly ? dataCache.users.slice(0, 10) : dataCache.users;
+            
+            console.log(`Showing steps for ${usersToShow.length} users (${showTopOnly ? 'top 10' : 'all'})`);
+            
             // Get last 7 days of steps
             const last7Days = [];
             const stepsData = [];
@@ -663,10 +701,18 @@
                 
                 // Use cached data if available for today
                 if (i === 0 && dataCache.todaySteps) {
-                    dayTotal = Object.values(dataCache.todaySteps).reduce((a, b) => a + b, 0);
+                    // Filter based on toggle
+                    if (showTopOnly) {
+                        const topUserIds = usersToShow.map(u => u.id);
+                        dayTotal = Object.entries(dataCache.todaySteps)
+                            .filter(([userId]) => topUserIds.includes(userId))
+                            .reduce((sum, [, steps]) => sum + steps, 0);
+                    } else {
+                        dayTotal = Object.values(dataCache.todaySteps).reduce((a, b) => a + b, 0);
+                    }
                 } else {
                     // Batch load for historical data
-                    const dayPromises = dataCache.users.slice(0, 10).map(user => 
+                    const dayPromises = usersToShow.map(user => 
                         db.collection('users').doc(user.id)
                             .collection('stepsData').doc(dateStr).get()
                             .then(doc => doc.exists ? (doc.data().steps || 0) : 0)
@@ -862,14 +908,14 @@
                     
                 case 'calories':
                     html = '<h3>Calories Burned Leaders</h3>';
+                    html += '<p style="color: #718096; font-size: 0.875rem;">Showing calories burned from activities logged today by ALL users</p>';
                     
                     // Load calories data from activityLog
                     if (!dataCache.calories[today]) {
                         const caloriesData = {};
                         
-                        // Batch load calories for top users
-                        const topUsers = dataCache.users.slice(0, 20);
-                        const caloriesPromises = topUsers.map(async user => {
+                        // Load calories for ALL users to ensure we catch everyone who logged
+                        const caloriesPromises = dataCache.users.map(async user => {
                             try {
                                 const entriesSnapshot = await db.collection('users').doc(user.id)
                                     .collection('activityLog').doc(today)
@@ -883,11 +929,14 @@
                                 if (totalCalories > 0) {
                                     caloriesData[user.id] = totalCalories;
                                 }
-                            } catch (e) {}
+                            } catch (e) {
+                                console.log(`Error loading calories for ${user.id}:`, e);
+                            }
                         });
                         
                         await Promise.all(caloriesPromises);
                         dataCache.calories[today] = caloriesData;
+                        console.log(`Loaded calorie data for ${Object.keys(caloriesData).length} users`);
                     }
                     
                     const caloriesLeaders = Object.entries(dataCache.calories[today] || {})
@@ -1029,8 +1078,8 @@
             const content = document.getElementById('foodsContent');
             content.innerHTML = '<div class="loading-message"><div class="loading-spinner"></div><span>Loading...</span></div>';
             
-            // Update stats
-            document.getElementById('uniqueFoodsCount').textContent = dataCache.foods?.length || '-';
+            // Update stats with actual count
+            document.getElementById('uniqueFoodsCount').textContent = dataCache.totalFoodCount || dataCache.foods?.length || '-';
             
             // Count categories
             const categories = {};
