@@ -499,8 +499,12 @@
             <div class="sidebar-footer">
                 <button id="refreshBtn" class="btn-refresh">🔄 Refresh</button>
                 <button id="signOutBtn" class="btn-logout">Sign Out</button>
+                <button onclick="exportDebugLogs()" class="btn-logout" style="background: rgba(255,152,0,0.2); border-color: rgba(255,152,0,0.3);">📥 Debug Logs</button>
                 <div class="cache-info">
                     Cache: <span id="cacheStatus">Empty</span>
+                </div>
+                <div class="debug-panel" id="debugPanel" style="margin-top: 1rem; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 8px; max-height: 200px; overflow-y: auto; font-size: 0.7rem; color: rgba(255,255,255,0.7);">
+                    <div style="color: rgba(255,255,255,0.5);">Debug logs...</div>
                 </div>
             </div>
         </nav>
@@ -834,9 +838,83 @@
             databaseURL: "https://rovi-16b3a-default-rtdb.firebaseio.com"
         };
 
+        // Debug logging system
+        const debugLogs = [];
+        const MAX_DEBUG_LOGS = 500;
+        
+        function debugLog(category, message, data = null) {
+            const logEntry = {
+                timestamp: new Date().toISOString(),
+                category: category,
+                message: message,
+                data: data
+            };
+            
+            debugLogs.push(logEntry);
+            if (debugLogs.length > MAX_DEBUG_LOGS) {
+                debugLogs.shift();
+            }
+            
+            const color = {
+                'AUTH': 'color: #4CAF50',
+                'DATA': 'color: #2196F3',
+                'ERROR': 'color: #f44336',
+                'FEED': 'color: #9C27B0',
+                'FIREBASE': 'color: #FF9800',
+                'STEPS': 'color: #00BCD4',
+                'FOOD': 'color: #8BC34A',
+                'ACTIVITY': 'color: #FFC107'
+            }[category] || 'color: #666';
+            
+            console.log(`%c[${category}] ${message}`, color, data || '');
+            updateDebugPanel();
+        }
+        
+        function exportDebugLogs() {
+            const debugData = {
+                exportTime: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                currentUser: currentUser?.email || 'Not logged in',
+                totalUsers: dataCache.users?.length || 0,
+                logs: debugLogs,
+                dataCache: {
+                    users: dataCache.users?.length || 0,
+                    todaySteps: dataCache.todaySteps ? Object.keys(dataCache.todaySteps).length : 0,
+                    foods: dataCache.foods?.length || 0,
+                    lastFetch: dataCache.lastFetch ? new Date(dataCache.lastFetch).toISOString() : null
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(debugData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `rovi-debug-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function updateDebugPanel() {
+            const panel = document.getElementById('debugPanel');
+            if (!panel) return;
+            
+            const recentLogs = debugLogs.slice(-10).reverse();
+            const html = recentLogs.map(log => {
+                const time = new Date(log.timestamp).toLocaleTimeString();
+                return `<div class="debug-entry ${log.category.toLowerCase()}">
+                    <span class="debug-time">${time}</span>
+                    <span class="debug-category">[${log.category}]</span>
+                    <span class="debug-message">${log.message}</span>
+                </div>`;
+            }).join('');
+            
+            panel.innerHTML = html || '<div class="debug-entry">No logs yet</div>';
+        }
+
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        debugLog('FIREBASE', 'Firebase initialized');
 
         const ADMIN_UID = 'byothLpU8SdS5SYpxlUFTOpGT0p1';
         
@@ -936,7 +1014,7 @@
         // Auth State Observer
         auth.onAuthStateChanged(async (user) => {
             if (user) {
-                console.log('User signed in:', user.email);
+                debugLog('AUTH', `User signed in: ${user.email}`, { uid: user.uid });
                 currentUser = user;
                 
                 if (user.uid === ADMIN_UID || user.email === 'vinh2711@googlemail.com') {
@@ -1054,7 +1132,7 @@
 
         // Main data loading function with enhanced metrics
         async function loadDashboardData() {
-            console.log('Loading dashboard data...');
+            debugLog('DATA', 'Starting dashboard data load...');
             document.getElementById('lastUpdate').textContent = 'Updating...';
             
             // Check cache validity
@@ -1067,33 +1145,41 @@
             try {
                 // Load Users (cached)
                 if (!dataCache.users) {
+                    debugLog('DATA', 'Loading users from Firebase...');
                     const usersSnapshot = await db.collection('users').get();
                     dataCache.users = usersSnapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data()
                     }));
+                    debugLog('DATA', `Loaded ${dataCache.users.length} users`, dataCache.users.map(u => u.email));
+                } else {
+                    debugLog('DATA', `Using cached users: ${dataCache.users.length}`);
                 }
                 
                 document.getElementById('totalUsers').textContent = dataCache.users.length;
                 
                 // Load today's steps (using yyyy-MM-dd format)
                 const today = new Date().toISOString().split('T')[0];
-                console.log('Loading dashboard data for date:', today);
+                debugLog('DATA', `Loading data for date: ${today}`);
                 let totalStepsToday = 0;
                 let activeUsersToday = 0;
                 
                 // Batch load steps for all users from stepsData collection
+                debugLog('STEPS', 'Loading steps for all users...');
                 const stepsPromises = dataCache.users.map(user => 
                     db.collection('users').doc(user.id)
                         .collection('stepsData').doc(today).get()
                         .then(doc => {
                             if (doc.exists) {
-                                console.log(`Steps data found for ${user.email}:`, doc.data());
+                                const steps = doc.data().steps || 0;
+                                debugLog('STEPS', `${user.email}: ${steps} steps`);
+                            } else {
+                                debugLog('STEPS', `${user.email}: No data for ${today}`);
                             }
                             return { userId: user.id, data: doc.exists ? doc.data() : null };
                         })
                         .catch(err => {
-                            console.error(`Error loading steps for ${user.email}:`, err);
+                            debugLog('ERROR', `Steps failed for ${user.email}: ${err.message}`);
                             return { userId: user.id, data: null };
                         })
                 );
