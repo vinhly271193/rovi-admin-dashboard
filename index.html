@@ -1211,16 +1211,19 @@
                 debugLog('STEPS', `Summary: ${totalStepsToday} total steps from ${activeUsersToday} active users`);
                 
                 // Load calories burned today from activityLog/{date} document (in parallel)
-                debugLog('ACTIVITY', 'Loading activities for all users...');
                 let totalCaloriesBurned = 0;
                 let activeSessions = 0;
+                let stepCalories = 0;
                 
-                // Calculate calories from steps FIRST (approx 0.04 calories per step)
-                const stepCalories = Math.round(totalStepsToday * 0.04);
-                totalCaloriesBurned += stepCalories;
-                debugLog('ACTIVITY', `Added ${stepCalories} calories from ${totalStepsToday} steps`);
-                
-                const activityPromises = dataCache.users.map(user => 
+                try {
+                    debugLog('ACTIVITY', 'Loading activities for all users...');
+                    
+                    // Calculate calories from steps FIRST (approx 0.04 calories per step)
+                    stepCalories = Math.round(totalStepsToday * 0.04);
+                    totalCaloriesBurned += stepCalories;
+                    debugLog('ACTIVITY', `Added ${stepCalories} calories from ${totalStepsToday} steps`);
+                    
+                    const activityPromises = dataCache.users.map(user => 
                     db.collection('users').doc(user.id)
                         .collection('activityLog').doc(today).get()
                         .then(doc => {
@@ -1264,7 +1267,10 @@
                     }
                 });
                 
-                debugLog('ACTIVITY', `Total: ${totalCaloriesBurned} calories (including ${stepCalories} from steps), ${activeSessions} sessions`);
+                    debugLog('ACTIVITY', `Total: ${totalCaloriesBurned} calories (including ${stepCalories} from steps), ${activeSessions} sessions`);
+                } catch (activityError) {
+                    debugLog('ERROR', `Activity loading failed: ${activityError.message}`, activityError);
+                }
                 
                 document.getElementById('totalCaloriesBurned').textContent = totalCaloriesBurned > 0 ? totalCaloriesBurned.toLocaleString() : '0';
                 document.getElementById('activeSessions').textContent = activeSessions > 0 ? activeSessions : '0';
@@ -1274,13 +1280,15 @@
                 dataCache.todaySessions = activeSessions;
                 
                 // Load foods logged today from foodLog/{date} document (in parallel)
-                debugLog('FOOD', 'Loading food logs for all users...');
                 let totalFoodsLogged = 0;
                 let totalCaloriesConsumed = 0;
                 let uniqueFoodsToday = new Set();
                 dataCache.loggedFoods = {};
                 
-                const foodPromises = dataCache.users.map(user => 
+                try {
+                    debugLog('FOOD', 'Loading food logs for all users...');
+                    
+                    const foodPromises = dataCache.users.map(user => 
                     db.collection('users').doc(user.id)
                         .collection('foodLog').doc(today).get()
                         .then(doc => {
@@ -1329,7 +1337,10 @@
                     });
                 });
                 
-                debugLog('FOOD', `Summary: ${totalFoodsLogged} food entries, ${totalCaloriesConsumed} calories consumed`);
+                    debugLog('FOOD', `Summary: ${totalFoodsLogged} food entries, ${totalCaloriesConsumed} calories consumed`);
+                } catch (foodError) {
+                    debugLog('ERROR', `Food loading failed: ${foodError.message}`, foodError);
+                }
                 
                 document.getElementById('foodsLoggedToday').textContent = totalFoodsLogged;
                 document.getElementById('uniqueFoodsToday').textContent = uniqueFoodsToday.size;
