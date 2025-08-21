@@ -458,7 +458,7 @@
         <div class="login-card">
             <h1>ROVI Analytics</h1>
             <p>Premium Admin Dashboard</p>
-            <button id="googleSignInBtn" class="btn-primary">
+            <button id="googleSignInBtn" class="btn-primary" onclick="console.log('Button onclick fired'); handleSignIn()">
                 <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right: 8px; vertical-align: middle;">
                     <path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -831,6 +831,32 @@
     <script>
         console.log('Dashboard script starting...');
         
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
+        
+        function initializeApp() {
+            console.log('DOM ready, initializing app...');
+            setupEventListeners();
+        }
+        
+        // Global function for inline onclick
+        window.handleSignIn = async function() {
+            console.log('handleSignIn called');
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
+                const result = await auth.signInWithPopup(provider);
+                console.log('Sign in successful:', result.user.email);
+            } catch (error) {
+                console.error('Sign in error:', error);
+                alert('Sign in failed: ' + error.message);
+            }
+        }
+        
         // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDrNsSCG2FJ1es4BHe_URbwhuEpkA_5VyU",
@@ -1032,11 +1058,14 @@
             }
         });
 
-        // Sign In
-        const signInBtn = document.getElementById('googleSignInBtn');
-        console.log('Sign in button element:', signInBtn);
-        if (signInBtn) {
-            signInBtn.addEventListener('click', async () => {
+        function setupEventListeners() {
+            console.log('Setting up event listeners...');
+            
+            // Sign In
+            const signInBtn = document.getElementById('googleSignInBtn');
+            console.log('Sign in button element:', signInBtn);
+            if (signInBtn) {
+                signInBtn.addEventListener('click', async () => {
                 console.log('Sign in button clicked');
                 debugLog('AUTH', 'Sign in button clicked');
             try {
@@ -1052,19 +1081,22 @@
                 showError(error.message);
             }
             });
-        } else {
-            console.error('Sign in button not found!');
-        }
+            } else {
+                console.error('Sign in button not found!');
+            }
 
-        // Sign Out
-        document.getElementById('signOutBtn').addEventListener('click', () => {
-            dataCache = { users: null, foods: null, activities: {}, calories: {}, lastFetch: null };
-            auth.signOut();
-        });
+            // Sign Out
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', () => {
+                    dataCache = { users: null, foods: null, activities: {}, calories: {}, lastFetch: null };
+                    auth.signOut();
+                });
+            }
 
-        // Navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() {
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
                 document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
                 this.classList.add('active');
                 
@@ -1115,11 +1147,15 @@
             }
         });
 
-        // Refresh Button
-        document.getElementById('refreshBtn').addEventListener('click', () => {
-            dataCache = { users: null, foods: null, activities: {}, calories: {}, lastFetch: null };
-            loadDashboardData();
-        });
+            // Refresh Button
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => {
+                    dataCache = { users: null, foods: null, activities: {}, calories: {}, lastFetch: null };
+                    loadDashboardData();
+                });
+            }
+        } // End of setupEventListeners
 
         function showLogin() {
             document.getElementById('loginScreen').style.display = 'flex';
