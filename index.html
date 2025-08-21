@@ -1208,10 +1208,17 @@
                 const engagementRate = Math.round((activeUsersToday / dataCache.users.length) * 100);
                 document.getElementById('engagementRate').textContent = engagementRate + '%';
                 
+                debugLog('STEPS', `Summary: ${totalStepsToday} total steps from ${activeUsersToday} active users`);
+                
                 // Load calories burned today from activityLog/{date} document (in parallel)
-                console.log('Loading activities for all users...');
+                debugLog('ACTIVITY', 'Loading activities for all users...');
                 let totalCaloriesBurned = 0;
                 let activeSessions = 0;
+                
+                // Calculate calories from steps FIRST (approx 0.04 calories per step)
+                const stepCalories = Math.round(totalStepsToday * 0.04);
+                totalCaloriesBurned += stepCalories;
+                debugLog('ACTIVITY', `Added ${stepCalories} calories from ${totalStepsToday} steps`);
                 
                 const activityPromises = dataCache.users.map(user => 
                     db.collection('users').doc(user.id)
@@ -1219,6 +1226,7 @@
                         .then(doc => {
                             if (doc.exists) {
                                 const data = doc.data();
+                                debugLog('ACTIVITY', `${user.email} activity data:`, data);
                                 // Check if this is a single activity or has entries
                                 if (data.entries && Array.isArray(data.entries)) {
                                     // Multiple activities in entries array
@@ -1240,19 +1248,23 @@
                             return { calories: 0, sessions: 0, userId: user.id };
                         })
                         .catch(e => {
-                            console.error(`Error loading activities for user ${user.id}:`, e);
+                            debugLog('ERROR', `Activity load failed for ${user.email}: ${e.message}`);
                             return { calories: 0, sessions: 0, userId: user.id };
                         })
                 );
                 
                 const activityResults = await Promise.all(activityPromises);
+                debugLog('ACTIVITY', `Loaded activity data for ${activityResults.length} users`);
+                
                 activityResults.forEach(result => {
                     totalCaloriesBurned += result.calories;
                     activeSessions += result.sessions;
                     if (result.calories > 0) {
-                        console.log(`User ${result.userId}: ${result.calories} calories burned`);
+                        debugLog('ACTIVITY', `User ${result.userId}: ${result.calories} calories from activities`);
                     }
                 });
+                
+                debugLog('ACTIVITY', `Total: ${totalCaloriesBurned} calories (including ${stepCalories} from steps), ${activeSessions} sessions`);
                 
                 document.getElementById('totalCaloriesBurned').textContent = totalCaloriesBurned > 0 ? totalCaloriesBurned.toLocaleString() : '0';
                 document.getElementById('activeSessions').textContent = activeSessions > 0 ? activeSessions : '0';
@@ -1262,7 +1274,7 @@
                 dataCache.todaySessions = activeSessions;
                 
                 // Load foods logged today from foodLog/{date} document (in parallel)
-                console.log('Loading food logs for all users...');
+                debugLog('FOOD', 'Loading food logs for all users...');
                 let totalFoodsLogged = 0;
                 let totalCaloriesConsumed = 0;
                 let uniqueFoodsToday = new Set();
@@ -1317,7 +1329,7 @@
                     });
                 });
                 
-                console.log(`Loaded ${totalFoodsLogged} food entries, ${totalCaloriesConsumed} total calories`);
+                debugLog('FOOD', `Summary: ${totalFoodsLogged} food entries, ${totalCaloriesConsumed} calories consumed`);
                 
                 document.getElementById('foodsLoggedToday').textContent = totalFoodsLogged;
                 document.getElementById('uniqueFoodsToday').textContent = uniqueFoodsToday.size;
@@ -1391,6 +1403,14 @@
                 // Update cache timestamp
                 dataCache.lastFetch = Date.now();
                 updateCacheStatus();
+                
+                debugLog('DATA', 'Dashboard load complete!', {
+                    totalSteps: totalStepsToday,
+                    caloriesBurned: totalCaloriesBurned,
+                    caloriesConsumed: totalCaloriesConsumed,
+                    foodEntries: totalFoodsLogged,
+                    activeUsers: activeUsersToday
+                });
                 
                 // Update charts with delay to ensure DOM is ready
                 setTimeout(() => updateCharts(), 100);
