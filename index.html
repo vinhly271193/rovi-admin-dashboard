@@ -1492,6 +1492,12 @@
             }
             
             updateQuickLeaderboard();
+            
+            // Start social feed and load initial data
+            debugLog('FEED', 'Starting social feed...');
+            await loadInitialFeedData(today);
+            startSocialFeed();
+            
             document.getElementById('lastUpdate').textContent = 'Last updated: ' + new Date(dataCache.lastFetch).toLocaleTimeString() + ' (cached)';
         }
 
@@ -2070,7 +2076,7 @@
         
         async function loadInitialFeedData(today) {
             // Load existing data for today to populate feed immediately
-            console.log('Loading initial feed data for today:', today);
+            debugLog('FEED', `Loading initial feed data for today: ${today}`);
             for (const user of dataCache.users) {
                 try {
                     // Load steps
@@ -2157,7 +2163,7 @@
                 }
             }
             
-            console.log(`Loaded ${feedItems.length} initial feed items`);
+            debugLog('FEED', `Loaded ${feedItems.length} initial feed items`);
             updateFeedDisplay();
         }
         
@@ -2192,7 +2198,7 @@
         }
         
         async function startSocialFeed() {
-            console.log('Starting social feed...');
+            debugLog('FEED', 'Starting real-time social feed listeners...');
             const today = new Date().toISOString().split('T')[0];
             
             // Clear existing listeners
