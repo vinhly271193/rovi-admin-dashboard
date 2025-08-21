@@ -829,6 +829,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        console.log('Dashboard script starting...');
+        
         // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDrNsSCG2FJ1es4BHe_URbwhuEpkA_5VyU",
@@ -1031,15 +1033,28 @@
         });
 
         // Sign In
-        document.getElementById('googleSignInBtn').addEventListener('click', async () => {
+        const signInBtn = document.getElementById('googleSignInBtn');
+        console.log('Sign in button element:', signInBtn);
+        if (signInBtn) {
+            signInBtn.addEventListener('click', async () => {
+                console.log('Sign in button clicked');
+                debugLog('AUTH', 'Sign in button clicked');
             try {
+                debugLog('AUTH', 'Creating Google Auth Provider...');
                 const provider = new firebase.auth.GoogleAuthProvider();
                 provider.setCustomParameters({ prompt: 'select_account' });
-                await auth.signInWithPopup(provider);
+                debugLog('AUTH', 'Attempting sign in with popup...');
+                const result = await auth.signInWithPopup(provider);
+                debugLog('AUTH', 'Sign in successful', { user: result.user.email });
             } catch (error) {
+                console.error('Sign in error:', error);
+                debugLog('ERROR', `Sign in failed: ${error.message}`, error);
                 showError(error.message);
             }
-        });
+            });
+        } else {
+            console.error('Sign in button not found!');
+        }
 
         // Sign Out
         document.getElementById('signOutBtn').addEventListener('click', () => {
