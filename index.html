@@ -1394,7 +1394,10 @@
                     debugLog('ERROR', `Food loading failed: ${foodError.message}`, foodError);
                 }
                 
+                debugLog('DATA', 'Updating UI elements after food loading...');
+                debugLog('DATA', 'Setting foodsLoggedToday...');
                 document.getElementById('foodsLoggedToday').textContent = totalFoodsLogged;
+                debugLog('DATA', 'Setting uniqueFoodsToday...');
                 document.getElementById('uniqueFoodsToday').textContent = uniqueFoodsToday.size;
                 
                 // Update calories consumed if element exists
@@ -1407,24 +1410,30 @@
                 dataCache.todayCaloriesConsumed = totalCaloriesConsumed;
                 
                 // Update average calories per user if element exists
+                debugLog('DATA', 'Calculating average calories per user...');
                 const avgCaloriesEl = document.getElementById('avgCaloriesPerUser');
                 if (avgCaloriesEl) {
                     const usersWhoAte = foodResults.filter(foods => foods.length > 0).length;
                     const avgCaloriesConsumed = usersWhoAte > 0 ? Math.round(totalCaloriesConsumed / usersWhoAte) : 0;
                     avgCaloriesEl.textContent = avgCaloriesConsumed.toLocaleString();
+                    debugLog('DATA', `Average calories: ${avgCaloriesConsumed} (${usersWhoAte} users ate)`);
                 }
                 
                 // Find daily champion
+                debugLog('DATA', 'Finding daily champion...');
                 const topUser = Object.entries(dailySteps)
                     .sort((a, b) => b[1] - a[1])[0];
+                debugLog('DATA', `Top user: ${topUser ? topUser[0] : 'none'} with ${topUser ? topUser[1] : 0} steps`);
                 
                 if (topUser && topUser[1] > 0) {
                     const champion = dataCache.users.find(u => u.id === topUser[0]);
+                    debugLog('DATA', `Setting champion UI for ${champion?.email || 'unknown'}`);
                     document.getElementById('dailyChampion').textContent = 
                         champion?.name || champion?.email?.split('@')[0] || 'Anonymous';
                     document.getElementById('championSteps').textContent = topUser[1].toLocaleString() + ' steps';
                     document.getElementById('championStreak').textContent = 'Today\'s leader';
                 } else {
+                    debugLog('DATA', 'No champion found, setting default messages');
                     document.getElementById('dailyChampion').textContent = 'No activity yet';
                     document.getElementById('championSteps').textContent = 'Be the first!';
                     document.getElementById('championStreak').textContent = 'Start walking';
@@ -1456,12 +1465,20 @@
                 });
                 
                 // Update charts with delay to ensure DOM is ready
-                setTimeout(() => updateCharts(), 100);
+                debugLog('DATA', 'Scheduling chart update...');
+                setTimeout(() => {
+                    debugLog('DATA', 'Calling updateCharts...');
+                    updateCharts();
+                }, 100);
                 
                 // Update quick leaderboard
+                debugLog('DATA', 'Calling updateQuickLeaderboard...');
                 updateQuickLeaderboard();
                 
+                debugLog('DATA', 'Setting last update time...');
                 document.getElementById('lastUpdate').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+                
+                debugLog('DATA', '=== Dashboard load completed successfully ===');
                 
             } catch (error) {
                 debugLog('ERROR', `=== CRITICAL ERROR IN loadDashboardData ===`);
