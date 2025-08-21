@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROVI Admin Dashboard - Premium</title>
-    <link rel="stylesheet" href="css/modern-dashboard.css">
+    <title>ROVI Admin Dashboard - Dark Premium</title>
+    <link rel="stylesheet" href="css/dark-premium.css">
     <style>
         /* Override for chart containers */
         .chart-container {
@@ -123,12 +123,9 @@
     </style>
 </head>
 <body>
-    <!-- Animated Background -->
-    <div class="floating-orbs">
-        <div class="orb orb1"></div>
-        <div class="orb orb2"></div>
-        <div class="orb orb3"></div>
-    </div>
+    <!-- Dark Mode Glow Effects -->
+    <div class="glow-orb glow-purple"></div>
+    <div class="glow-orb glow-blue"></div>
     
     <!-- Login Screen -->
     <div id="loginScreen" class="login-container">
@@ -186,49 +183,83 @@
 
             <!-- Overview Page -->
             <div id="overviewPage" class="page-content">
-                <!-- Stats Grid -->
+                <!-- Stats Grid - Enhanced with more metrics -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon">👥</div>
                         <div class="stat-content">
-                            <h3>Total Registered Users</h3>
+                            <h3>Total Users</h3>
                             <p class="stat-value" id="totalUsers">-</p>
+                            <div class="stat-change positive" id="userGrowth">
+                                <span>↑ Loading...</span>
+                            </div>
                             <div class="stat-description">
-                                <strong>DATA SOURCE:</strong>
-                                <span> All users in database</span>
+                                <strong>7-day growth:</strong> <span id="weeklyUserGrowth">-</span>
                             </div>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">👣</div>
                         <div class="stat-content">
-                            <h3>Total Steps Today</h3>
+                            <h3>Steps Today</h3>
                             <p class="stat-value" id="totalStepsToday">-</p>
-                            <div class="stat-description">
-                                <strong>DATA SOURCE:</strong>
-                                <span> Sum of ALL users' steps today</span>
+                            <div class="stat-change" id="stepsChange">
+                                <span>vs yesterday</span>
                             </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🍎</div>
-                        <div class="stat-content">
-                            <h3>Food Database Items</h3>
-                            <p class="stat-value" id="totalFoods">-</p>
                             <div class="stat-description">
-                                <strong>DATA SOURCE:</strong>
-                                <span> Actual count from foodDatabase</span>
+                                <strong>Avg per user:</strong> <span id="avgStepsPerUser">-</span>
                             </div>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">🔥</div>
                         <div class="stat-content">
-                            <h3>Active Users Count</h3>
-                            <p class="stat-value" id="activeToday">-</p>
+                            <h3>Calories Burned</h3>
+                            <p class="stat-value" id="totalCaloriesBurned">-</p>
+                            <div class="stat-change positive">
+                                <span id="caloriesTrend">↑ Calculating...</span>
+                            </div>
                             <div class="stat-description">
-                                <strong>DATA SOURCE:</strong>
-                                <span> Users who logged steps > 0 today</span>
+                                <strong>Active sessions:</strong> <span id="activeSessions">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🍽️</div>
+                        <div class="stat-content">
+                            <h3>Foods Logged Today</h3>
+                            <p class="stat-value" id="foodsLoggedToday">-</p>
+                            <div class="stat-change" id="foodsChange">
+                                <span>entries today</span>
+                            </div>
+                            <div class="stat-description">
+                                <strong>Unique items:</strong> <span id="uniqueFoodsToday">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-content">
+                            <h3>Engagement Rate</h3>
+                            <p class="stat-value" id="engagementRate">-%</p>
+                            <div class="stat-change positive">
+                                <span>Active today</span>
+                            </div>
+                            <div class="stat-description">
+                                <strong>7-day avg:</strong> <span id="weeklyEngagement">-%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-content">
+                            <h3>Daily Champion</h3>
+                            <p class="stat-value" id="dailyChampion" style="font-size: 1.2rem;">-</p>
+                            <div class="stat-change">
+                                <span id="championSteps">- steps</span>
+                            </div>
+                            <div class="stat-description">
+                                <strong>Streak:</strong> <span id="championStreak">- days</span>
                             </div>
                         </div>
                     </div>
@@ -559,7 +590,7 @@
                 cacheSize > 0 ? `${cacheSize} users, ${cacheAge}s ago` : 'Empty';
         }
 
-        // Main data loading function with caching
+        // Main data loading function with enhanced metrics
         async function loadDashboardData() {
             console.log('Loading dashboard data...');
             document.getElementById('lastUpdate').textContent = 'Updating...';
@@ -612,6 +643,79 @@
                 document.getElementById('totalStepsToday').textContent = totalStepsToday.toLocaleString();
                 document.getElementById('activeToday').textContent = activeUsersToday;
                 
+                // Calculate average steps per user
+                const avgSteps = activeUsersToday > 0 ? Math.round(totalStepsToday / activeUsersToday) : 0;
+                document.getElementById('avgStepsPerUser').textContent = avgSteps.toLocaleString();
+                
+                // Calculate engagement rate
+                const engagementRate = Math.round((activeUsersToday / dataCache.users.length) * 100);
+                document.getElementById('engagementRate').textContent = engagementRate + '%';
+                
+                // Load calories burned today
+                let totalCaloriesBurned = 0;
+                let activeSessions = 0;
+                
+                for (const user of dataCache.users) {
+                    try {
+                        const entriesSnapshot = await db.collection('users').doc(user.id)
+                            .collection('activityLog').doc(today)
+                            .collection('entries').get();
+                        
+                        entriesSnapshot.forEach(doc => {
+                            totalCaloriesBurned += doc.data().caloriesBurned || 0;
+                            activeSessions++;
+                        });
+                    } catch (e) {}
+                }
+                
+                document.getElementById('totalCaloriesBurned').textContent = totalCaloriesBurned.toLocaleString();
+                document.getElementById('activeSessions').textContent = activeSessions;
+                
+                // Load foods logged today
+                let totalFoodsLogged = 0;
+                let uniqueFoodsToday = new Set();
+                dataCache.loggedFoods = {};
+                
+                for (const user of dataCache.users) {
+                    try {
+                        const foodSnapshot = await db.collection('users').doc(user.id)
+                            .collection('foodLog').doc(today)
+                            .collection('entries').get();
+                        
+                        foodSnapshot.forEach(doc => {
+                            const food = doc.data();
+                            totalFoodsLogged++;
+                            const foodName = food.name || 'Unknown';
+                            uniqueFoodsToday.add(foodName);
+                            
+                            // Track food frequency for popular foods
+                            if (!dataCache.loggedFoods[foodName]) {
+                                dataCache.loggedFoods[foodName] = {
+                                    count: 0,
+                                    calories: food.calories || 0,
+                                    users: new Set()
+                                };
+                            }
+                            dataCache.loggedFoods[foodName].count++;
+                            dataCache.loggedFoods[foodName].users.add(user.id);
+                        });
+                    } catch (e) {}
+                }
+                
+                document.getElementById('foodsLoggedToday').textContent = totalFoodsLogged;
+                document.getElementById('uniqueFoodsToday').textContent = uniqueFoodsToday.size;
+                
+                // Find daily champion
+                const topUser = Object.entries(dailySteps)
+                    .sort((a, b) => b[1] - a[1])[0];
+                
+                if (topUser) {
+                    const champion = dataCache.users.find(u => u.id === topUser[0]);
+                    document.getElementById('dailyChampion').textContent = 
+                        champion?.name || champion?.email?.split('@')[0] || 'Anonymous';
+                    document.getElementById('championSteps').textContent = topUser[1].toLocaleString() + ' steps';
+                }
+                
                 // Load Food Database count (cached) - get ALL foods, not limited
                 if (!dataCache.foods) {
                     // First get the actual count
@@ -650,13 +754,27 @@
 
         function updateUIFromCache() {
             document.getElementById('totalUsers').textContent = dataCache.users?.length || '-';
-            document.getElementById('totalFoods').textContent = dataCache.foods?.length || '-';
+            document.getElementById('totalFoods').textContent = dataCache.totalFoodCount || dataCache.foods?.length || '-';
             
             if (dataCache.todaySteps) {
                 const totalSteps = Object.values(dataCache.todaySteps).reduce((a, b) => a + b, 0);
                 const activeUsers = Object.values(dataCache.todaySteps).filter(s => s > 0).length;
                 document.getElementById('totalStepsToday').textContent = totalSteps.toLocaleString();
                 document.getElementById('activeToday').textContent = activeUsers;
+                
+                // Update calculated metrics
+                const avgSteps = activeUsers > 0 ? Math.round(totalSteps / activeUsers) : 0;
+                document.getElementById('avgStepsPerUser').textContent = avgSteps.toLocaleString();
+                
+                const engagementRate = Math.round((activeUsers / (dataCache.users?.length || 1)) * 100);
+                document.getElementById('engagementRate').textContent = engagementRate + '%';
+            }
+            
+            // Update food stats if cached
+            if (dataCache.loggedFoods) {
+                const totalFoods = Object.values(dataCache.loggedFoods).reduce((sum, f) => sum + f.count, 0);
+                document.getElementById('foodsLoggedToday').textContent = totalFoods;
+                document.getElementById('uniqueFoodsToday').textContent = Object.keys(dataCache.loggedFoods).length;
             }
             
             updateQuickLeaderboard();
@@ -1101,25 +1219,33 @@
             
             switch(tab) {
                 case 'popular':
-                    // Sort by popularity or usageCount
-                    foods = (dataCache.foods || [])
-                        .sort((a, b) => (b.usageCount || b.popularity || 0) - (a.usageCount || a.popularity || 0))
+                    // Show ACTUALLY LOGGED foods, not database items
+                    const loggedFoods = Object.entries(dataCache.loggedFoods || {})
+                        .sort((a, b) => b[1].count - a[1].count)
                         .slice(0, 20);
                     
-                    html = '<h4>Top 20 Most Popular Foods</h4><div class="foods-grid">';
-                    foods.forEach((food, index) => {
-                        html += `
-                            <div class="food-item">
-                                <div class="food-emoji">${food.emoji || '🍽️'}</div>
-                                <div class="food-name">${food.name}</div>
-                                <div class="food-stats">
-                                    ${food.caloriesPerServing || 0} cal<br>
-                                    Usage: ${food.usageCount || food.popularity || 0}
+                    html = '<h4>Top 20 Most Logged Foods (from actual user logs)</h4>';
+                    html += '<p style="color: rgba(255,255,255,0.7); margin: 1rem 0;">These are foods users have actually logged, not from the database</p>';
+                    html += '<div class="foods-grid">';
+                    
+                    if (loggedFoods.length === 0) {
+                        html += '<p style="color: rgba(255,255,255,0.7); grid-column: 1/-1; text-align: center; padding: 2rem;">No foods logged today yet</p>';
+                    } else {
+                        loggedFoods.forEach(([name, data], index) => {
+                            html += `
+                                <div class="food-item">
+                                    <div class="food-emoji">🍽️</div>
+                                    <div class="food-name">${name}</div>
+                                    <div class="food-stats">
+                                        ${data.calories || 0} cal<br>
+                                        Logged ${data.count} times<br>
+                                        By ${data.users.size} users
+                                    </div>
+                                    <div style="color: #8b5cf6; font-weight: bold;">#${index + 1}</div>
                                 </div>
-                                <div style="color: #4299e1; font-weight: bold;">#${index + 1}</div>
-                            </div>
-                        `;
-                    });
+                            `;
+                        });
+                    }
                     html += '</div>';
                     break;
                     
