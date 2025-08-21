@@ -1432,11 +1432,13 @@
                 
                 // Load Food Database from foodDatabase collection
                 if (!dataCache.foods) {
+                    debugLog('DATA', '=== Loading Food Database Collection ===');
                     try {
                         // First get the actual count
+                        debugLog('DATA', 'Fetching foodDatabase collection count...');
                         const foodCountSnapshot = await db.collection('foodDatabase').get();
                         const actualFoodCount = foodCountSnapshot.size;
-                        console.log(`Food database contains ${actualFoodCount} items`);
+                        debugLog('DATA', `Food database contains ${actualFoodCount} items`);
                         
                         // Load a reasonable subset for display (500 for performance)
                         const foodSnapshot = await db.collection('foodDatabase').limit(500).get();
@@ -1454,16 +1456,27 @@
                             };
                         });
                         dataCache.totalFoodCount = actualFoodCount;
+                        debugLog('DATA', `Successfully loaded ${dataCache.foods.length} food items for display`);
                     } catch (e) {
+                        debugLog('ERROR', `Error loading food database: ${e.message}`, e);
                         console.error('Error loading food database:', e);
                         dataCache.foods = [];
                         dataCache.totalFoodCount = 0;
                     }
+                } else {
+                    debugLog('DATA', 'Using cached food database');
                 }
                 
-                document.getElementById('totalFoods').textContent = dataCache.totalFoodCount || dataCache.foods.length;
+                debugLog('DATA', 'Updating total foods display...');
+                const totalFoodsElement = document.getElementById('totalFoods');
+                if (totalFoodsElement) {
+                    totalFoodsElement.textContent = dataCache.totalFoodCount || dataCache.foods?.length || 0;
+                } else {
+                    debugLog('ERROR', 'totalFoods element not found!');
+                }
                 
                 // Update cache timestamp
+                debugLog('DATA', 'Updating cache timestamp...');
                 dataCache.lastFetch = Date.now();
                 updateCacheStatus();
                 
@@ -1484,6 +1497,10 @@
                 document.getElementById('lastUpdate').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
                 
             } catch (error) {
+                debugLog('ERROR', `=== CRITICAL ERROR IN loadDashboardData ===`);
+                debugLog('ERROR', `Error type: ${error.name}`);
+                debugLog('ERROR', `Error message: ${error.message}`);
+                debugLog('ERROR', `Stack trace:`, error.stack);
                 console.error('Error loading dashboard:', error);
                 document.getElementById('lastUpdate').textContent = 'Error loading data';
             }
