@@ -1189,7 +1189,7 @@
             // Check cache validity
             if (dataCache.lastFetch && (Date.now() - dataCache.lastFetch) < CACHE_DURATION) {
                 console.log('Using cached data');
-                updateUIFromCache();
+                await updateUIFromCache();
                 return;
             }
             
@@ -1488,7 +1488,7 @@
             }
         }
 
-        function updateUIFromCache() {
+        async function updateUIFromCache() {
             document.getElementById('totalUsers').textContent = dataCache.users?.length || '-';
             
             // Update food database count
