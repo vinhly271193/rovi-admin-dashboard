@@ -596,6 +596,32 @@
                         </div>
                     </div>
                     <div class="stat-card">
+                        <div class="stat-icon">🍎</div>
+                        <div class="stat-content">
+                            <h3>Calories Consumed</h3>
+                            <p class="stat-value" id="totalCaloriesConsumed">-</p>
+                            <div class="stat-change">
+                                <span>Today's intake</span>
+                            </div>
+                            <div class="stat-description">
+                                <strong>Avg per user:</strong> <span id="avgCaloriesPerUser">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✨</div>
+                        <div class="stat-content">
+                            <h3>Active Users Today</h3>
+                            <p class="stat-value" id="activeToday">-</p>
+                            <div class="stat-change">
+                                <span id="engagementPercent">-</span>
+                            </div>
+                            <div class="stat-description">
+                                <strong>Engagement:</strong> <span id="engagementRate">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
                         <div class="stat-icon">📈</div>
                         <div class="stat-content">
                             <h3>Active User %</h3>
@@ -1095,70 +1121,121 @@
                 const engagementRate = Math.round((activeUsersToday / dataCache.users.length) * 100);
                 document.getElementById('engagementRate').textContent = engagementRate + '%';
                 
-                // Load calories burned today from activityLog/{date}/entries
+                // Load calories burned today from activityLog/{date}/entries (in parallel)
+                console.log('Loading activities for all users...');
                 let totalCaloriesBurned = 0;
                 let activeSessions = 0;
                 
-                for (const user of dataCache.users) {
-                    try {
-                        const entriesSnapshot = await db.collection('users').doc(user.id)
-                            .collection('activityLog').doc(today)
-                            .collection('entries').get();
-                        
-                        if (!entriesSnapshot.empty) {
-                            entriesSnapshot.forEach(doc => {
-                                const calories = doc.data().caloriesBurned || 0;
-                                totalCaloriesBurned += calories;
-                                activeSessions++;
-                                console.log(`Activity for ${user.email}: ${doc.data().name}, ${calories} cal`);
-                            });
-                        }
-                    } catch (e) {
-                        console.error(`Error loading activities for ${user.email}:`, e);
+                const activityPromises = dataCache.users.map(user => 
+                    db.collection('users').doc(user.id)
+                        .collection('activityLog').doc(today)
+                        .collection('entries').get()
+                        .then(snapshot => {
+                            let userCalories = 0;
+                            let userSessions = 0;
+                            if (!snapshot.empty) {
+                                snapshot.forEach(doc => {
+                                    const calories = doc.data().caloriesBurned || 0;
+                                    userCalories += calories;
+                                    userSessions++;
+                                });
+                            }
+                            return { calories: userCalories, sessions: userSessions, userId: user.id };
+                        })
+                        .catch(e => {
+                            console.error(`Error loading activities for user ${user.id}:`, e);
+                            return { calories: 0, sessions: 0, userId: user.id };
+                        })
+                );
+                
+                const activityResults = await Promise.all(activityPromises);
+                activityResults.forEach(result => {
+                    totalCaloriesBurned += result.calories;
+                    activeSessions += result.sessions;
+                    if (result.calories > 0) {
+                        console.log(`User ${result.userId}: ${result.calories} calories burned`);
                     }
-                }
+                });
                 
                 document.getElementById('totalCaloriesBurned').textContent = totalCaloriesBurned > 0 ? totalCaloriesBurned.toLocaleString() : '0';
                 document.getElementById('activeSessions').textContent = activeSessions > 0 ? activeSessions : '0';
                 
-                // Load foods logged today from foodLog/{date}/entries
+                // Cache the calories data
+                dataCache.todayCaloriesBurned = totalCaloriesBurned;
+                dataCache.todaySessions = activeSessions;
+                
+                // Load foods logged today from foodLog/{date}/entries (in parallel)
+                console.log('Loading food logs for all users...');
                 let totalFoodsLogged = 0;
+                let totalCaloriesConsumed = 0;
                 let uniqueFoodsToday = new Set();
                 dataCache.loggedFoods = {};
                 
-                for (const user of dataCache.users) {
-                    try {
-                        const foodSnapshot = await db.collection('users').doc(user.id)
-                            .collection('foodLog').doc(today)
-                            .collection('entries').get();
-                        
-                        if (!foodSnapshot.empty) {
-                            foodSnapshot.forEach(doc => {
-                                const food = doc.data();
-                                totalFoodsLogged++;
-                                const foodName = food.name || 'Unknown';
-                                uniqueFoodsToday.add(foodName);
-                                
-                                // Track food frequency for popular foods
-                                if (!dataCache.loggedFoods[foodName]) {
-                                    dataCache.loggedFoods[foodName] = {
-                                        count: 0,
+                const foodPromises = dataCache.users.map(user => 
+                    db.collection('users').doc(user.id)
+                        .collection('foodLog').doc(today)
+                        .collection('entries').get()
+                        .then(snapshot => {
+                            const foods = [];
+                            if (!snapshot.empty) {
+                                snapshot.forEach(doc => {
+                                    const food = doc.data();
+                                    foods.push({
+                                        name: food.name || 'Unknown',
                                         calories: food.calories || 0,
-                                        users: new Set()
-                                    };
-                                }
-                                dataCache.loggedFoods[foodName].count++;
-                                dataCache.loggedFoods[foodName].users.add(user.id);
-                                console.log(`Food logged by ${user.email}: ${foodName}, ${food.calories} cal`);
-                            });
+                                        userId: user.id
+                                    });
+                                });
+                            }
+                            return foods;
+                        })
+                        .catch(e => {
+                            console.error(`Error loading foods for user ${user.id}:`, e);
+                            return [];
+                        })
+                );
+                
+                const foodResults = await Promise.all(foodPromises);
+                foodResults.forEach(userFoods => {
+                    userFoods.forEach(food => {
+                        totalFoodsLogged++;
+                        totalCaloriesConsumed += food.calories;
+                        uniqueFoodsToday.add(food.name);
+                        
+                        // Track food frequency
+                        if (!dataCache.loggedFoods[food.name]) {
+                            dataCache.loggedFoods[food.name] = {
+                                count: 0,
+                                calories: food.calories,
+                                users: new Set()
+                            };
                         }
-                    } catch (e) {
-                        console.error(`Error loading foods for ${user.email}:`, e);
-                    }
-                }
+                        dataCache.loggedFoods[food.name].count++;
+                        dataCache.loggedFoods[food.name].users.add(food.userId);
+                    });
+                });
+                
+                console.log(`Loaded ${totalFoodsLogged} food entries, ${totalCaloriesConsumed} total calories`);
                 
                 document.getElementById('foodsLoggedToday').textContent = totalFoodsLogged;
                 document.getElementById('uniqueFoodsToday').textContent = uniqueFoodsToday.size;
+                
+                // Update calories consumed if element exists
+                const caloriesConsumedEl = document.getElementById('totalCaloriesConsumed');
+                if (caloriesConsumedEl) {
+                    caloriesConsumedEl.textContent = totalCaloriesConsumed > 0 ? totalCaloriesConsumed.toLocaleString() : '0';
+                }
+                
+                // Cache consumed calories
+                dataCache.todayCaloriesConsumed = totalCaloriesConsumed;
+                
+                // Update average calories per user if element exists
+                const avgCaloriesEl = document.getElementById('avgCaloriesPerUser');
+                if (avgCaloriesEl) {
+                    const usersWhoAte = foodResults.filter(foods => foods.length > 0).length;
+                    const avgCaloriesConsumed = usersWhoAte > 0 ? Math.round(totalCaloriesConsumed / usersWhoAte) : 0;
+                    avgCaloriesEl.textContent = avgCaloriesConsumed.toLocaleString();
+                }
                 
                 // Find daily champion
                 const topUser = Object.entries(dailySteps)
@@ -1229,7 +1306,12 @@
 
         function updateUIFromCache() {
             document.getElementById('totalUsers').textContent = dataCache.users?.length || '-';
-            document.getElementById('totalFoods').textContent = dataCache.totalFoodCount || dataCache.foods?.length || '-';
+            
+            // Update food database count
+            const totalFoodsEl = document.getElementById('totalFoods');
+            if (totalFoodsEl) {
+                totalFoodsEl.textContent = dataCache.totalFoodCount || dataCache.foods?.length || '-';
+            }
             
             if (dataCache.todaySteps) {
                 const totalSteps = Object.values(dataCache.todaySteps).reduce((a, b) => a + b, 0);
@@ -1245,11 +1327,35 @@
                 document.getElementById('engagementRate').textContent = engagementRate + '%';
             }
             
+            // Update calories stats if cached
+            if (dataCache.todayCaloriesBurned !== undefined) {
+                document.getElementById('totalCaloriesBurned').textContent = dataCache.todayCaloriesBurned.toLocaleString();
+            }
+            if (dataCache.todaySessions !== undefined) {
+                document.getElementById('activeSessions').textContent = dataCache.todaySessions;
+            }
+            if (dataCache.todayCaloriesConsumed !== undefined) {
+                document.getElementById('totalCaloriesConsumed').textContent = dataCache.todayCaloriesConsumed.toLocaleString();
+            }
+            
             // Update food stats if cached
             if (dataCache.loggedFoods) {
                 const totalFoods = Object.values(dataCache.loggedFoods).reduce((sum, f) => sum + f.count, 0);
                 document.getElementById('foodsLoggedToday').textContent = totalFoods;
                 document.getElementById('uniqueFoodsToday').textContent = Object.keys(dataCache.loggedFoods).length;
+                
+                // Calculate average calories per user
+                if (dataCache.todayCaloriesConsumed !== undefined) {
+                    const usersWhoAte = Object.values(dataCache.loggedFoods).reduce((users, food) => {
+                        food.users.forEach(u => users.add(u));
+                        return users;
+                    }, new Set()).size;
+                    const avgCalories = usersWhoAte > 0 ? Math.round(dataCache.todayCaloriesConsumed / usersWhoAte) : 0;
+                    const avgCaloriesEl = document.getElementById('avgCaloriesPerUser');
+                    if (avgCaloriesEl) {
+                        avgCaloriesEl.textContent = avgCalories.toLocaleString();
+                    }
+                }
             }
             
             updateQuickLeaderboard();
