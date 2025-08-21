@@ -78,6 +78,15 @@
             color: white;
         }
         
+        /* Fix spacing for leaderboard sections */
+        #leaderboardContent h3 {
+            margin-bottom: 1.5rem !important;
+        }
+        
+        .leaderboard-item:first-child {
+            margin-top: 1rem;
+        }
+        
         .cache-info {
             font-size: 0.75rem;
             color: rgba(255, 255, 255, 0.7);
@@ -195,11 +204,11 @@
                         <div class="stat-content">
                             <h3>Total Users</h3>
                             <p class="stat-value" id="totalUsers">-</p>
-                            <div class="stat-change positive" id="userGrowth">
-                                <span>↑ Loading...</span>
+                            <div class="stat-change positive" id="userGrowth" style="display: none;">
+                                <span>↑ 0%</span>
                             </div>
                             <div class="stat-description">
-                                <strong>7-day growth:</strong> <span id="weeklyUserGrowth">-</span>
+                                <strong>Total:</strong> <span id="weeklyUserGrowth">All registered users</span>
                             </div>
                         </div>
                     </div>
@@ -219,13 +228,13 @@
                     <div class="stat-card">
                         <div class="stat-icon">🔥</div>
                         <div class="stat-content">
-                            <h3>Calories Burned</h3>
+                            <h3>Calories Burned Today</h3>
                             <p class="stat-value" id="totalCaloriesBurned">-</p>
-                            <div class="stat-change positive">
-                                <span id="caloriesTrend">↑ Calculating...</span>
+                            <div class="stat-change positive" style="display: none;">
+                                <span id="caloriesTrend">Today's total</span>
                             </div>
                             <div class="stat-description">
-                                <strong>Active sessions:</strong> <span id="activeSessions">-</span>
+                                <strong>Workout count:</strong> <span id="activeSessions">-</span>
                             </div>
                         </div>
                     </div>
@@ -245,13 +254,13 @@
                     <div class="stat-card">
                         <div class="stat-icon">📈</div>
                         <div class="stat-content">
-                            <h3>Engagement Rate</h3>
-                            <p class="stat-value" id="engagementRate">-%</p>
-                            <div class="stat-change positive">
+                            <h3>Active User %</h3>
+                            <p class="stat-value" id="engagementRate">0%</p>
+                            <div class="stat-change positive" style="display: none;">
                                 <span>Active today</span>
                             </div>
                             <div class="stat-description">
-                                <strong>7-day avg:</strong> <span id="weeklyEngagement">-%</span>
+                                <strong>What:</strong> <span id="weeklyEngagement">% of users with steps today</span>
                             </div>
                         </div>
                     </div>
@@ -673,8 +682,8 @@
                     } catch (e) {}
                 }
                 
-                document.getElementById('totalCaloriesBurned').textContent = totalCaloriesBurned.toLocaleString();
-                document.getElementById('activeSessions').textContent = activeSessions;
+                document.getElementById('totalCaloriesBurned').textContent = totalCaloriesBurned > 0 ? totalCaloriesBurned.toLocaleString() : '0';
+                document.getElementById('activeSessions').textContent = activeSessions > 0 ? activeSessions : '0';
                 
                 // Load foods logged today
                 let totalFoodsLogged = 0;
@@ -714,11 +723,16 @@
                 const topUser = Object.entries(dailySteps)
                     .sort((a, b) => b[1] - a[1])[0];
                 
-                if (topUser) {
+                if (topUser && topUser[1] > 0) {
                     const champion = dataCache.users.find(u => u.id === topUser[0]);
                     document.getElementById('dailyChampion').textContent = 
                         champion?.name || champion?.email?.split('@')[0] || 'Anonymous';
                     document.getElementById('championSteps').textContent = topUser[1].toLocaleString() + ' steps';
+                    document.getElementById('championStreak').textContent = 'Today\'s leader';
+                } else {
+                    document.getElementById('dailyChampion').textContent = 'No activity yet';
+                    document.getElementById('championSteps').textContent = 'Be the first!';
+                    document.getElementById('championStreak').textContent = 'Start walking';
                 }
                 
                 // Load Food Database count (cached) - get ALL foods, not limited
@@ -743,8 +757,8 @@
                 dataCache.lastFetch = Date.now();
                 updateCacheStatus();
                 
-                // Update charts
-                await updateCharts();
+                // Update charts with delay to ensure DOM is ready
+                setTimeout(() => updateCharts(), 100);
                 
                 // Update quick leaderboard
                 updateQuickLeaderboard();
@@ -787,6 +801,13 @@
         }
 
         async function updateCharts() {
+            // Make sure Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js not loaded yet, retrying...');
+                setTimeout(() => updateCharts(), 500);
+                return;
+            }
+            
             // Check if we should show all users or just top users
             const showTopOnly = document.getElementById('showTopUsersOnly')?.checked ?? true;
             const usersToShow = showTopOnly ? dataCache.users.slice(0, 10) : dataCache.users;
@@ -841,6 +862,10 @@
             
             // Force canvas to exact size before creating chart
             const canvas = document.getElementById('stepsChart');
+            if (!canvas) {
+                console.error('Canvas stepsChart not found');
+                return;
+            }
             const ctx = canvas.getContext('2d');
             
             // Clear any existing content
@@ -947,6 +972,10 @@
             }
             
             const activityCanvas = document.getElementById('activityChart');
+            if (!activityCanvas) {
+                console.error('Canvas activityChart not found');
+                return;
+            }
             const activityCtx = activityCanvas.getContext('2d');
             
             // Clear and force dimensions
@@ -1062,7 +1091,7 @@
                     const stepsLeaders = Object.entries(dataCache.todaySteps || {})
                         .sort((a, b) => b[1] - a[1]);
                     
-                    html = '<h3>Today\'s Step Leaders</h3>';
+                    html = '<h3 style="margin-bottom: 1.5rem;">Today\'s Step Leaders</h3>';
                     stepsLeaders.forEach(([userId, steps], index) => {
                         const user = dataCache.users.find(u => u.id === userId);
                         const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
@@ -1254,6 +1283,19 @@
             const content = document.getElementById('foodsContent');
             content.innerHTML = '<div class="loading-message"><div class="loading-spinner"></div><span>Loading...</span></div>';
             
+            // Ensure we have food data
+            if (!dataCache.foods && tab !== 'popular') {
+                try {
+                    const foodSnapshot = await db.collection('foodDatabase').limit(500).get();
+                    dataCache.foods = foodSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                } catch(e) {
+                    console.error('Error loading foods:', e);
+                }
+            }
+            
             // Update stats with actual count
             document.getElementById('uniqueFoodsCount').textContent = dataCache.totalFoodCount || dataCache.foods?.length || '-';
             
@@ -1306,9 +1348,13 @@
                     break;
                     
                 case 'recent':
-                    html = '<h4>Recently Added Foods</h4><div class="foods-grid">';
-                    foods = (dataCache.foods || []).slice(-20).reverse();
-                    foods.forEach(food => {
+                    html = '<h4>Recently Added Foods</h4>';
+                    if (!dataCache.foods || dataCache.foods.length === 0) {
+                        html += '<p style="color: rgba(255,255,255,0.7); text-align: center; padding: 2rem;">No foods in database yet</p>';
+                    } else {
+                        html += '<div class="foods-grid">';
+                        foods = (dataCache.foods || []).slice(-20).reverse();
+                        foods.forEach(food => {
                         html += `
                             <div class="food-item">
                                 <div class="food-emoji">${food.emoji || '🍽️'}</div>
@@ -1316,12 +1362,13 @@
                                 <div class="food-stats">${food.caloriesPerServing || 0} cal</div>
                             </div>
                         `;
-                    });
-                    html += '</div>';
+                        });
+                        html += '</div>';
+                    }
                     break;
                     
                 case 'all':
-                    html = `<h4>All Foods (${dataCache.foods?.length || 0} items)</h4>`;
+                    html = `<h4>All Foods (${dataCache.totalFoodCount || dataCache.foods?.length || 0} items)</h4>`;
                     html += '<div style="max-height: 600px; overflow-y: auto;">';
                     html += '<table class="data-table"><thead><tr><th>Name</th><th>Category</th><th>Calories</th><th>Usage</th></tr></thead><tbody>';
                     
@@ -1341,31 +1388,58 @@
                 case 'search':
                     html = `
                         <div style="margin: 1rem 0;">
-                            <input type="text" id="foodSearch" placeholder="Search foods..." style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 6px;">
+                            <input type="text" id="foodSearch" placeholder="Search foods..." style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; color: white;">
                         </div>
                         <div id="searchResults"></div>
                     `;
-                    setTimeout(() => {
-                        document.getElementById('foodSearch')?.addEventListener('input', (e) => {
-                            const query = e.target.value.toLowerCase();
-                            const filtered = (dataCache.foods || []).filter(f => 
-                                f.name.toLowerCase().includes(query) ||
-                                (f.searchTerms && f.searchTerms.some(term => term.toLowerCase().includes(query)))
-                            );
+                    setTimeout(async () => {
+                        // Ensure foods are loaded for search
+                        if (!dataCache.foods || dataCache.foods.length === 0) {
+                            try {
+                                const foodSnapshot = await db.collection('foodDatabase').limit(500).get();
+                                dataCache.foods = foodSnapshot.docs.map(doc => ({
+                                    id: doc.id,
+                                    ...doc.data()
+                                }));
+                            } catch(e) {
+                                console.error('Error loading foods for search:', e);
+                            }
+                        }
+                        
+                        const searchInput = document.getElementById('foodSearch');
+                        if (searchInput) {
+                            // Show initial message
+                            document.getElementById('searchResults').innerHTML = '<p style="color: rgba(255, 255, 255, 0.7);">Type to search ' + (dataCache.foods?.length || 0) + ' foods...</p>';
                             
-                            let resultsHtml = `<p>Found ${filtered.length} items</p><div class="foods-grid">`;
-                            filtered.slice(0, 20).forEach(food => {
-                                resultsHtml += `
-                                    <div class="food-item">
-                                        <div class="food-emoji">${food.emoji || '🍽️'}</div>
-                                        <div class="food-name">${food.name}</div>
-                                        <div class="food-stats">${food.caloriesPerServing || 0} cal</div>
-                                    </div>
-                                `;
+                            searchInput.addEventListener('input', (e) => {
+                                const query = e.target.value.toLowerCase();
+                                if (!query) {
+                                    document.getElementById('searchResults').innerHTML = '<p style="color: rgba(255, 255, 255, 0.7);">Type to search...</p>';
+                                    return;
+                                }
+                                const filtered = (dataCache.foods || []).filter(f => 
+                                    f.name.toLowerCase().includes(query) ||
+                                    (f.searchTerms && f.searchTerms.some(term => term.toLowerCase().includes(query)))
+                                );
+                                
+                                let resultsHtml = `<p style="color: rgba(255, 255, 255, 0.7);">Found ${filtered.length} items</p><div class="foods-grid">`;
+                                if (filtered.length === 0) {
+                                    resultsHtml += '<p style="color: rgba(255, 255, 255, 0.5); grid-column: 1/-1; text-align: center; padding: 2rem;">No foods match your search</p>';
+                                } else {
+                                    filtered.slice(0, 20).forEach(food => {
+                                        resultsHtml += `
+                                            <div class="food-item">
+                                                <div class="food-emoji">${food.emoji || '🍽️'}</div>
+                                                <div class="food-name">${food.name}</div>
+                                                <div class="food-stats">${food.caloriesPerServing || 0} cal</div>
+                                            </div>
+                                        `;
+                                    });
+                                }
+                                resultsHtml += '</div>';
+                                document.getElementById('searchResults').innerHTML = resultsHtml;
                             });
-                            resultsHtml += '</div>';
-                            document.getElementById('searchResults').innerHTML = resultsHtml;
-                        });
+                        }
                     }, 100);
                     break;
             }

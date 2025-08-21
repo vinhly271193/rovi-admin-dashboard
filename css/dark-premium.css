@@ -649,6 +649,27 @@ input:checked + .toggle-slider:before {
     box-shadow: var(--shadow-md);
 }
 
+/* Sidebar Buttons */
+.btn-refresh, .btn-logout {
+    background: var(--glass-dark);
+    color: var(--text-secondary);
+    border: 1px solid var(--glass-border);
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s var(--animation);
+}
+
+.btn-refresh:hover, .btn-logout:hover {
+    background: var(--glass-light);
+    color: var(--text-primary);
+    border-color: rgba(167, 139, 250, 0.3);
+}
+
 /* Loading */
 .loading-spinner {
     width: 40px;
