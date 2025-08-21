@@ -6,12 +6,63 @@
     <title>ROVI Admin Dashboard - Dark Premium</title>
     <link rel="stylesheet" href="css/dark-premium.css">
     <style>
+        /* Reduce spacing and padding throughout */
+        .stat-card {
+            padding: 0.75rem !important;
+            margin-bottom: 0.75rem;
+        }
+        
+        .stat-card .stat-icon {
+            font-size: 1.25rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 1.5rem !important;
+            margin-bottom: 0.25rem !important;
+            line-height: 1.2 !important;
+        }
+        
+        .stat-card h3 {
+            font-size: 0.7rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+        
+        .stats-grid {
+            gap: 0.75rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .chart-card {
+            padding: 1rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+        
+        .main-content {
+            padding: 1rem !important;
+        }
+        
+        .dashboard-header {
+            margin-bottom: 1rem !important;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 1.5rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+        
+        .stat-description {
+            padding: 0.3rem !important;
+            margin-top: 0.3rem !important;
+            font-size: 0.65rem !important;
+        }
+        
         /* Override for chart containers */
         .chart-container {
             position: relative;
-            height: 300px !important;
-            max-height: 300px !important;
-            min-height: 300px !important;
+            height: 250px !important;
+            max-height: 250px !important;
+            min-height: 250px !important;
             width: 100%;
             overflow: hidden !important;
         }
@@ -279,42 +330,84 @@
                     </div>
                 </div>
 
+                <!-- Time Frame Selector -->
+                <div class="chart-card" style="margin-bottom: 0.5rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <label style="color: var(--text-secondary); font-size: 0.875rem;">Time Frame:</label>
+                        <select id="timeFrameSelector" style="background: var(--glass-dark); color: white; border: 1px solid var(--glass-border); padding: 0.5rem; border-radius: 8px;">
+                            <option value="today">Today</option>
+                            <option value="week" selected>Last 7 Days</option>
+                            <option value="month">Last 30 Days</option>
+                            <option value="all">All Time</option>
+                        </select>
+                        <label style="color: var(--text-secondary); font-size: 0.875rem;">View:</label>
+                        <select id="viewSelector" style="background: var(--glass-dark); color: white; border: 1px solid var(--glass-border); padding: 0.5rem; border-radius: 8px;">
+                            <option value="aggregate">Aggregated</option>
+                            <option value="individual">Individual Users</option>
+                            <option value="comparison">User Comparison</option>
+                        </select>
+                    </div>
+                </div>
+
                 <!-- Charts -->
                 <div class="insights-grid">
                     <div class="chart-card">
                         <div class="chart-title">
-                            📊 Daily Steps Trend
-                            <span class="data-scope">ALL USERS COMBINED</span>
+                            📊 Steps Trend
+                            <span class="data-scope" id="stepsScope">7-DAY AGGREGATE</span>
                         </div>
-                        <div class="chart-description">
-                            <strong>What this shows:</strong> The total number of steps recorded by your entire community over the past week. Each point represents the sum of ALL users' steps for that day.
-                        </div>
-                        <div class="toggle-container">
-                            <div class="toggle-switch">
-                                <input type="checkbox" id="showTopUsersOnly" checked>
-                                <span class="toggle-slider"></span>
-                            </div>
-                            <label for="showTopUsersOnly" class="toggle-label">
-                                <strong>Filter:</strong> Show top 10 most active users only (toggle off to see ALL users)
-                            </label>
+                        <div class="chart-description" style="font-size: 0.7rem; padding: 0.5rem;">
+                            <strong>Insight:</strong> <span id="stepsInsight">Loading...</span>
                         </div>
                         <div class="chart-container">
-                            <div style="position: absolute; width: 100%; height: 300px; overflow: hidden;">
-                                <canvas id="stepsChart" style="position: absolute; width: 100% !important; height: 300px !important;"></canvas>
+                            <div style="position: absolute; width: 100%; height: 250px; overflow: hidden;">
+                                <canvas id="stepsChart" style="position: absolute; width: 100% !important; height: 250px !important;"></canvas>
                             </div>
                         </div>
                     </div>
                     <div class="chart-card">
                         <div class="chart-title">
                             🏃 Activity Distribution
-                            <span class="data-scope">TODAY ONLY</span>
+                            <span class="data-scope" id="activityScope">TODAY</span>
                         </div>
-                        <div class="chart-description">
-                            <strong>What this shows:</strong> A pie chart showing how many users have logged steps today (Active) versus how many haven't logged any activity yet (Inactive). Based on ALL registered users.
+                        <div class="chart-description" style="font-size: 0.7rem; padding: 0.5rem;">
+                            <strong>Insight:</strong> <span id="activityInsight">Loading...</span>
                         </div>
                         <div class="chart-container">
-                            <div style="position: absolute; width: 100%; height: 300px; overflow: hidden;">
-                                <canvas id="activityChart" style="position: absolute; width: 100% !important; height: 300px !important;"></canvas>
+                            <div style="position: absolute; width: 100%; height: 250px; overflow: hidden;">
+                                <canvas id="activityChart" style="position: absolute; width: 100% !important; height: 250px !important;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Insights Row -->
+                <div class="insights-grid">
+                    <div class="chart-card">
+                        <div class="chart-title">
+                            🍽️ Food Trends
+                            <span class="data-scope" id="foodScope">ACTUAL LOGS</span>
+                        </div>
+                        <div class="chart-description" style="font-size: 0.7rem; padding: 0.5rem;">
+                            <strong>Insight:</strong> <span id="foodInsight">Loading...</span>
+                        </div>
+                        <div class="chart-container">
+                            <div style="position: absolute; width: 100%; height: 250px; overflow: hidden;">
+                                <canvas id="foodChart" style="position: absolute; width: 100% !important; height: 250px !important;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">
+                            🔥 Calorie Balance
+                            <span class="data-scope" id="calorieScope">7-DAY</span>
+                        </div>
+                        <div class="chart-description" style="font-size: 0.7rem; padding: 0.5rem;">
+                            <strong>Insight:</strong> <span id="calorieInsight">Loading...</span>
+                        </div>
+                        <div class="chart-container">
+                            <div style="position: absolute; width: 100%; height: 250px; overflow: hidden;">
+                                <canvas id="calorieChart" style="position: absolute; width: 100% !important; height: 250px !important;"></canvas>
                             </div>
                         </div>
                     </div>
@@ -442,6 +535,10 @@
         let currentUser = null;
         let stepsChartInstance = null;
         let activityChartInstance = null;
+        let foodChartInstance = null;
+        let calorieChartInstance = null;
+        let currentTimeFrame = 'week';
+        let currentView = 'aggregate';
 
         // Prevent chart expansion with MutationObserver
         function preventChartExpansion() {
@@ -476,10 +573,38 @@
         document.addEventListener('DOMContentLoaded', () => {
             preventChartExpansion();
             
-            // Add event listener for the toggle
+            // Add event listeners for controls
             const toggle = document.getElementById('showTopUsersOnly');
             if (toggle) {
                 toggle.addEventListener('change', () => {
+                    updateCharts();
+                });
+            }
+            
+            // Time frame selector
+            const timeFrameSelector = document.getElementById('timeFrameSelector');
+            if (timeFrameSelector) {
+                timeFrameSelector.addEventListener('change', (e) => {
+                    currentTimeFrame = e.target.value;
+                    console.log('Time frame changed to:', currentTimeFrame);
+                    updateCharts();
+                    
+                    // Update scope labels
+                    const scopeText = currentTimeFrame === 'today' ? 'TODAY' : 
+                                     currentTimeFrame === 'week' ? '7-DAY' : 
+                                     currentTimeFrame === 'month' ? '30-DAY' : 'ALL TIME';
+                    document.getElementById('stepsScope').textContent = scopeText + ' AGGREGATE';
+                    document.getElementById('calorieScope').textContent = scopeText;
+                    document.getElementById('foodScope').textContent = scopeText + ' LOGS';
+                });
+            }
+            
+            // View selector
+            const viewSelector = document.getElementById('viewSelector');
+            if (viewSelector) {
+                viewSelector.addEventListener('change', (e) => {
+                    currentView = e.target.value;
+                    console.log('View changed to:', currentView);
                     updateCharts();
                 });
             }
@@ -835,6 +960,95 @@
             document.getElementById('lastUpdate').textContent = 'Last updated: ' + new Date(dataCache.lastFetch).toLocaleTimeString() + ' (cached)';
         }
 
+        // Load food usage data from actual logs over time period
+        async function loadFoodUsageData(days = 7) {
+            const foodUsage = {};
+            const endDate = new Date();
+            
+            for (let i = 0; i < days; i++) {
+                const currentDate = new Date();
+                currentDate.setDate(currentDate.getDate() - i);
+                const dateStr = currentDate.toISOString().split('T')[0];
+                
+                // Load from all users' food logs
+                for (const user of dataCache.users) {
+                    try {
+                        const foodSnapshot = await db.collection('users').doc(user.id)
+                            .collection('foodLog').doc(dateStr)
+                            .collection('entries').get();
+                        
+                        if (!foodSnapshot.empty) {
+                            foodSnapshot.forEach(doc => {
+                                const food = doc.data();
+                                const foodName = food.name || 'Unknown';
+                                
+                                if (!foodUsage[foodName]) {
+                                    foodUsage[foodName] = {
+                                        name: foodName,
+                                        totalLogs: 0,
+                                        uniqueUsers: new Set(),
+                                        totalCalories: 0,
+                                        dates: new Set()
+                                    };
+                                }
+                                
+                                foodUsage[foodName].totalLogs++;
+                                foodUsage[foodName].uniqueUsers.add(user.id);
+                                foodUsage[foodName].totalCalories += (food.calories || 0);
+                                foodUsage[foodName].dates.add(dateStr);
+                            });
+                        }
+                    } catch (e) {
+                        console.error(`Error loading food data for ${user.id} on ${dateStr}:`, e);
+                    }
+                }
+            }
+            
+            // Convert Sets to counts
+            Object.keys(foodUsage).forEach(key => {
+                foodUsage[key].uniqueUserCount = foodUsage[key].uniqueUsers.size;
+                foodUsage[key].dayCount = foodUsage[key].dates.size;
+                delete foodUsage[key].uniqueUsers;
+                delete foodUsage[key].dates;
+            });
+            
+            return foodUsage;
+        }
+
+        // Generate insights based on data
+        function generateInsights(data, type) {
+            switch(type) {
+                case 'steps':
+                    const totalSteps = data.reduce((a, b) => a + b, 0);
+                    const avgSteps = Math.round(totalSteps / data.length);
+                    const trend = data[data.length - 1] > data[0] ? '📈' : '📉';
+                    return `${trend} Avg: ${avgSteps.toLocaleString()} steps/day. Total: ${totalSteps.toLocaleString()}`;
+                    
+                case 'activity':
+                    const activePercent = Math.round((data.active / (data.active + data.inactive)) * 100);
+                    return `${activePercent}% of users active today. ${data.active} active, ${data.inactive} inactive.`;
+                    
+                case 'food':
+                    const topFoods = Object.values(data).sort((a, b) => b.totalLogs - a.totalLogs).slice(0, 3);
+                    if (topFoods.length > 0) {
+                        return `Top: ${topFoods.map(f => `${f.name} (${f.totalLogs}x)`).join(', ')}`;
+                    }
+                    return 'No food data available';
+                    
+                case 'calories':
+                    if (data.burned && data.consumed) {
+                        const avgBurned = Math.round(data.burned.reduce((a, b) => a + b, 0) / data.burned.length);
+                        const avgConsumed = Math.round(data.consumed.reduce((a, b) => a + b, 0) / data.consumed.length);
+                        const balance = avgBurned - avgConsumed;
+                        return `Avg burned: ${avgBurned}, consumed: ${avgConsumed}. Balance: ${balance > 0 ? '+' : ''}${balance}`;
+                    }
+                    return 'Loading calorie data...';
+                    
+                default:
+                    return 'Loading insights...';
+            }
+        }
+
         async function updateCharts() {
             // Make sure Chart.js is loaded
             if (typeof Chart === 'undefined') {
@@ -894,6 +1108,9 @@
                 stepsChartInstance.destroy();
                 stepsChartInstance = null;
             }
+            
+            // Update insights
+            document.getElementById('stepsInsight').textContent = generateInsights(stepsData, 'steps');
             
             // Force canvas to exact size before creating chart
             const canvas = document.getElementById('stepsChart');
@@ -1081,6 +1298,164 @@
                     }
                 }
             });
+            
+            // Update activity insight
+            document.getElementById('activityInsight').textContent = generateInsights({active: activeUsers, inactive: inactiveUsers}, 'activity');
+            
+            // Create Food Chart
+            if (foodChartInstance) {
+                foodChartInstance.destroy();
+                foodChartInstance = null;
+            }
+            
+            const foodCanvas = document.getElementById('foodChart');
+            if (foodCanvas) {
+                const foodCtx = foodCanvas.getContext('2d');
+                
+                // Load actual food usage data
+                const foodUsage = await loadFoodUsageData(currentTimeFrame === 'today' ? 1 : currentTimeFrame === 'week' ? 7 : 30);
+                const topFoods = Object.values(foodUsage).sort((a, b) => b.totalLogs - a.totalLogs).slice(0, 10);
+                
+                foodCanvas.width = foodCanvas.offsetWidth;
+                foodCanvas.height = 250;
+                
+                foodChartInstance = new Chart(foodCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: topFoods.map(f => f.name.length > 15 ? f.name.substring(0, 15) + '...' : f.name),
+                        datasets: [{
+                            label: 'Times Logged',
+                            data: topFoods.map(f => f.totalLogs),
+                            backgroundColor: '#8b5cf6',
+                            borderColor: '#7c3aed',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    afterLabel: function(context) {
+                                        const food = topFoods[context.dataIndex];
+                                        return `Users: ${food.uniqueUserCount}\nCalories: ${food.totalCalories}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: '#9ca3af' },
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                            },
+                            x: {
+                                ticks: { color: '#9ca3af', maxRotation: 45, minRotation: 45 },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+                
+                document.getElementById('foodInsight').textContent = generateInsights(foodUsage, 'food');
+            }
+            
+            // Create Calorie Balance Chart
+            if (calorieChartInstance) {
+                calorieChartInstance.destroy();
+                calorieChartInstance = null;
+            }
+            
+            const calorieCanvas = document.getElementById('calorieChart');
+            if (calorieCanvas) {
+                const calorieCtx = calorieCanvas.getContext('2d');
+                
+                // Load calorie data
+                const days = currentTimeFrame === 'today' ? 1 : currentTimeFrame === 'week' ? 7 : 30;
+                const burnedData = [];
+                const consumedData = [];
+                const labels = [];
+                
+                for (let i = days - 1; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    labels.push(date.toLocaleDateString('en', { weekday: 'short', day: 'numeric' }));
+                    
+                    let dayBurned = 0;
+                    let dayConsumed = 0;
+                    
+                    for (const user of dataCache.users.slice(0, 10)) { // Sample for performance
+                        try {
+                            const activitySnapshot = await db.collection('users').doc(user.id)
+                                .collection('activityLog').doc(dateStr)
+                                .collection('entries').get();
+                            activitySnapshot.forEach(doc => {
+                                dayBurned += doc.data().caloriesBurned || 0;
+                            });
+                            
+                            const foodSnapshot = await db.collection('users').doc(user.id)
+                                .collection('foodLog').doc(dateStr)
+                                .collection('entries').get();
+                            foodSnapshot.forEach(doc => {
+                                dayConsumed += doc.data().calories || 0;
+                            });
+                        } catch (e) {}
+                    }
+                    
+                    burnedData.push(dayBurned);
+                    consumedData.push(dayConsumed);
+                }
+                
+                calorieCanvas.width = calorieCanvas.offsetWidth;
+                calorieCanvas.height = 250;
+                
+                calorieChartInstance = new Chart(calorieCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Burned',
+                            data: burnedData,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4
+                        }, {
+                            label: 'Consumed',
+                            data: consumedData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: { color: '#9ca3af' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: '#9ca3af' },
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                            },
+                            x: {
+                                ticks: { color: '#9ca3af' },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+                
+                document.getElementById('calorieInsight').textContent = generateInsights({burned: burnedData, consumed: consumedData}, 'calories');
+            }
         }
 
         function updateQuickLeaderboard() {
