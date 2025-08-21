@@ -1430,47 +1430,14 @@
                     document.getElementById('championStreak').textContent = 'Start walking';
                 }
                 
-                // Load Food Database from foodDatabase collection
-                if (!dataCache.foods) {
-                    debugLog('DATA', '=== Loading Food Database Collection ===');
-                    try {
-                        // First get the actual count
-                        debugLog('DATA', 'Fetching foodDatabase collection count...');
-                        const foodCountSnapshot = await db.collection('foodDatabase').get();
-                        const actualFoodCount = foodCountSnapshot.size;
-                        debugLog('DATA', `Food database contains ${actualFoodCount} items`);
-                        
-                        // Load a reasonable subset for display (500 for performance)
-                        const foodSnapshot = await db.collection('foodDatabase').limit(500).get();
-                        dataCache.foods = foodSnapshot.docs.map(doc => {
-                            const data = doc.data();
-                            return {
-                                id: doc.id,
-                                name: data.name || 'Unknown',
-                                calories: data.calories || data.caloriesPerServing || 0,
-                                caloriesPerServing: data.caloriesPerServing || data.calories || 0,
-                                category: data.category || 'Uncategorized',
-                                emoji: data.emoji || '🍽️',
-                                searchTerms: data.searchTerms || [],
-                                usageCount: data.usageCount || 0
-                            };
-                        });
-                        dataCache.totalFoodCount = actualFoodCount;
-                        debugLog('DATA', `Successfully loaded ${dataCache.foods.length} food items for display`);
-                    } catch (e) {
-                        debugLog('ERROR', `Error loading food database: ${e.message}`, e);
-                        console.error('Error loading food database:', e);
-                        dataCache.foods = [];
-                        dataCache.totalFoodCount = 0;
-                    }
-                } else {
-                    debugLog('DATA', 'Using cached food database');
-                }
+                // Update unique foods count from actual user logs
+                debugLog('DATA', 'Calculating unique foods from user logs...');
+                const uniqueFoodsFromLogs = Object.keys(dataCache.loggedFoods || {}).length;
+                debugLog('DATA', `Found ${uniqueFoodsFromLogs} unique foods logged by users`);
                 
-                debugLog('DATA', 'Updating total foods display...');
                 const totalFoodsElement = document.getElementById('totalFoods');
                 if (totalFoodsElement) {
-                    totalFoodsElement.textContent = dataCache.totalFoodCount || dataCache.foods?.length || 0;
+                    totalFoodsElement.textContent = uniqueFoodsFromLogs;
                 } else {
                     debugLog('ERROR', 'totalFoods element not found!');
                 }
@@ -1514,12 +1481,12 @@
             debugLog('DATA', `Updating total users display: ${userCount} users`);
             document.getElementById('totalUsers').textContent = userCount || '-';
             
-            // Update food database count
+            // Update unique foods count from actual user logs
             const totalFoodsEl = document.getElementById('totalFoods');
             if (totalFoodsEl) {
-                const foodCount = dataCache.totalFoodCount || dataCache.foods?.length || 0;
-                debugLog('DATA', `Updating food count display: ${foodCount} foods`);
-                totalFoodsEl.textContent = foodCount || '-';
+                const uniqueFoodCount = Object.keys(dataCache.loggedFoods || {}).length;
+                debugLog('DATA', `Updating unique foods display: ${uniqueFoodCount} unique foods from user logs`);
+                totalFoodsEl.textContent = uniqueFoodCount || '-';
             }
             
             if (dataCache.todaySteps) {
@@ -2693,25 +2660,21 @@
             const content = document.getElementById('foodsContent');
             content.innerHTML = '<div class="loading-message"><div class="loading-spinner"></div><span>Loading...</span></div>';
             
-            // Ensure we have food data
-            if (!dataCache.foods && tab !== 'popular') {
-                try {
-                    const foodSnapshot = await db.collection('foodDatabase').limit(500).get();
-                    dataCache.foods = foodSnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                } catch(e) {
-                    console.error('Error loading foods:', e);
-                }
+            debugLog('FOOD', `Loading food tab: ${tab}`);
+            
+            // Load actual user food logs over the past 30 days
+            if (!dataCache.userFoodHistory) {
+                debugLog('FOOD', 'Loading user food history from past 30 days...');
+                dataCache.userFoodHistory = await loadFoodUsageData(30);
             }
             
-            // Update stats with actual count
-            document.getElementById('uniqueFoodsCount').textContent = dataCache.totalFoodCount || dataCache.foods?.length || '-';
+            // Update stats with actual user data
+            const uniqueFoodCount = Object.keys(dataCache.userFoodHistory || {}).length;
+            document.getElementById('uniqueFoodsCount').textContent = uniqueFoodCount || '-';
             
-            // Count categories
+            // Count categories from actual logged foods
             const categories = {};
-            dataCache.foods?.forEach(food => {
+            Object.values(dataCache.userFoodHistory || {}).forEach(food => {
                 const category = food.category || 'Uncategorized';
                 categories[category] = (categories[category] || 0) + 1;
             });
@@ -2758,18 +2721,19 @@
                     break;
                     
                 case 'recent':
-                    html = '<h4>Recently Added Foods</h4>';
-                    if (!dataCache.foods || dataCache.foods.length === 0) {
-                        html += '<p style="color: rgba(255,255,255,0.7); text-align: center; padding: 2rem;">No foods in database yet</p>';
+                    html = '<h4>Recently Logged Foods (Today)</h4>';
+                    const todaysFoods = Object.entries(dataCache.loggedFoods || {});
+                    if (todaysFoods.length === 0) {
+                        html += '<p style="color: rgba(255,255,255,0.7); text-align: center; padding: 2rem;">No foods logged today yet</p>';
                     } else {
                         html += '<div class="foods-grid">';
-                        foods = (dataCache.foods || []).slice(-20).reverse();
-                        foods.forEach(food => {
+                        todaysFoods.slice(-20).reverse().forEach(([name, data]) => {
                         html += `
                             <div class="food-item">
-                                <div class="food-emoji">${food.emoji || '🍽️'}</div>
-                                <div class="food-name">${food.name}</div>
-                                <div class="food-stats">${food.caloriesPerServing || 0} cal</div>
+                                <div class="food-emoji">🍽️</div>
+                                <div class="food-name">${name}</div>
+                                <div class="food-stats">${data.calories || 0} cal<br>
+                                Logged ${data.count} times</div>
                             </div>
                         `;
                         });
@@ -2778,17 +2742,19 @@
                     break;
                     
                 case 'all':
-                    html = `<h4>All Foods (${dataCache.totalFoodCount || dataCache.foods?.length || 0} items)</h4>`;
+                    const allUserFoods = Object.values(dataCache.userFoodHistory || {});
+                    html = `<h4>All User-Logged Foods (${allUserFoods.length} unique items from last 30 days)</h4>`;
                     html += '<div style="max-height: 600px; overflow-y: auto;">';
-                    html += '<table class="data-table"><thead><tr><th>Name</th><th>Category</th><th>Calories</th><th>Usage</th></tr></thead><tbody>';
+                    html += '<table class="data-table"><thead><tr><th>Name</th><th>Avg Calories</th><th>Times Logged</th><th>Users</th></tr></thead><tbody>';
                     
-                    (dataCache.foods || []).forEach(food => {
+                    allUserFoods.sort((a, b) => b.totalLogs - a.totalLogs).forEach(food => {
+                        const avgCalories = food.totalLogs > 0 ? Math.round(food.totalCalories / food.totalLogs) : 0;
                         html += `
                             <tr>
-                                <td>${food.emoji || ''} ${food.name}</td>
-                                <td>${food.category || 'N/A'}</td>
-                                <td>${food.caloriesPerServing || 0}</td>
-                                <td>${food.usageCount || food.popularity || 0}</td>
+                                <td>${food.name}</td>
+                                <td>${avgCalories}</td>
+                                <td>${food.totalLogs}</td>
+                                <td>${food.uniqueUsers?.size || 0}</td>
                             </tr>
                         `;
                     });
@@ -2798,28 +2764,16 @@
                 case 'search':
                     html = `
                         <div style="margin: 1rem 0;">
-                            <input type="text" id="foodSearch" placeholder="Search foods..." style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; color: white;">
+                            <input type="text" id="foodSearch" placeholder="Search user-logged foods..." style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; color: white;">
                         </div>
                         <div id="searchResults"></div>
                     `;
-                    setTimeout(async () => {
-                        // Ensure foods are loaded for search
-                        if (!dataCache.foods || dataCache.foods.length === 0) {
-                            try {
-                                const foodSnapshot = await db.collection('foodDatabase').limit(500).get();
-                                dataCache.foods = foodSnapshot.docs.map(doc => ({
-                                    id: doc.id,
-                                    ...doc.data()
-                                }));
-                            } catch(e) {
-                                console.error('Error loading foods for search:', e);
-                            }
-                        }
-                        
+                    setTimeout(() => {
                         const searchInput = document.getElementById('foodSearch');
                         if (searchInput) {
+                            const userFoods = Object.values(dataCache.userFoodHistory || {});
                             // Show initial message
-                            document.getElementById('searchResults').innerHTML = '<p style="color: rgba(255, 255, 255, 0.7);">Type to search ' + (dataCache.foods?.length || 0) + ' foods...</p>';
+                            document.getElementById('searchResults').innerHTML = '<p style="color: rgba(255, 255, 255, 0.7);">Type to search ' + userFoods.length + ' user-logged foods...</p>';
                             
                             searchInput.addEventListener('input', (e) => {
                                 const query = e.target.value.toLowerCase();
@@ -2827,9 +2781,8 @@
                                     document.getElementById('searchResults').innerHTML = '<p style="color: rgba(255, 255, 255, 0.7);">Type to search...</p>';
                                     return;
                                 }
-                                const filtered = (dataCache.foods || []).filter(f => 
-                                    f.name.toLowerCase().includes(query) ||
-                                    (f.searchTerms && f.searchTerms.some(term => term.toLowerCase().includes(query)))
+                                const filtered = userFoods.filter(f => 
+                                    f.name.toLowerCase().includes(query)
                                 );
                                 
                                 let resultsHtml = `<p style="color: rgba(255, 255, 255, 0.7);">Found ${filtered.length} items</p><div class="foods-grid">`;
@@ -2837,11 +2790,15 @@
                                     resultsHtml += '<p style="color: rgba(255, 255, 255, 0.5); grid-column: 1/-1; text-align: center; padding: 2rem;">No foods match your search</p>';
                                 } else {
                                     filtered.slice(0, 20).forEach(food => {
+                                        const avgCalories = food.totalLogs > 0 ? Math.round(food.totalCalories / food.totalLogs) : 0;
                                         resultsHtml += `
                                             <div class="food-item">
-                                                <div class="food-emoji">${food.emoji || '🍽️'}</div>
+                                                <div class="food-emoji">🍽️</div>
                                                 <div class="food-name">${food.name}</div>
-                                                <div class="food-stats">${food.caloriesPerServing || 0} cal</div>
+                                                <div class="food-stats">
+                                                    ${avgCalories} cal avg<br>
+                                                    Logged ${food.totalLogs} times
+                                                </div>
                                             </div>
                                         `;
                                     });
