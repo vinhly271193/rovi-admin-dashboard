@@ -1216,16 +1216,17 @@
                 let activeUsersToday = 0;
                 
                 // Batch load steps for all users from stepsData collection
-                debugLog('STEPS', 'Loading steps for all users...');
+                debugLog('STEPS', `=== Loading Steps Data for ${today} ===`);
+                debugLog('STEPS', `Fetching from ${dataCache.users.length} users...`);
                 const stepsPromises = dataCache.users.map(user => 
                     db.collection('users').doc(user.id)
                         .collection('stepsData').doc(today).get()
                         .then(doc => {
                             if (doc.exists) {
                                 const steps = doc.data().steps || 0;
-                                debugLog('STEPS', `${user.email}: ${steps} steps`);
+                                debugLog('STEPS', `✓ ${user.email}: ${steps} steps recorded`);
                             } else {
-                                debugLog('STEPS', `${user.email}: No data for ${today}`);
+                                debugLog('STEPS', `✗ ${user.email}: No steps document found for ${today}`);
                             }
                             return { userId: user.id, data: doc.exists ? doc.data() : null };
                         })
@@ -1489,25 +1490,36 @@
         }
 
         async function updateUIFromCache() {
-            document.getElementById('totalUsers').textContent = dataCache.users?.length || '-';
+            debugLog('DATA', '=== Starting UI Update from Cache ===');
+            
+            // Update total users
+            const userCount = dataCache.users?.length || 0;
+            debugLog('DATA', `Updating total users display: ${userCount} users`);
+            document.getElementById('totalUsers').textContent = userCount || '-';
             
             // Update food database count
             const totalFoodsEl = document.getElementById('totalFoods');
             if (totalFoodsEl) {
-                totalFoodsEl.textContent = dataCache.totalFoodCount || dataCache.foods?.length || '-';
+                const foodCount = dataCache.totalFoodCount || dataCache.foods?.length || 0;
+                debugLog('DATA', `Updating food count display: ${foodCount} foods`);
+                totalFoodsEl.textContent = foodCount || '-';
             }
             
             if (dataCache.todaySteps) {
+                debugLog('DATA', `Processing todaySteps data:`, dataCache.todaySteps);
                 const totalSteps = Object.values(dataCache.todaySteps).reduce((a, b) => a + b, 0);
                 const activeUsers = Object.values(dataCache.todaySteps).filter(s => s > 0).length;
+                debugLog('DATA', `Step stats - Total: ${totalSteps}, Active users: ${activeUsers}`);
                 document.getElementById('totalStepsToday').textContent = totalSteps.toLocaleString();
                 document.getElementById('activeToday').textContent = activeUsers;
                 
                 // Update calculated metrics
                 const avgSteps = activeUsers > 0 ? Math.round(totalSteps / activeUsers) : 0;
+                debugLog('DATA', `Average steps per active user: ${avgSteps}`);
                 document.getElementById('avgStepsPerUser').textContent = avgSteps.toLocaleString();
                 
                 const engagementRate = Math.round((activeUsers / (dataCache.users?.length || 1)) * 100);
+                debugLog('DATA', `Engagement rate: ${engagementRate}% (${activeUsers}/${dataCache.users?.length} users)`);
                 document.getElementById('engagementRate').textContent = engagementRate + '%';
             }
             
@@ -2127,13 +2139,17 @@
         
         async function loadInitialFeedData(today) {
             // Load existing data for today to populate feed immediately
-            debugLog('FEED', `Loading initial feed data for today: ${today}`);
+            debugLog('FEED', `=== Loading Initial Feed Data for ${today} ===`);
+            debugLog('FEED', `Processing ${dataCache.users.length} users for feed data`);
+            
             for (const user of dataCache.users) {
+                debugLog('FEED', `Checking ${user.email} for activity...`);
                 try {
                     // Load steps
                     const stepsDoc = await db.collection('users').doc(user.id)
                         .collection('stepsData').doc(today).get();
                     if (stepsDoc.exists && stepsDoc.data().steps > 0) {
+                        debugLog('FEED', `  → Found ${stepsDoc.data().steps} steps for ${user.email}`);
                         const feedKey = `${user.id}-steps-${today}`;
                         if (!feedItemKeys.has(feedKey)) {
                             feedItemKeys.add(feedKey);
@@ -2152,12 +2168,15 @@
                         }
                     }
                     
-                    // Load activities
+                    // Load activities  
                     const activityDoc = await db.collection('users').doc(user.id)
                         .collection('activityLog').doc(today).get();
+                    debugLog('FEED', `  → Activity doc exists: ${activityDoc.exists}`);
                     if (activityDoc.exists) {
                         const data = activityDoc.data();
+                        debugLog('FEED', `  → Activity data:`, data);
                         if (data.caloriesBurned > 0 && data.name) {
+                            debugLog('FEED', `  → Found activity: ${data.name} (${data.caloriesBurned} cal)`);
                             const feedKey = `${user.id}-activity-${data.name}`;
                             if (!feedItemKeys.has(feedKey)) {
                                 feedItemKeys.add(feedKey);
@@ -2219,19 +2238,30 @@
         }
         
         function updateFeedDisplay() {
+            debugLog('FEED', '=== Updating Feed Display ===');
             const feedContent = document.getElementById('socialFeed');
-            if (!feedContent) return;
+            debugLog('FEED', `Feed element: ${feedContent ? 'found' : 'NOT FOUND'}`);
+            if (!feedContent) {
+                debugLog('ERROR', 'socialFeed element not found!');
+                return;
+            }
+            
+            debugLog('FEED', `Total feed items: ${feedItems.length}, Current filter: ${currentFeedFilter}`);
             
             // Filter items based on current filter
             let filteredItems = currentFeedFilter === 'all' 
                 ? feedItems 
                 : feedItems.filter(item => item.type === currentFeedFilter);
             
+            debugLog('FEED', `After filtering: ${filteredItems.length} items`);
+            
             // Sort by timestamp (newest first)
             filteredItems.sort((a, b) => b.timestamp - a.timestamp);
             
             // Limit to 50 items for performance
             filteredItems = filteredItems.slice(0, 50);
+            
+            debugLog('FEED', `Displaying ${filteredItems.length} items in feed`);
             
             if (filteredItems.length === 0) {
                 feedContent.innerHTML = `
@@ -2395,9 +2425,15 @@
         }
         
         function updateQuickLeaderboard() {
-            const sorted = Object.entries(dataCache.todaySteps || {})
+            debugLog('DATA', '=== Updating Quick Leaderboard ===');
+            const stepsData = dataCache.todaySteps || {};
+            debugLog('DATA', `Steps data available for ${Object.keys(stepsData).length} users:`, stepsData);
+            
+            const sorted = Object.entries(stepsData)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 5);
+            
+            debugLog('DATA', `Top 5 performers:`, sorted);
             
             let html = '';
             sorted.forEach(([userId, steps], index) => {
@@ -2418,7 +2454,13 @@
                 `;
             });
             
-            document.getElementById('quickLeaderboard').innerHTML = html || '<p>No activity data today</p>';
+            const leaderboardEl = document.getElementById('quickLeaderboard');
+            debugLog('DATA', `Setting leaderboard HTML (${html.length} chars) to element:`, leaderboardEl ? 'found' : 'NOT FOUND');
+            if (leaderboardEl) {
+                leaderboardEl.innerHTML = html || '<p>No activity data today</p>';
+            } else {
+                debugLog('ERROR', 'quickLeaderboard element not found!');
+            }
         }
 
         async function loadLeaderboards() {
