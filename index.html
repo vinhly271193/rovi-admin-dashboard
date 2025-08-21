@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROVI Admin Dashboard - Optimized</title>
-    <link rel="stylesheet" href="css/dashboard.css">
+    <title>ROVI Admin Dashboard - Premium</title>
+    <link rel="stylesheet" href="css/modern-dashboard.css">
     <style>
-        /* Fixed chart heights - STRICT enforcement */
+        /* Override for chart containers */
         .chart-container {
             position: relative;
             height: 300px !important;
@@ -16,95 +16,12 @@
             overflow: hidden !important;
         }
         
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin: 1rem 0;
-            overflow: hidden !important;
-        }
-        
-        .chart-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 0.5rem;
-        }
-        
-        .chart-description {
-            background: #f7fafc;
-            border-left: 4px solid #4299e1;
-            padding: 0.75rem;
-            margin: 0.75rem 0;
-            font-size: 0.9rem;
-            color: #4a5568;
-        }
-        
-        .data-scope {
-            display: inline-block;
-            background: #edf2f7;
-            color: #2d3748;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-left: 0.5rem;
-        }
-        
-        .chart-card canvas {
-            max-height: 300px !important;
-            height: 300px !important;
-            display: block !important;
-        }
-        
-        /* Prevent chart.js from overriding styles */
         #stepsChart, #activityChart {
             max-height: 300px !important;
             height: 100% !important;
         }
         
-        .insights-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-        
-        .leaderboard-container {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-        }
-        
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem;
-            background: #f7fafc;
-            border-radius: 8px;
-            margin: 0.5rem 0;
-            transition: all 0.2s;
-        }
-        
-        .leaderboard-item:hover {
-            background: #edf2f7;
-            transform: translateX(5px);
-        }
-        
-        .leaderboard-rank {
-            font-size: 1.5rem;
-            font-weight: bold;
-            width: 40px;
-            text-align: center;
-        }
-        
-        .leaderboard-rank.gold { color: #ffd700; }
-        .leaderboard-rank.silver { color: #c0c0c0; }
-        .leaderboard-rank.bronze { color: #cd7f32; }
-        
+        /* Food Grid */
         .foods-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -113,94 +30,106 @@
         }
         
         .food-item {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
             padding: 1rem;
             text-align: center;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
         }
         
         .food-item:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            background: rgba(255, 255, 255, 0.15);
         }
         
         .food-emoji {
             font-size: 2rem;
             margin-bottom: 0.5rem;
+            animation: float-emoji 3s ease-in-out infinite;
+        }
+        
+        @keyframes float-emoji {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
         }
         
         .food-name {
             font-weight: 600;
-            color: #2d3748;
+            color: white;
             margin-bottom: 0.25rem;
         }
         
         .food-stats {
             font-size: 0.875rem;
-            color: #718096;
+            color: rgba(255, 255, 255, 0.8);
         }
         
-        .tab-buttons {
-            display: flex;
-            gap: 1rem;
-            margin: 1rem 0;
-            border-bottom: 2px solid #e2e8f0;
-        }
-        
-        .tab-button {
-            padding: 0.75rem 1.5rem;
-            background: none;
-            border: none;
-            color: #718096;
-            font-weight: 500;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -2px;
-            transition: all 0.2s;
-        }
-        
-        .tab-button.active {
-            color: #4299e1;
-            border-bottom-color: #4299e1;
-        }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #e2e8f0;
-            border-top-color: #4299e1;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
+        /* Loading States */
         .loading-message {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 1rem;
-            padding: 1rem;
-            background: #f7fafc;
-            border-radius: 8px;
-            margin: 1rem 0;
+            padding: 2rem;
+            color: white;
         }
         
         .cache-info {
             font-size: 0.75rem;
-            color: #718096;
+            color: rgba(255, 255, 255, 0.7);
             padding: 0.5rem;
-            background: #f7fafc;
-            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
             margin-top: 0.5rem;
+            text-align: center;
+        }
+        
+        /* Data Table */
+        .data-table {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            color: white;
+        }
+        
+        .data-table thead {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .data-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: white;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+        }
+        
+        .data-table td {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .data-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
     </style>
 </head>
 <body>
+    <!-- Animated Background -->
+    <div class="floating-orbs">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+        <div class="orb orb3"></div>
+    </div>
+    
     <!-- Login Screen -->
     <div id="loginScreen" class="login-container">
         <div class="login-card">
@@ -264,9 +193,9 @@
                         <div class="stat-content">
                             <h3>Total Registered Users</h3>
                             <p class="stat-value" id="totalUsers">-</p>
-                            <div style="background: #f7fafc; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">
-                                <strong style="font-size: 0.75rem; color: #4a5568;">DATA SOURCE:</strong>
-                                <span style="font-size: 0.75rem; color: #718096;">All users in database</span>
+                            <div class="stat-description">
+                                <strong>DATA SOURCE:</strong>
+                                <span> All users in database</span>
                             </div>
                         </div>
                     </div>
@@ -275,9 +204,9 @@
                         <div class="stat-content">
                             <h3>Total Steps Today</h3>
                             <p class="stat-value" id="totalStepsToday">-</p>
-                            <div style="background: #f7fafc; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">
-                                <strong style="font-size: 0.75rem; color: #4a5568;">DATA SOURCE:</strong>
-                                <span style="font-size: 0.75rem; color: #718096;">Sum of ALL users' steps today</span>
+                            <div class="stat-description">
+                                <strong>DATA SOURCE:</strong>
+                                <span> Sum of ALL users' steps today</span>
                             </div>
                         </div>
                     </div>
@@ -286,9 +215,9 @@
                         <div class="stat-content">
                             <h3>Food Database Items</h3>
                             <p class="stat-value" id="totalFoods">-</p>
-                            <div style="background: #f7fafc; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">
-                                <strong style="font-size: 0.75rem; color: #4a5568;">DATA SOURCE:</strong>
-                                <span style="font-size: 0.75rem; color: #718096;">Actual count from foodDatabase</span>
+                            <div class="stat-description">
+                                <strong>DATA SOURCE:</strong>
+                                <span> Actual count from foodDatabase</span>
                             </div>
                         </div>
                     </div>
@@ -297,9 +226,9 @@
                         <div class="stat-content">
                             <h3>Active Users Count</h3>
                             <p class="stat-value" id="activeToday">-</p>
-                            <div style="background: #f7fafc; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem;">
-                                <strong style="font-size: 0.75rem; color: #4a5568;">DATA SOURCE:</strong>
-                                <span style="font-size: 0.75rem; color: #718096;">Users who logged steps > 0 today</span>
+                            <div class="stat-description">
+                                <strong>DATA SOURCE:</strong>
+                                <span> Users who logged steps > 0 today</span>
                             </div>
                         </div>
                     </div>
@@ -315,10 +244,13 @@
                         <div class="chart-description">
                             <strong>What this shows:</strong> The total number of steps recorded by your entire community over the past week. Each point represents the sum of ALL users' steps for that day.
                         </div>
-                        <div style="margin: 1rem 0; padding: 0.75rem; background: #fff5f5; border-radius: 8px;">
-                            <label style="font-size: 0.875rem; color: #4a5568; cursor: pointer;">
-                                <input type="checkbox" id="showTopUsersOnly" checked style="margin-right: 0.5rem;"> 
-                                <strong>Filter:</strong> Show top 10 most active users only (uncheck to see ALL users)
+                        <div class="toggle-container">
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="showTopUsersOnly" checked>
+                                <span class="toggle-slider"></span>
+                            </div>
+                            <label for="showTopUsersOnly" class="toggle-label">
+                                <strong>Filter:</strong> Show top 10 most active users only (toggle off to see ALL users)
                             </label>
                         </div>
                         <div class="chart-container">
@@ -806,10 +738,11 @@
                     datasets: [{
                         label: 'Total Steps',
                         data: stepsData,
-                        borderColor: '#4299e1',
-                        backgroundColor: 'rgba(66, 153, 225, 0.1)',
+                        borderColor: 'rgba(255, 255, 255, 0.8)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        borderWidth: 2
                     }]
                 },
                 options: {
@@ -828,9 +761,21 @@
                         y: {
                             beginAtZero: true,
                             ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
                                 callback: function(value) {
                                     return value.toLocaleString();
                                 }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
                             }
                         }
                     },
@@ -872,7 +817,12 @@
                     labels: ['Active Today', 'Inactive Today'],
                     datasets: [{
                         data: [activeUsers, inactiveUsers],
-                        backgroundColor: ['#48bb78', '#e2e8f0']
+                        backgroundColor: [
+                            'rgba(79, 172, 254, 0.8)',
+                            'rgba(255, 255, 255, 0.2)'
+                        ],
+                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -909,8 +859,8 @@
                         <div style="display: flex; align-items: center; gap: 1rem;">
                             <span class="leaderboard-rank ${rankClass}">${index + 1}</span>
                             <div>
-                                <strong>${user?.email || userId.substring(0, 8) + '...'}</strong>
-                                <div style="color: #718096; font-size: 0.875rem;">
+                                <strong style="color: white;">${user?.email || userId.substring(0, 8) + '...'}</strong>
+                                <div style="color: rgba(255, 255, 255, 0.7); font-size: 0.875rem;">
                                     ${steps.toLocaleString()} steps today
                                 </div>
                             </div>
