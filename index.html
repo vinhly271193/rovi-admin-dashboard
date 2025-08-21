@@ -1389,6 +1389,10 @@
                     });
                 });
                 
+                // Calculate users who ate (moved inside try block)
+                const usersWhoAte = foodResults.filter(foods => foods.length > 0).length;
+                dataCache.usersWhoAte = usersWhoAte; // Store for later use
+                
                     debugLog('FOOD', `Summary: ${totalFoodsLogged} food entries, ${totalCaloriesConsumed} calories consumed`);
                 } catch (foodError) {
                     debugLog('ERROR', `Food loading failed: ${foodError.message}`, foodError);
@@ -1413,7 +1417,7 @@
                 debugLog('DATA', 'Calculating average calories per user...');
                 const avgCaloriesEl = document.getElementById('avgCaloriesPerUser');
                 if (avgCaloriesEl) {
-                    const usersWhoAte = foodResults.filter(foods => foods.length > 0).length;
+                    const usersWhoAte = dataCache.usersWhoAte || 0;
                     const avgCaloriesConsumed = usersWhoAte > 0 ? Math.round(totalCaloriesConsumed / usersWhoAte) : 0;
                     avgCaloriesEl.textContent = avgCaloriesConsumed.toLocaleString();
                     debugLog('DATA', `Average calories: ${avgCaloriesConsumed} (${usersWhoAte} users ate)`);
