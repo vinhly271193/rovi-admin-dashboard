@@ -72,6 +72,272 @@
             height: 100% !important;
         }
         
+        /* Social Feed Styles */
+        .social-feed-container {
+            background: var(--glass-dark);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .feed-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(167, 139, 250, 0.05);
+        }
+        
+        .feed-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .live-indicator {
+            width: 8px;
+            height: 8px;
+            background: #34d399;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px #34d399;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .feed-filters {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .feed-filter {
+            background: var(--glass-dark);
+            color: var(--text-secondary);
+            border: 1px solid var(--glass-border);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .feed-filter:hover {
+            background: rgba(167, 139, 250, 0.1);
+            color: white;
+            border-color: rgba(167, 139, 250, 0.3);
+        }
+        
+        .feed-filter.active {
+            background: var(--gradient-primary);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .feed-content {
+            height: 400px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            position: relative;
+        }
+        
+        .feed-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .feed-content::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 3px;
+        }
+        
+        .feed-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease-out;
+            transition: all 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .feed-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(167, 139, 250, 0.2);
+            transform: translateX(5px);
+        }
+        
+        .feed-item.new-item {
+            animation: newItemGlow 1s ease-out;
+        }
+        
+        @keyframes newItemGlow {
+            0% {
+                box-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
+            }
+            100% {
+                box-shadow: none;
+            }
+        }
+        
+        .feed-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        .feed-body {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .feed-user {
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.2rem;
+        }
+        
+        .feed-action {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .feed-action .highlight {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+        
+        .feed-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+        }
+        
+        .feed-time {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .feed-type-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            margin-left: auto;
+        }
+        
+        .feed-type-icon.steps {
+            background: rgba(34, 211, 153, 0.1);
+        }
+        
+        .feed-type-icon.food {
+            background: rgba(251, 191, 36, 0.1);
+        }
+        
+        .feed-type-icon.activity {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .feed-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+        
+        .pulse-loader {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .pulse-loader div {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            animation: pulseLoad 1.4s ease-in-out infinite;
+        }
+        
+        .pulse-loader div:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .pulse-loader div:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes pulseLoad {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+        
         /* Food Grid */
         .foods-grid {
             display: grid;
@@ -248,6 +514,33 @@
 
             <!-- Overview Page -->
             <div id="overviewPage" class="page-content">
+                
+                <!-- Real-Time Social Feed -->
+                <div class="social-feed-container">
+                    <div class="feed-header">
+                        <h3 class="feed-title">
+                            <span class="live-indicator"></span>
+                            Live Activity Feed
+                        </h3>
+                        <div class="feed-filters">
+                            <button class="feed-filter active" data-filter="all">All</button>
+                            <button class="feed-filter" data-filter="steps">Steps</button>
+                            <button class="feed-filter" data-filter="food">Food</button>
+                            <button class="feed-filter" data-filter="activity">Activities</button>
+                        </div>
+                    </div>
+                    <div class="feed-content" id="socialFeed">
+                        <div class="feed-loading">
+                            <div class="pulse-loader">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                            <span>Loading live feed...</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Stats Grid - Enhanced with more metrics -->
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -539,6 +832,9 @@
         let calorieChartInstance = null;
         let currentTimeFrame = 'week';
         let currentView = 'aggregate';
+        let feedListeners = [];
+        let feedItems = [];
+        let currentFeedFilter = 'all';
 
         // Prevent chart expansion with MutationObserver
         function preventChartExpansion() {
@@ -1458,6 +1754,219 @@
             }
         }
 
+        // Social Feed Functions
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const then = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const seconds = Math.floor((now - then) / 1000);
+            
+            if (seconds < 60) return 'just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+            return then.toLocaleDateString();
+        }
+        
+        function getUserInitial(email) {
+            return email ? email.charAt(0).toUpperCase() : '?';
+        }
+        
+        function getUserName(user) {
+            if (user.name) return user.name;
+            if (user.email) return user.email.split('@')[0];
+            return 'User';
+        }
+        
+        function createFeedItem(type, data) {
+            const item = document.createElement('div');
+            item.className = `feed-item ${data.isNew ? 'new-item' : ''}`;
+            item.dataset.type = type;
+            item.dataset.timestamp = data.timestamp;
+            
+            let avatar = '👤';
+            let action = '';
+            let highlight = '';
+            let typeIcon = '';
+            
+            switch(type) {
+                case 'steps':
+                    avatar = '👣';
+                    action = `logged <span class="highlight">${data.value.toLocaleString()} steps</span>`;
+                    typeIcon = '<div class="feed-type-icon steps">👣</div>';
+                    break;
+                case 'food':
+                    avatar = '🍽️';
+                    action = `logged <span class="highlight">${data.foodName}</span>`;
+                    if (data.calories) {
+                        action += ` <span style="color: var(--text-tertiary);">(${data.calories} cal)</span>`;
+                    }
+                    typeIcon = '<div class="feed-type-icon food">🍽️</div>';
+                    break;
+                case 'activity':
+                    avatar = '🏃';
+                    action = `completed <span class="highlight">${data.activityName}</span>`;
+                    if (data.duration) {
+                        action += ` for <span class="highlight">${data.duration} min</span>`;
+                    }
+                    if (data.caloriesBurned) {
+                        action += ` <span style="color: var(--text-tertiary);">(${data.caloriesBurned} cal burned)</span>`;
+                    }
+                    typeIcon = '<div class="feed-type-icon activity">🔥</div>';
+                    break;
+            }
+            
+            item.innerHTML = `
+                <div class="feed-avatar">${getUserInitial(data.userEmail)}</div>
+                <div class="feed-body">
+                    <div class="feed-user">${getUserName(data)}</div>
+                    <div class="feed-action">${action}</div>
+                    <div class="feed-meta">
+                        <span class="feed-time">🕐 ${getTimeAgo(data.timestamp)}</span>
+                    </div>
+                </div>
+                ${typeIcon}
+            `;
+            
+            return item;
+        }
+        
+        function updateFeedDisplay() {
+            const feedContent = document.getElementById('socialFeed');
+            if (!feedContent) return;
+            
+            // Filter items based on current filter
+            let filteredItems = currentFeedFilter === 'all' 
+                ? feedItems 
+                : feedItems.filter(item => item.type === currentFeedFilter);
+            
+            // Sort by timestamp (newest first)
+            filteredItems.sort((a, b) => b.timestamp - a.timestamp);
+            
+            // Limit to 50 items for performance
+            filteredItems = filteredItems.slice(0, 50);
+            
+            if (filteredItems.length === 0) {
+                feedContent.innerHTML = `
+                    <div class="feed-loading">
+                        <span>No activities yet today</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            feedContent.innerHTML = '';
+            filteredItems.forEach(item => {
+                feedContent.appendChild(createFeedItem(item.type, item.data));
+            });
+        }
+        
+        async function startSocialFeed() {
+            console.log('Starting social feed...');
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Clear existing listeners
+            feedListeners.forEach(unsubscribe => unsubscribe());
+            feedListeners = [];
+            feedItems = [];
+            
+            // Monitor all users' activities for today
+            for (const user of dataCache.users) {
+                // Listen to steps
+                const stepsListener = db.collection('users').doc(user.id)
+                    .collection('stepsData').doc(today)
+                    .onSnapshot(doc => {
+                        if (doc.exists && doc.data().steps > 0) {
+                            const existingIndex = feedItems.findIndex(
+                                item => item.type === 'steps' && item.data.userId === user.id
+                            );
+                            
+                            const feedData = {
+                                userId: user.id,
+                                userEmail: user.email,
+                                name: user.name,
+                                value: doc.data().steps,
+                                timestamp: doc.data().date || new Date(),
+                                isNew: existingIndex === -1
+                            };
+                            
+                            if (existingIndex >= 0) {
+                                feedItems[existingIndex] = { type: 'steps', data: feedData, timestamp: new Date() };
+                            } else {
+                                feedItems.push({ type: 'steps', data: feedData, timestamp: new Date() });
+                            }
+                            
+                            updateFeedDisplay();
+                        }
+                    });
+                feedListeners.push(stepsListener);
+                
+                // Listen to food logs
+                const foodListener = db.collection('users').doc(user.id)
+                    .collection('foodLog').doc(today)
+                    .collection('entries')
+                    .onSnapshot(snapshot => {
+                        snapshot.docChanges().forEach(change => {
+                            if (change.type === 'added') {
+                                const food = change.doc.data();
+                                feedItems.push({
+                                    type: 'food',
+                                    data: {
+                                        userId: user.id,
+                                        userEmail: user.email,
+                                        name: user.name,
+                                        foodName: food.name,
+                                        calories: food.calories,
+                                        mealType: food.mealType,
+                                        timestamp: food.dateCreated || new Date(),
+                                        isNew: true
+                                    },
+                                    timestamp: new Date()
+                                });
+                            }
+                        });
+                        updateFeedDisplay();
+                    });
+                feedListeners.push(foodListener);
+                
+                // Listen to activities
+                const activityListener = db.collection('users').doc(user.id)
+                    .collection('activityLog').doc(today)
+                    .collection('entries')
+                    .onSnapshot(snapshot => {
+                        snapshot.docChanges().forEach(change => {
+                            if (change.type === 'added') {
+                                const activity = change.doc.data();
+                                feedItems.push({
+                                    type: 'activity',
+                                    data: {
+                                        userId: user.id,
+                                        userEmail: user.email,
+                                        name: user.name,
+                                        activityName: activity.name,
+                                        duration: activity.duration,
+                                        caloriesBurned: activity.caloriesBurned,
+                                        timestamp: activity.dateCreated || new Date(),
+                                        isNew: true
+                                    },
+                                    timestamp: new Date()
+                                });
+                            }
+                        });
+                        updateFeedDisplay();
+                    });
+                feedListeners.push(activityListener);
+            }
+            
+            // Add feed filter listeners
+            document.querySelectorAll('.feed-filter').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    document.querySelectorAll('.feed-filter').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentFeedFilter = e.target.dataset.filter;
+                    updateFeedDisplay();
+                });
+            });
+        }
+        
         function updateQuickLeaderboard() {
             const sorted = Object.entries(dataCache.todaySteps || {})
                 .sort((a, b) => b[1] - a[1])
