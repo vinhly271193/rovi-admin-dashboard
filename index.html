@@ -1951,6 +1951,99 @@
             return item;
         }
         
+        async function loadInitialFeedData(today) {
+            // Load existing data for today to populate feed immediately
+            console.log('Loading initial feed data for today:', today);
+            for (const user of dataCache.users) {
+                try {
+                    // Load steps
+                    const stepsDoc = await db.collection('users').doc(user.id)
+                        .collection('stepsData').doc(today).get();
+                    if (stepsDoc.exists && stepsDoc.data().steps > 0) {
+                        const feedKey = `${user.id}-steps-${today}`;
+                        if (!feedItemKeys.has(feedKey)) {
+                            feedItemKeys.add(feedKey);
+                            feedItems.push({
+                                type: 'steps',
+                                data: {
+                                    userId: user.id,
+                                    userEmail: user.email,
+                                    name: user.name,
+                                    value: stepsDoc.data().steps,
+                                    timestamp: new Date(),
+                                    isNew: false
+                                },
+                                timestamp: new Date()
+                            });
+                        }
+                    }
+                    
+                    // Load activities
+                    const activityDoc = await db.collection('users').doc(user.id)
+                        .collection('activityLog').doc(today).get();
+                    if (activityDoc.exists) {
+                        const data = activityDoc.data();
+                        if (data.caloriesBurned > 0 && data.name) {
+                            const feedKey = `${user.id}-activity-${data.name}`;
+                            if (!feedItemKeys.has(feedKey)) {
+                                feedItemKeys.add(feedKey);
+                                feedItems.push({
+                                    type: 'activity',
+                                    data: {
+                                        userId: user.id,
+                                        userEmail: user.email,
+                                        name: user.name,
+                                        activityName: data.name,
+                                        duration: data.duration,
+                                        caloriesBurned: data.caloriesBurned,
+                                        timestamp: new Date(),
+                                        isNew: false
+                                    },
+                                    timestamp: new Date()
+                                });
+                            }
+                        }
+                    }
+                    
+                    // Load food
+                    const foodDoc = await db.collection('users').doc(user.id)
+                        .collection('foodLog').doc(today).get();
+                    if (foodDoc.exists) {
+                        const data = foodDoc.data();
+                        ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
+                            if (data[mealType] && Array.isArray(data[mealType])) {
+                                data[mealType].forEach(food => {
+                                    const feedKey = `${user.id}-${mealType}-${food.name}`;
+                                    if (!feedItemKeys.has(feedKey)) {
+                                        feedItemKeys.add(feedKey);
+                                        feedItems.push({
+                                            type: 'food',
+                                            data: {
+                                                userId: user.id,
+                                                userEmail: user.email,
+                                                name: user.name,
+                                                foodName: food.name,
+                                                calories: food.calories,
+                                                mealType: mealType,
+                                                timestamp: new Date(),
+                                                isNew: false
+                                            },
+                                            timestamp: new Date()
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error(`Error loading initial data for ${user.email}:`, e);
+                }
+            }
+            
+            console.log(`Loaded ${feedItems.length} initial feed items`);
+            updateFeedDisplay();
+        }
+        
         function updateFeedDisplay() {
             const feedContent = document.getElementById('socialFeed');
             if (!feedContent) return;
@@ -2112,6 +2205,9 @@
                     });
                 feedListeners.push(activityListener);
             }
+            
+            // Load initial data immediately
+            loadInitialFeedData(today);
             
             // Add feed filter listeners
             document.querySelectorAll('.feed-filter').forEach(button => {
