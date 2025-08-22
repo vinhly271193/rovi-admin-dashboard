@@ -3157,14 +3157,18 @@
                     
                 case 'all':
                     const allUserFoods = Object.values(dataCache.userFoodHistory || {});
-                    html = `<h4>All User-Logged Foods (${allUserFoods.length} unique items from last 30 days)</h4>`;
-                    html += '<div style="max-height: 600px; overflow-y: auto;">';
-                    html += '<table class="data-table"><thead><tr><th>Name</th><th>Avg Calories</th><th>Times Logged</th><th>Users</th></tr></thead><tbody>';
+                    // Sort by times logged and get top 20
+                    const top20Foods = allUserFoods.sort((a, b) => b.totalLogs - a.totalLogs).slice(0, 20);
                     
-                    allUserFoods.sort((a, b) => b.totalLogs - a.totalLogs).forEach(food => {
+                    html = `<h4>Top 20 Most Popular Foods (from ${allUserFoods.length} unique items logged in last 30 days)</h4>`;
+                    html += '<div style="max-height: 600px; overflow-y: auto;">';
+                    html += '<table class="data-table"><thead><tr><th>Rank</th><th>Name</th><th>Avg Calories</th><th>Times Logged</th><th>Users</th></tr></thead><tbody>';
+                    
+                    top20Foods.forEach((food, index) => {
                         const avgCalories = food.totalLogs > 0 ? Math.round(food.totalCalories / food.totalLogs) : 0;
                         html += `
                             <tr>
+                                <td>#${index + 1}</td>
                                 <td>${food.name}</td>
                                 <td>${avgCalories}</td>
                                 <td>${food.totalLogs}</td>
