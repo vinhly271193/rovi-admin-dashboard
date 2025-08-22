@@ -1108,6 +1108,20 @@
             return `${year}-${month}-${day}`;
         }
         
+        // Helper function to safely update element text content
+        function updateElementText(id, value) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            } else {
+                if (typeof debugLog !== 'undefined') {
+                    debugLog('WARN', `Element with id '${id}' not found`);
+                } else {
+                    console.warn(`Element with id '${id}' not found`);
+                }
+            }
+        }
+        
         let currentUser = null;
         let stepsChartInstance = null;
         let activityChartInstance = null;
@@ -1402,15 +1416,6 @@
                 dataCache.todaySteps = dailySteps;
                 
                 // Update UI with null checks
-                const updateElementText = (id, value) => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.textContent = value;
-                    } else {
-                        debugLog('WARN', `Element with id '${id}' not found`);
-                    }
-                };
-                
                 updateElementText('totalStepsToday', totalStepsToday.toLocaleString());
                 updateElementText('activeToday', activeUsersToday);
                 
