@@ -1358,7 +1358,7 @@
                     debugLog('DATA', `Using cached users: ${dataCache.users.length}`);
                 }
                 
-                document.getElementById('totalUsers').textContent = dataCache.users.length;
+                updateElementText('totalUsers', dataCache.users.length);
                 
                 // Load today's steps (using yyyy-MM-dd format)
                 const today = getLocalDateString();
@@ -1400,16 +1400,27 @@
                 });
                 
                 dataCache.todaySteps = dailySteps;
-                document.getElementById('totalStepsToday').textContent = totalStepsToday.toLocaleString();
-                document.getElementById('activeToday').textContent = activeUsersToday;
+                
+                // Update UI with null checks
+                const updateElementText = (id, value) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = value;
+                    } else {
+                        debugLog('WARN', `Element with id '${id}' not found`);
+                    }
+                };
+                
+                updateElementText('totalStepsToday', totalStepsToday.toLocaleString());
+                updateElementText('activeToday', activeUsersToday);
                 
                 // Calculate average steps per user
                 const avgSteps = activeUsersToday > 0 ? Math.round(totalStepsToday / activeUsersToday) : 0;
-                document.getElementById('avgStepsPerUser').textContent = avgSteps.toLocaleString();
+                updateElementText('avgStepsPerUser', avgSteps.toLocaleString());
                 
                 // Calculate engagement rate
                 const engagementRate = Math.round((activeUsersToday / dataCache.users.length) * 100);
-                document.getElementById('engagementRate').textContent = engagementRate + '%';
+                updateElementText('engagementRate', engagementRate + '%');
                 
                 debugLog('STEPS', `Summary: ${totalStepsToday} total steps from ${activeUsersToday} active users`);
                 
@@ -1475,8 +1486,8 @@
                     debugLog('ERROR', `Activity loading failed: ${activityError.message}`, activityError);
                 }
                 
-                document.getElementById('totalCaloriesBurned').textContent = totalCaloriesBurned > 0 ? totalCaloriesBurned.toLocaleString() : '0';
-                document.getElementById('activeSessions').textContent = activeSessions > 0 ? activeSessions : '0';
+                updateElementText('totalCaloriesBurned', totalCaloriesBurned > 0 ? totalCaloriesBurned.toLocaleString() : '0');
+                updateElementText('activeSessions', activeSessions > 0 ? activeSessions : '0');
                 
                 // Cache the calories data
                 dataCache.todayCaloriesBurned = totalCaloriesBurned;
@@ -1551,9 +1562,9 @@
                 
                 debugLog('DATA', 'Updating UI elements after food loading...');
                 debugLog('DATA', 'Setting foodsLoggedToday...');
-                document.getElementById('foodsLoggedToday').textContent = totalFoodsLogged;
+                updateElementText('foodsLoggedToday', totalFoodsLogged);
                 debugLog('DATA', 'Setting uniqueFoodsToday...');
-                document.getElementById('uniqueFoodsToday').textContent = uniqueFoodsToday.size;
+                updateElementText('uniqueFoodsToday', uniqueFoodsToday.size);
                 
                 // Update calories consumed if element exists
                 const caloriesConsumedEl = document.getElementById('totalCaloriesConsumed');
@@ -1583,15 +1594,15 @@
                 if (topUser && topUser[1] > 0) {
                     const champion = dataCache.users.find(u => u.id === topUser[0]);
                     debugLog('DATA', `Setting champion UI for ${champion?.email || 'unknown'}`);
-                    document.getElementById('dailyChampion').textContent = 
-                        champion?.name || champion?.email?.split('@')[0] || 'Anonymous';
-                    document.getElementById('championSteps').textContent = topUser[1].toLocaleString() + ' steps';
-                    document.getElementById('championStreak').textContent = 'Today\'s leader';
+                    updateElementText('dailyChampion', 
+                        champion?.name || champion?.email?.split('@')[0] || 'Anonymous');
+                    updateElementText('championSteps', topUser[1].toLocaleString() + ' steps');
+                    updateElementText('championStreak', 'Today\'s leader');
                 } else {
                     debugLog('DATA', 'No champion found, setting default messages');
-                    document.getElementById('dailyChampion').textContent = 'No activity yet';
-                    document.getElementById('championSteps').textContent = 'Be the first!';
-                    document.getElementById('championStreak').textContent = 'Start walking';
+                    updateElementText('dailyChampion', 'No activity yet');
+                    updateElementText('championSteps', 'Be the first!');
+                    updateElementText('championStreak', 'Start walking');
                 }
                 
                 // Update unique foods count from actual user logs
