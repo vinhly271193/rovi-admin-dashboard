@@ -3104,34 +3104,31 @@
             
             switch(tab) {
                 case 'popular':
-                    // Show ACTUALLY LOGGED foods, not database items
-                    const loggedFoods = Object.entries(dataCache.loggedFoods || {})
-                        .sort((a, b) => b[1].count - a[1].count)
-                        .slice(0, 20);
+                    // Get all user foods from history and sort by times logged
+                    const popularFoods = Object.values(dataCache.userFoodHistory || {});
+                    const top20PopularFoods = popularFoods.sort((a, b) => b.totalLogs - a.totalLogs).slice(0, 20);
                     
-                    html = '<h4>Top 20 Most Logged Foods (from actual user logs)</h4>';
-                    html += '<p style="color: rgba(255,255,255,0.7); margin: 1rem 0;">These are foods users have actually logged, not from the database</p>';
-                    html += '<div class="foods-grid">';
+                    html = `<h4>Top 20 Most Popular Foods (from ${popularFoods.length} unique items logged in last 30 days)</h4>`;
+                    html += '<div style="max-height: 600px; overflow-y: auto;">';
+                    html += '<table class="data-table"><thead><tr><th>Rank</th><th>Name</th><th>Avg Calories</th><th>Times Logged</th><th>Users</th></tr></thead><tbody>';
                     
-                    if (loggedFoods.length === 0) {
-                        html += '<p style="color: rgba(255,255,255,0.7); grid-column: 1/-1; text-align: center; padding: 2rem;">No foods logged today yet</p>';
+                    if (top20PopularFoods.length === 0) {
+                        html += '<tr><td colspan="5" style="text-align: center; color: rgba(255,255,255,0.7); padding: 2rem;">No foods logged yet</td></tr>';
                     } else {
-                        loggedFoods.forEach(([name, data], index) => {
+                        top20PopularFoods.forEach((food, index) => {
+                            const avgCalories = food.totalLogs > 0 ? Math.round(food.totalCalories / food.totalLogs) : 0;
                             html += `
-                                <div class="food-item">
-                                    <div class="food-emoji">🍽️</div>
-                                    <div class="food-name">${name}</div>
-                                    <div class="food-stats">
-                                        ${data.calories || 0} cal<br>
-                                        Logged ${data.count} times<br>
-                                        By ${data.users.size} users
-                                    </div>
-                                    <div style="color: #8b5cf6; font-weight: bold;">#${index + 1}</div>
-                                </div>
+                                <tr>
+                                    <td style="color: #8b5cf6; font-weight: bold;">#${index + 1}</td>
+                                    <td>${food.name}</td>
+                                    <td>${avgCalories}</td>
+                                    <td>${food.totalLogs}</td>
+                                    <td>${food.uniqueUsers?.size || 0}</td>
+                                </tr>
                             `;
                         });
                     }
-                    html += '</div>';
+                    html += '</tbody></table></div>';
                     break;
                     
                 case 'recent':
@@ -3157,18 +3154,15 @@
                     
                 case 'all':
                     const allUserFoods = Object.values(dataCache.userFoodHistory || {});
-                    // Sort by times logged and get top 20
-                    const top20Foods = allUserFoods.sort((a, b) => b.totalLogs - a.totalLogs).slice(0, 20);
                     
-                    html = `<h4>Top 20 Most Popular Foods (from ${allUserFoods.length} unique items logged in last 30 days)</h4>`;
+                    html = `<h4>All User-Logged Foods (${allUserFoods.length} unique items from last 30 days)</h4>`;
                     html += '<div style="max-height: 600px; overflow-y: auto;">';
-                    html += '<table class="data-table"><thead><tr><th>Rank</th><th>Name</th><th>Avg Calories</th><th>Times Logged</th><th>Users</th></tr></thead><tbody>';
+                    html += '<table class="data-table"><thead><tr><th>Name</th><th>Avg Calories</th><th>Times Logged</th><th>Users</th></tr></thead><tbody>';
                     
-                    top20Foods.forEach((food, index) => {
+                    allUserFoods.sort((a, b) => b.totalLogs - a.totalLogs).forEach(food => {
                         const avgCalories = food.totalLogs > 0 ? Math.round(food.totalCalories / food.totalLogs) : 0;
                         html += `
                             <tr>
-                                <td>#${index + 1}</td>
                                 <td>${food.name}</td>
                                 <td>${avgCalories}</td>
                                 <td>${food.totalLogs}</td>
