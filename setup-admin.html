@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Admin - ROVI</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0C0C0C;
+            color: #FFFFFF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #1C1C1E;
+            padding: 40px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 {
+            color: #FF6B00;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .success {
+            background: rgba(52, 199, 89, 0.2);
+            color: #34C759;
+        }
+        .error {
+            background: rgba(255, 59, 48, 0.2);
+            color: #FF3B30;
+        }
+        .info {
+            background: rgba(0, 122, 255, 0.2);
+            color: #007AFF;
+        }
+        button {
+            background: #FF6B00;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #FF5500;
+        }
+        .admin-info {
+            background: #2C2C2E;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .admin-info p {
+            margin: 8px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Admin Setup</h1>
+        
+        <div class="admin-info">
+            <h3>Admin Configuration:</h3>
+            <p>UID: byothLpU8SdS5SYpxlUFTOpGT0p1</p>
+            <p>Email: vinh2711@googlemail.com</p>
+            <p>Role: super_admin</p>
+        </div>
+        
+        <div id="status" class="status info">
+            Ready to configure admin access...
+        </div>
+        
+        <button onclick="setupAdmin()">Setup Admin Access</button>
+        <button onclick="verifyAdmin()" style="background: #007AFF;">Verify Admin Status</button>
+        <button onclick="window.location.href='xp-admin-dashboard.html'" style="background: #34C759;">Go to XP Admin Dashboard</button>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script>
+        const ADMIN_UID = 'byothLpU8SdS5SYpxlUFTOpGT0p1';
+        const ADMIN_EMAIL = 'vinh2711@googlemail.com';
+        
+        // Initialize Firebase
+        const db = firebase.firestore();
+        
+        async function setupAdmin() {
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                statusDiv.className = 'status info';
+                statusDiv.textContent = 'Setting up admin access...';
+                
+                // Add to admins collection
+                await db.collection('admins').doc(ADMIN_UID).set({
+                    email: ADMIN_EMAIL,
+                    role: 'super_admin',
+                    displayName: 'Vinh (Super Admin)',
+                    grantedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    permissions: {
+                        canAdjustXP: true,
+                        canFlagUsers: true,
+                        canResolveAnomalies: true,
+                        canGenerateReports: true,
+                        canRecalculateXP: true,
+                        canViewAllUsers: true,
+                        canModifyAchievements: true
+                    }
+                });
+                
+                // Also ensure user document exists with admin flag
+                await db.collection('users').doc(ADMIN_UID).set({
+                    isAdmin: true,
+                    adminRole: 'super_admin',
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = `
+                    ✅ Admin access configured successfully!<br>
+                    <br>
+                    Admin UID: ${ADMIN_UID}<br>
+                    Email: ${ADMIN_EMAIL}<br>
+                    Role: super_admin<br>
+                    <br>
+                    You can now access the XP Admin Dashboard.
+                `;
+                
+            } catch (error) {
+                console.error('Error setting up admin:', error);
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        async function verifyAdmin() {
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                statusDiv.className = 'status info';
+                statusDiv.textContent = 'Verifying admin status...';
+                
+                // Check admins collection
+                const adminDoc = await db.collection('admins').doc(ADMIN_UID).get();
+                
+                if (adminDoc.exists) {
+                    const adminData = adminDoc.data();
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = `
+                        ✅ Admin verified!<br>
+                        <br>
+                        Email: ${adminData.email}<br>
+                        Role: ${adminData.role}<br>
+                        Granted: ${adminData.grantedAt ? new Date(adminData.grantedAt.toDate()).toLocaleDateString() : 'Unknown'}<br>
+                        <br>
+                        Permissions:<br>
+                        ${Object.entries(adminData.permissions || {})
+                            .filter(([_, value]) => value)
+                            .map(([key, _]) => `• ${key}`)
+                            .join('<br>')}
+                    `;
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '❌ Admin not found. Please run setup first.';
+                }
+                
+            } catch (error) {
+                console.error('Error verifying admin:', error);
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        // Auto-verify on load
+        window.addEventListener('load', () => {
+            verifyAdmin();
+        });
+    </script>
+</body>
+</html>

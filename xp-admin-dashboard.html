@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XP Admin Dashboard - ROVI</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #FF6B00;
+            --success-color: #34C759;
+            --warning-color: #FF9500;
+            --danger-color: #FF3B30;
+            --info-color: #007AFF;
+            --bg-dark: #0C0C0C;
+            --bg-card: #1C1C1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #8E8E93;
+            --border-color: #38383A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), #FF9500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #FF5500;
+        }
+
+        .btn-secondary {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: var(--bg-card);
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .stat-change {
+            margin-top: 10px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .stat-change.negative {
+            color: var(--danger-color);
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* User Cards */
+        .user-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .user-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .user-details {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .user-xp {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-right: 20px;
+        }
+
+        .severity-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .severity-low {
+            background: rgba(52, 199, 89, 0.2);
+            color: var(--success-color);
+        }
+
+        .severity-medium {
+            background: rgba(255, 149, 0, 0.2);
+            color: var(--warning-color);
+        }
+
+        .severity-high {
+            background: rgba(255, 59, 48, 0.2);
+            color: var(--danger-color);
+        }
+
+        .severity-critical {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        /* Anomaly Cards */
+        .anomaly-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .anomaly-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .anomaly-type {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .anomaly-description {
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .anomaly-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Search Section */
+        .search-section {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Investigation Results */
+        .investigation-result {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+
+        .investigation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .suspicious-activities {
+            background: rgba(255, 59, 48, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .suspicious-activities h4 {
+            color: var(--danger-color);
+            margin-bottom: 10px;
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-list li {
+            padding: 8px 0;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .activity-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* Charts */
+        .chart-container {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            height: 400px;
+            position: relative;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>XP Admin Dashboard</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="refreshData()">
+                    🔄 Refresh
+                </button>
+                <button class="btn btn-primary" onclick="generateReport()">
+                    📊 Generate Report
+                </button>
+                <button class="btn btn-danger" onclick="signOut()">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-change positive">
+                    <span>↑ 12%</span> from last week
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="flaggedUsers">0</div>
+                <div class="stat-label">Flagged Users</div>
+                <div class="stat-change negative">
+                    <span>↑ 3</span> new flags
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalXP">0</div>
+                <div class="stat-label">Total XP Distributed</div>
+                <div class="stat-change positive">
+                    <span>↑ 2.5M</span> this month
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeAnomalies">0</div>
+                <div class="stat-label">Active Anomalies</div>
+                <div class="stat-change negative">
+                    <span>5</span> unresolved
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('flagged')">Flagged Users</button>
+            <button class="tab" onclick="switchTab('anomalies')">Anomalies</button>
+            <button class="tab" onclick="switchTab('investigations')">Investigations</button>
+            <button class="tab" onclick="switchTab('reports')">Reports</button>
+        </div>
+
+        <!-- Content Sections -->
+        <div id="flagged" class="content-section active">
+            <div class="user-grid" id="flaggedUsersList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading flagged users...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="anomalies" class="content-section">
+            <div id="anomaliesList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading anomalies...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="investigations" class="content-section">
+            <div class="search-section">
+                <input type="text" 
+                       class="search-input" 
+                       id="userSearchInput" 
+                       placeholder="Enter User ID to investigate..."
+                       onkeypress="if(event.key==='Enter') investigateUser()">
+                <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="investigateUser()">
+                    🔍 Investigate User
+                </button>
+            </div>
+            <div id="investigationResults"></div>
+        </div>
+
+        <div id="reports" class="content-section">
+            <div class="chart-container">
+                <canvas id="xpChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="userActivityChart"></canvas>
+            </div>
+            <button class="btn btn-danger" style="width: 100%;" onclick="recalculateAllXP()">
+                ⚠️ Recalculate All User XP (Dangerous)
+            </button>
+        </div>
+    </div>
+
+    <!-- XP Adjustment Modal -->
+    <div id="adjustmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Adjust User XP</h2>
+            </div>
+            <div class="form-group">
+                <label class="form-label">User ID</label>
+                <input type="text" class="form-input" id="adjustUserId" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Current XP</label>
+                <input type="text" class="form-input" id="currentXP" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">New XP Amount</label>
+                <input type="number" class="form-input" id="newXP" placeholder="Enter new XP amount">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Reason for Adjustment</label>
+                <input type="text" class="form-input" id="adjustmentReason" placeholder="Enter reason for this adjustment">
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitXPAdjustment()">Apply Adjustment</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script>
+        // Initialize Firebase (config will come from firebase-config.js)
+        if (typeof firebase !== 'undefined') {
+            // Auth state observer
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    console.log('Admin authenticated:', user.email);
+                    checkAdminAccess(user);
+                } else {
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        const db = firebase.firestore();
+        let currentUser = null;
+        let flaggedUsersData = [];
+        let anomaliesData = [];
+
+        // Check if user has admin access
+        async function checkAdminAccess(user) {
+            try {
+                // Check if user is in admin list
+                const adminDoc = await db.collection('admins').doc(user.uid).get();
+                if (!adminDoc.exists) {
+                    alert('Access Denied: You do not have admin privileges');
+                    firebase.auth().signOut();
+                    return;
+                }
+                
+                currentUser = user;
+                loadDashboardData();
+            } catch (error) {
+                console.error('Error checking admin access:', error);
+                alert('Error verifying admin access');
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                await Promise.all([
+                    loadStats(),
+                    loadFlaggedUsers(),
+                    loadAnomalies()
+                ]);
+                initCharts();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Load statistics
+        async function loadStats() {
+            try {
+                // Get total users count
+                const usersSnapshot = await db.collection('users').get();
+                document.getElementById('totalUsers').textContent = usersSnapshot.size;
+
+                // Get total XP
+                let totalXP = 0;
+                usersSnapshot.forEach(doc => {
+                    totalXP += doc.data().xp || 0;
+                });
+                document.getElementById('totalXP').textContent = formatNumber(totalXP);
+
+                // These would come from your flagged users and anomalies collections
+                const flaggedSnapshot = await db.collection('flagged_users').get();
+                document.getElementById('flaggedUsers').textContent = flaggedSnapshot.size;
+
+                const anomaliesSnapshot = await db.collection('xp_anomalies')
+                    .where('resolved', '==', false)
+                    .get();
+                document.getElementById('activeAnomalies').textContent = anomaliesSnapshot.size;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load flagged users
+        async function loadFlaggedUsers() {
+            try {
+                const snapshot = await db.collection('flagged_users')
+                    .orderBy('flaggedDate', 'desc')
+                    .limit(50)
+                    .get();
+
+                flaggedUsersData = [];
+                snapshot.forEach(doc => {
+                    flaggedUsersData.push({ id: doc.id, ...doc.data() });
+                });
+
+                displayFlaggedUsers();
+            } catch (error) {
+                console.error('Error loading flagged users:', error);
+            }
+        }
+
+        // Display flagged users
+        function displayFlaggedUsers() {
+            const container = document.getElementById('flaggedUsersList');
+            
+            if (flaggedUsersData.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No flagged users found</p>';
+                return;
+            }
+
+            container.innerHTML = flaggedUsersData.map(user => `
+                <div class="user-card">
+                    <div class="user-info">
+                        <div class="user-name">${user.userName || 'Unknown User'}</div>
+                        <div class="user-details">
+                            ID: ${user.userId}<br>
+                            Reason: ${user.flagReason}<br>
+                            Flagged: ${new Date(user.flaggedDate?.toDate()).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <div class="user-xp">${formatNumber(user.totalXP || 0)} XP</div>
+                    <span class="severity-badge severity-${user.severity?.toLowerCase() || 'low'}">
+                        ${user.severity || 'Low'}
+                    </span>
+                    <button class="btn btn-primary" onclick="openAdjustmentModal('${user.userId}', ${user.totalXP || 0})">
+                        Adjust XP
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Load anomalies
+        async function loadAnomalies() {
+            try {
+                const snapshot = await db.collection('xp_anomalies')
+                    .orderBy('detectedDate', 'desc')
+                    .limit(50)
+                    .get();
+
+                anomaliesData = [];
+                snapshot.forEach(doc => {
+                    anomaliesData.push({ id: doc.id, ...doc.data() });
+                });
+
+                displayAnomalies();
+            } catch (error) {
+                console.error('Error loading anomalies:', error);
+            }
+        }
+
+        // Display anomalies
+        function displayAnomalies() {
+            const container = document.getElementById('anomaliesList');
+            
+            if (anomaliesData.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No anomalies detected</p>';
+                return;
+            }
+
+            container.innerHTML = anomaliesData.map(anomaly => `
+                <div class="anomaly-card">
+                    <div class="anomaly-header">
+                        <div>
+                            <div class="anomaly-type">${anomaly.anomalyType}</div>
+                            <div class="anomaly-description">${anomaly.description}</div>
+                        </div>
+                        <span class="severity-badge severity-${getSeverityFromType(anomaly.anomalyType)}">
+                            ${anomaly.resolved ? 'Resolved' : 'Active'}
+                        </span>
+                    </div>
+                    <div class="anomaly-meta">
+                        <span>User: ${anomaly.userId}</span>
+                        <span>XP: ${anomaly.xpAmount}</span>
+                        <span>Date: ${new Date(anomaly.detectedDate?.toDate()).toLocaleDateString()}</span>
+                    </div>
+                    ${!anomaly.resolved ? `
+                        <button class="btn btn-primary" style="margin-top: 15px;" onclick="resolveAnomaly('${anomaly.id}')">
+                            Resolve
+                        </button>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Investigate user
+        async function investigateUser() {
+            const userId = document.getElementById('userSearchInput').value.trim();
+            if (!userId) {
+                alert('Please enter a User ID');
+                return;
+            }
+
+            const resultsContainer = document.getElementById('investigationResults');
+            resultsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><p>Investigating user...</p></div>';
+
+            try {
+                // Get user data
+                const userDoc = await db.collection('users').doc(userId).get();
+                if (!userDoc.exists) {
+                    resultsContainer.innerHTML = '<p style="color: var(--danger-color);">User not found</p>';
+                    return;
+                }
+
+                const userData = userDoc.data();
+
+                // Get XP transactions
+                const transactionsSnapshot = await db.collection('xp_transactions')
+                    .where('userId', '==', userId)
+                    .orderBy('timestamp', 'desc')
+                    .limit(100)
+                    .get();
+
+                // Analyze for suspicious patterns
+                const suspiciousActivities = analyzeSuspiciousPatterns(transactionsSnapshot.docs);
+
+                // Display investigation results
+                resultsContainer.innerHTML = `
+                    <div class="investigation-result">
+                        <div class="investigation-header">
+                            <div>
+                                <h3>${userData.displayName || 'Unknown User'}</h3>
+                                <p style="color: var(--text-secondary);">User ID: ${userId}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="user-xp">${formatNumber(userData.xp || 0)} XP</div>
+                                <p style="color: var(--text-secondary);">Level ${userData.level || 1}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+                            <div>
+                                <strong>Total Transactions:</strong> ${transactionsSnapshot.size}
+                            </div>
+                            <div>
+                                <strong>Account Created:</strong> ${userData.createdAt ? new Date(userData.createdAt.toDate()).toLocaleDateString() : 'Unknown'}
+                            </div>
+                            <div>
+                                <strong>Last Active:</strong> ${userData.lastActive ? new Date(userData.lastActive.toDate()).toLocaleDateString() : 'Unknown'}
+                            </div>
+                            <div>
+                                <strong>Daily Average:</strong> ${calculateDailyAverage(userData)} XP
+                            </div>
+                        </div>
+                        
+                        ${suspiciousActivities.length > 0 ? `
+                            <div class="suspicious-activities">
+                                <h4>⚠️ Suspicious Activities Detected</h4>
+                                <ul class="activity-list">
+                                    ${suspiciousActivities.map(activity => `<li>${activity}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : '<p style="color: var(--success-color);">✓ No suspicious activities detected</p>'}
+                        
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-primary" onclick="openAdjustmentModal('${userId}', ${userData.xp || 0})">
+                                Adjust XP
+                            </button>
+                            <button class="btn btn-danger" style="margin-left: 10px;" onclick="flagUser('${userId}')">
+                                Flag User
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error investigating user:', error);
+                resultsContainer.innerHTML = '<p style="color: var(--danger-color);">Error investigating user</p>';
+            }
+        }
+
+        // Analyze suspicious patterns
+        function analyzeSuspiciousPatterns(transactions) {
+            const patterns = [];
+            let rapidFireCount = 0;
+            let highValueCount = 0;
+            let lastTimestamp = null;
+
+            transactions.forEach(doc => {
+                const data = doc.data();
+                const timestamp = data.timestamp?.toDate();
+                
+                // Check rapid-fire transactions
+                if (lastTimestamp && timestamp) {
+                    const timeDiff = (lastTimestamp - timestamp) / 1000; // seconds
+                    if (timeDiff < 5) rapidFireCount++;
+                }
+                lastTimestamp = timestamp;
+
+                // Check high-value transactions
+                if (data.amount > 200) highValueCount++;
+            });
+
+            if (rapidFireCount > 10) {
+                patterns.push(`Rapid-fire transactions detected: ${rapidFireCount} instances`);
+            }
+            if (highValueCount > 5) {
+                patterns.push(`Multiple high-value transactions: ${highValueCount} transactions over 200 XP`);
+            }
+
+            return patterns;
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update content sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+
+            // Load data if needed
+            if (tabName === 'reports' && !window.chartsInitialized) {
+                initCharts();
+            }
+        }
+
+        // Initialize charts
+        function initCharts() {
+            const xpCtx = document.getElementById('xpChart').getContext('2d');
+            new Chart(xpCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'XP Distributed',
+                        data: [12000, 15000, 13000, 18000, 20000, 17000, 19000],
+                        borderColor: '#FF6B00',
+                        backgroundColor: 'rgba(255, 107, 0, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#FFFFFF' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#8E8E93' },
+                            grid: { color: '#38383A' }
+                        },
+                        x: {
+                            ticks: { color: '#8E8E93' },
+                            grid: { color: '#38383A' }
+                        }
+                    }
+                }
+            });
+
+            const activityCtx = document.getElementById('userActivityChart').getContext('2d');
+            new Chart(activityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Login', 'Meal Log', 'Workout', 'Challenge', 'Friend Add', 'Achievement'],
+                    datasets: [{
+                        label: 'Activity Count',
+                        data: [450, 320, 280, 150, 90, 75],
+                        backgroundColor: [
+                            '#007AFF',
+                            '#34C759',
+                            '#FF9500',
+                            '#FF3B30',
+                            '#AF52DE',
+                            '#FFD60A'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#FFFFFF' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#8E8E93' },
+                            grid: { color: '#38383A' }
+                        },
+                        x: {
+                            ticks: { color: '#8E8E93' },
+                            grid: { color: '#38383A' }
+                        }
+                    }
+                }
+            });
+
+            window.chartsInitialized = true;
+        }
+
+        // Modal functions
+        function openAdjustmentModal(userId, currentXP) {
+            document.getElementById('adjustUserId').value = userId;
+            document.getElementById('currentXP').value = currentXP;
+            document.getElementById('adjustmentModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('adjustmentModal').classList.remove('active');
+            document.getElementById('newXP').value = '';
+            document.getElementById('adjustmentReason').value = '';
+        }
+
+        async function submitXPAdjustment() {
+            const userId = document.getElementById('adjustUserId').value;
+            const newXP = parseInt(document.getElementById('newXP').value);
+            const reason = document.getElementById('adjustmentReason').value;
+
+            if (!newXP || !reason) {
+                alert('Please provide new XP amount and reason');
+                return;
+            }
+
+            try {
+                // Update user's XP
+                await db.collection('users').doc(userId).update({
+                    xp: newXP,
+                    lastModified: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Log the adjustment
+                await db.collection('admin_actions').add({
+                    adminId: currentUser.uid,
+                    action: 'xp_adjustment',
+                    userId: userId,
+                    newXP: newXP,
+                    reason: reason,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert('XP adjusted successfully');
+                closeModal();
+                refreshData();
+            } catch (error) {
+                console.error('Error adjusting XP:', error);
+                alert('Error adjusting XP');
+            }
+        }
+
+        // Utility functions
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+
+        function getSeverityFromType(type) {
+            if (type.includes('critical') || type.includes('exploit')) return 'critical';
+            if (type.includes('suspicious') || type.includes('unusual')) return 'high';
+            if (type.includes('anomaly')) return 'medium';
+            return 'low';
+        }
+
+        function calculateDailyAverage(userData) {
+            if (!userData.createdAt) return 0;
+            const daysSinceCreation = Math.max(1, 
+                (Date.now() - userData.createdAt.toDate()) / (1000 * 60 * 60 * 24)
+            );
+            return Math.round((userData.xp || 0) / daysSinceCreation);
+        }
+
+        async function resolveAnomaly(anomalyId) {
+            try {
+                await db.collection('xp_anomalies').doc(anomalyId).update({
+                    resolved: true,
+                    resolvedBy: currentUser.uid,
+                    resolvedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert('Anomaly resolved');
+                loadAnomalies();
+            } catch (error) {
+                console.error('Error resolving anomaly:', error);
+                alert('Error resolving anomaly');
+            }
+        }
+
+        async function flagUser(userId) {
+            const reason = prompt('Enter reason for flagging this user:');
+            if (!reason) return;
+
+            try {
+                await db.collection('flagged_users').doc(userId).set({
+                    userId: userId,
+                    flagReason: reason,
+                    flaggedBy: currentUser.uid,
+                    flaggedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    severity: 'medium'
+                });
+                alert('User flagged successfully');
+                loadFlaggedUsers();
+            } catch (error) {
+                console.error('Error flagging user:', error);
+                alert('Error flagging user');
+            }
+        }
+
+        async function generateReport() {
+            alert('Generating comprehensive XP report...\nThis would export data to CSV/PDF');
+            // Implementation would generate and download a report
+        }
+
+        async function recalculateAllXP() {
+            if (!confirm('⚠️ WARNING: This will recalculate XP for ALL users based on transaction history. This operation cannot be undone. Continue?')) {
+                return;
+            }
+            
+            if (!confirm('Are you ABSOLUTELY sure? This will affect all users.')) {
+                return;
+            }
+
+            alert('Recalculating all user XP... This may take several minutes.');
+            // Implementation would trigger backend recalculation
+        }
+
+        function refreshData() {
+            loadDashboardData();
+        }
+
+        function signOut() {
+            firebase.auth().signOut();
+        }
+    </script>
+</body>
+</html>
