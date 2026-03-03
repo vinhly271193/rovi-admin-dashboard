@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ROVI Admin Dashboard - Dark Premium</title>
     <link rel="stylesheet" href="css/dark-premium.css">
+    <link rel="stylesheet" href="css/rovi-design-system.css">
     <style>
         /* Theme Variables */
         :root {
@@ -482,83 +483,6 @@
             }
         }
         
-        /* Reduce spacing and padding throughout */
-        .stat-card {
-            padding: 0.75rem !important;
-            margin-bottom: 0.75rem;
-        }
-        
-        .stat-card .stat-icon {
-            font-size: 1.25rem !important;
-            margin-bottom: 0.25rem !important;
-        }
-        
-        .stat-card .stat-value {
-            font-size: 1.2rem !important;
-            margin-bottom: 0.25rem !important;
-            line-height: 1.2 !important;
-        }
-        
-        .stat-card h3 {
-            font-size: 0.56rem !important;
-            margin-bottom: 0.25rem !important;
-        }
-        
-        .stats-grid {
-            gap: 0.75rem !important;
-            margin-bottom: 1rem !important;
-        }
-        
-        .chart-card {
-            padding: 0.8rem !important;
-            margin-bottom: 0.75rem !important;
-        }
-        
-        .main-content {
-            padding: 0.8rem !important;
-        }
-        
-        .dashboard-header {
-            margin-bottom: 1rem !important;
-        }
-        
-        .dashboard-header h1 {
-            font-size: 1.2rem !important;
-            margin-bottom: 0.25rem !important;
-        }
-        
-        .stat-description {
-            padding: 0.3rem !important;
-            margin-top: 0.3rem !important;
-            font-size: 0.65rem !important;
-        }
-        
-        /* Override for chart containers */
-        .chart-container {
-            position: relative;
-            height: 250px !important;
-            max-height: 250px !important;
-            min-height: 250px !important;
-            width: 100%;
-            overflow: hidden !important;
-        }
-        
-        /* Ensure canvas elements respect container heights */
-        canvas {
-            max-width: 100% !important;
-            max-height: 100% !important;
-        }
-        
-        .sparkline-chart {
-            max-height: 60px !important;
-            height: 60px !important;
-        }
-        
-        #stepsChart, #activityChart {
-            max-height: 300px !important;
-            height: 100% !important;
-        }
-        
         /* Social Feed Styles */
         .social-feed-container {
             background: var(--glass-dark);
@@ -636,7 +560,7 @@
             border: 1px solid var(--glass-border);
             padding: 0.3rem 0.8rem;
             border-radius: 16px;
-            font-size: 0.6rem;
+            font-size: 0.75rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -738,7 +662,7 @@
         
         .feed-action {
             color: var(--text-secondary);
-            font-size: 0.6rem;
+            font-size: 0.75rem;
             margin-bottom: 0.3rem;
         }
         
@@ -750,7 +674,7 @@
         .feed-meta {
             display: flex;
             gap: 0.8rem;
-            font-size: 0.56rem;
+            font-size: 0.75rem;
             color: var(--text-tertiary);
         }
         
@@ -892,7 +816,7 @@
         }
         
         .cache-info {
-            font-size: 0.6rem;
+            font-size: 0.75rem;
             color: rgba(255, 255, 255, 0.7);
             padding: 0.5rem;
             background: rgba(255, 255, 255, 0.1);
@@ -920,7 +844,7 @@
             font-weight: 600;
             color: white;
             text-transform: uppercase;
-            font-size: 0.6rem;
+            font-size: 0.75rem;
             letter-spacing: 1px;
         }
         
@@ -980,7 +904,7 @@
             align-items: center;
             padding: 2px 6px;
             border-radius: 4px;
-            font-size: 0.6rem;
+            font-size: 0.75rem;
             font-weight: 600;
             margin-left: 0.5rem;
         }
@@ -1094,7 +1018,7 @@
         <nav class="sidebar">
             <div class="sidebar-header">
                 <h2>ROVI Analytics</h2>
-                <span id="userEmail" style="font-size: 0.6rem; color: #718096;"></span>
+                <span id="userEmail" style="font-size: 0.75rem; color: #718096;"></span>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item active" data-page="overview">
@@ -1118,6 +1042,18 @@
                 <li class="nav-item" data-page="analytics">
                     <span class="icon">📈</span> Analytics
                 </li>
+                <li class="nav-item" data-page="growth">
+                    <span class="icon">📈</span> Growth
+                </li>
+                <li class="nav-item" data-page="workouts">
+                    <span class="icon">💪</span> Workouts
+                </li>
+                <li class="nav-item" data-page="nutrition">
+                    <span class="icon">🥗</span> Nutrition
+                </li>
+                <li class="nav-item" data-page="weight">
+                    <span class="icon">⚖️</span> Weight
+                </li>
                 <li class="nav-item" data-page="socialmedia">
                     <span class="icon">📱</span> Social Media
                 </li>
@@ -1125,11 +1061,10 @@
             <div class="sidebar-footer">
                 <button id="refreshBtn" class="btn-refresh">🔄 Refresh</button>
                 <button id="signOutBtn" class="btn-logout">Sign Out</button>
-                <button onclick="exportDebugLogs()" class="btn-logout" style="background: rgba(255,152,0,0.2); border-color: rgba(255,152,0,0.3);">📥 Debug Logs</button>
                 <div class="cache-info">
                     Cache: <span id="cacheStatus">Empty</span>
                 </div>
-                <div class="debug-panel" id="debugPanel" style="margin-top: 1rem; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 8px; max-height: 160px; overflow-y: auto; font-size: 0.56rem; color: rgba(255,255,255,0.7);">
+                <div class="debug-panel" id="debugPanel" style="margin-top: 1rem; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 8px; max-height: 160px; overflow-y: auto; font-size: 0.75rem; color: rgba(255,255,255,0.7);">
                     <div style="color: rgba(255,255,255,0.5);">Debug logs...</div>
                 </div>
             </div>
@@ -1159,7 +1094,7 @@
                             <button class="feed-filter" data-filter="activity">Activities</button>
                         </div>
                     </div>
-                    <div class="feed-description" style="font-size: 0.6rem; color: var(--text-secondary); padding: 0.5rem; margin: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                    <div class="feed-description chart-description" style="margin: 0.5rem;">
                         <strong>Purpose:</strong> Real-time stream of user activities as they happen across the platform<br>
                         <strong>Why it's useful:</strong> Provides immediate visibility into platform health and user engagement patterns<br>
                         <strong>Key insights:</strong> Quiet feeds indicate low engagement; bursts of activity show peak usage times; variety of activities indicates well-rounded user base
@@ -1304,110 +1239,114 @@
                 </div>
 
                 <!-- New Visualization Sections -->
-                <div class="dashboard-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.8rem; margin-bottom: 1rem;">
+                <div class="dashboard-row grid-auto" style="margin-bottom: 1rem;">
                     <!-- Weekly Progress Chart -->
                     <div class="chart-card">
                         <div class="chart-title">
                             📊 Weekly Progress Overview
                             <span class="data-scope">LAST 7 DAYS</span>
                         </div>
-                        <div class="chart-description" style="font-size: 0.6rem; color: var(--text-secondary); padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <div class="chart-description">
                             <strong>Purpose:</strong> Tracks daily steps, calories burned, and activities over the past week<br>
                             <strong>Why it's useful:</strong> Identifies patterns in user engagement and activity levels throughout the week<br>
                             <strong>Key insights:</strong> Look for weekend vs weekday differences, declining trends that need intervention, and peak activity days for challenges
                         </div>
-                        <div style="height: 160px; max-height: 160px; overflow: hidden;">
+                        <div class="chart-container chart-sm">
                             <canvas id="weeklyProgressChart"></canvas>
                         </div>
                     </div>
-                    
+
                     <!-- User Activity Heatmap -->
                     <div class="chart-card">
                         <div class="chart-title">
                             🗓️ Activity Heatmap
                             <span class="data-scope">LAST 30 DAYS</span>
                         </div>
-                        <div class="chart-description" style="font-size: 0.6rem; color: var(--text-secondary); padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <div class="chart-description">
                             <strong>Purpose:</strong> Visual calendar showing daily activity intensity across the month<br>
                             <strong>Why it's useful:</strong> Quickly spot inactive periods, consistency patterns, and seasonal trends<br>
                             <strong>Key insights:</strong> Dark spots indicate low activity requiring engagement campaigns, bright areas show successful periods to replicate
                         </div>
-                        <div id="activityHeatmap" style="height: 160px; overflow: auto;"></div>
+                        <div id="activityHeatmap" class="chart-container chart-sm" style="overflow: auto;"></div>
                     </div>
-                    
+
                     <!-- Goal Progress -->
                     <div class="chart-card">
                         <div class="chart-title">
                             🎯 Daily Goals Progress
                             <span class="data-scope">TODAY</span>
                         </div>
-                        <div class="chart-description" style="font-size: 0.6rem; color: var(--text-secondary); padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <div class="chart-description">
                             <strong>Purpose:</strong> Real-time tracking of community progress toward daily goals (10K steps, 2K calories)<br>
                             <strong>Why it's useful:</strong> Motivates users by showing collective achievement and identifies if goals are too easy/hard<br>
                             <strong>Key insights:</strong> If consistently under 50%, goals may be too ambitious; over 90% suggests raising the bar
                         </div>
-                        <div style="height: 160px; max-height: 160px; overflow: hidden;">
+                        <div class="chart-container chart-sm">
                             <canvas id="goalProgressChart"></canvas>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Trend Analysis Row -->
-                <div class="dashboard-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.8rem; margin-bottom: 1rem;">
+                <div class="dashboard-row grid-auto-sm" style="margin-bottom: 1rem;">
                     <!-- Steps Trend -->
                     <div class="chart-card">
                         <div class="chart-title">
                             📈 Steps Trend
-                            <span class="trend-indicator trend-up">+15%</span>
+                            <span class="trend-indicator trend-up" id="stepsTrendPct">--</span>
                         </div>
-                        <div class="chart-description" style="font-size: 0.56rem; color: var(--text-secondary); padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <div class="chart-description">
                             <strong>Purpose:</strong> 7-day moving average of platform-wide step counts<br>
                             <strong>Insights:</strong> Rising trends indicate successful engagement; drops suggest intervention needed
                         </div>
-                        <div style="height: 120px; max-height: 120px; overflow: hidden;">
+                        <div class="trend-chart-container">
                             <canvas id="stepsTrendChart"></canvas>
                         </div>
                     </div>
-                    
+
                     <!-- Calories Trend -->
                     <div class="chart-card">
                         <div class="chart-title">
                             🔥 Calories Trend
-                            <span class="trend-indicator trend-neutral">0%</span>
+                            <span class="trend-indicator trend-neutral" id="caloriesTrendPct">--</span>
                         </div>
-                        <div class="chart-description" style="font-size: 0.56rem; color: var(--text-secondary); padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <div class="chart-description">
                             <strong>Purpose:</strong> Tracks calories burned through activities and steps<br>
                             <strong>Insights:</strong> Flat trends may indicate users need new workout challenges or motivation
                         </div>
-                        <div style="height: 120px; max-height: 120px; overflow: hidden;">
+                        <div class="trend-chart-container">
                             <canvas id="caloriesTrendChart"></canvas>
                         </div>
                     </div>
-                    
+
                     <!-- Engagement Trend -->
                     <div class="chart-card">
                         <div class="chart-title">
                             👥 User Engagement
-                            <span class="trend-indicator trend-down">-5%</span>
+                            <span class="trend-indicator trend-down" id="engagementTrendPct">--</span>
                         </div>
-                        <div class="chart-description" style="font-size: 0.56rem; color: var(--text-secondary); padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <div class="chart-description">
                             <strong>Purpose:</strong> Percentage of users actively using the app daily<br>
                             <strong>Insights:</strong> Declining engagement requires immediate attention - consider push notifications or challenges
                         </div>
-                        <canvas id="engagementTrendChart" style="height: 120px;"></canvas>
+                        <div class="trend-chart-container">
+                            <canvas id="engagementTrendChart"></canvas>
+                        </div>
                     </div>
-                    
+
                     <!-- Food Logging Trend -->
                     <div class="chart-card">
                         <div class="chart-title">
                             🍽️ Food Logging
-                            <span class="trend-indicator trend-up">+8%</span>
+                            <span class="trend-indicator trend-up" id="foodTrendPct">--</span>
                         </div>
-                        <div class="chart-description" style="font-size: 0.56rem; color: var(--text-secondary); padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <div class="chart-description">
                             <strong>Purpose:</strong> Tracks meal logging frequency and consistency<br>
                             <strong>Insights:</strong> Higher logging correlates with better health outcomes and app retention
                         </div>
-                        <canvas id="foodTrendChart" style="height: 120px;"></canvas>
+                        <div class="trend-chart-container">
+                            <canvas id="foodTrendChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -1437,10 +1376,10 @@
                             📊 Steps Trend
                             <span class="data-scope" id="stepsScope">7-DAY AGGREGATE</span>
                         </div>
-                        <div class="chart-description" style="font-size: 0.56rem; padding: 0.5rem;">
+                        <div class="chart-description">
                             <strong>Insight:</strong> <span id="stepsInsight">Loading...</span>
                         </div>
-                        <div class="chart-container" style="height: 250px; max-height: 250px; overflow: hidden;">
+                        <div class="chart-container chart-md">
                             <canvas id="stepsChart"></canvas>
                         </div>
                     </div>
@@ -1449,10 +1388,10 @@
                             🏃 Activity Distribution
                             <span class="data-scope" id="activityScope">TODAY</span>
                         </div>
-                        <div class="chart-description" style="font-size: 0.56rem; padding: 0.5rem;">
+                        <div class="chart-description">
                             <strong>Insight:</strong> <span id="activityInsight">Loading...</span>
                         </div>
-                        <div class="chart-container" style="height: 250px; max-height: 250px; overflow: hidden;">
+                        <div class="chart-container chart-md">
                             <canvas id="activityChart"></canvas>
                         </div>
                     </div>
@@ -1465,10 +1404,10 @@
                             🍽️ Food Trends
                             <span class="data-scope" id="foodScope">ACTUAL LOGS</span>
                         </div>
-                        <div class="chart-description" style="font-size: 0.56rem; padding: 0.5rem;">
+                        <div class="chart-description">
                             <strong>Insight:</strong> <span id="foodInsight">Loading...</span>
                         </div>
-                        <div class="chart-container" style="height: 250px; max-height: 250px; overflow: hidden;">
+                        <div class="chart-container chart-md">
                             <canvas id="foodChart"></canvas>
                         </div>
                     </div>
@@ -1477,10 +1416,10 @@
                             🔥 Calorie Balance
                             <span class="data-scope" id="calorieScope">7-DAY</span>
                         </div>
-                        <div class="chart-description" style="font-size: 0.56rem; padding: 0.5rem;">
+                        <div class="chart-description">
                             <strong>Insight:</strong> <span id="calorieInsight">Loading...</span>
                         </div>
-                        <div class="chart-container" style="height: 250px; max-height: 250px; overflow: hidden;">
+                        <div class="chart-container chart-md">
                             <canvas id="calorieChart"></canvas>
                         </div>
                     </div>
@@ -1492,7 +1431,7 @@
                         🏆 Today's Top Performers
                         <span class="data-scope">INDIVIDUAL USERS</span>
                     </div>
-                    <div class="chart-description" style="font-size: 0.6rem; color: var(--text-secondary); padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                    <div class="chart-description">
                         <strong>Purpose:</strong> Recognizes today's most active users to drive competition and motivation<br>
                         <strong>Why it's useful:</strong> Creates positive reinforcement and social proof that encourages others to be more active<br>
                         <strong>Key insights:</strong> Consistent top performers may be power users or potential cheaters; rotating leaders indicates healthy competition
@@ -1697,22 +1636,22 @@
                                 <div class="stat-card">
                                     <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Active Streaks</div>
                                     <div style="font-size: 1.6rem; font-weight: bold;" id="activeStreaksCount">0</div>
-                                    <div style="font-size: 0.6rem; color: #22d3a5;">↑ 12% from last week</div>
+                                    <div style="font-size: 0.75rem; color: #22d3a5;">↑ 12% from last week</div>
                                 </div>
                                 <div class="stat-card">
                                     <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Longest Current</div>
                                     <div style="font-size: 1.6rem; font-weight: bold;" id="longestStreak">0 days</div>
-                                    <div style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">User: <span id="longestStreakUser">-</span></div>
+                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">User: <span id="longestStreakUser">-</span></div>
                                 </div>
                                 <div class="stat-card">
                                     <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">At Risk</div>
                                     <div style="font-size: 1.6rem; font-weight: bold; color: #FF9500;" id="atRiskCount">0</div>
-                                    <div style="font-size: 0.6rem; color: #FF9500;">3+ days inactive</div>
+                                    <div style="font-size: 0.75rem; color: #FF9500;">3+ days inactive</div>
                                 </div>
                                 <div class="stat-card">
                                     <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Avg Streak</div>
                                     <div style="font-size: 1.6rem; font-weight: bold;" id="avgStreak">0 days</div>
-                                    <div style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">Platform average</div>
+                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">Platform average</div>
                                 </div>
                             </div>
                             
@@ -1722,7 +1661,7 @@
                                 <div id="streakHeatmap" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
                                     <!-- Will be populated by JavaScript -->
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 0.8rem; margin-top: 1rem; font-size: 0.6rem;">
+                                <div style="display: flex; align-items: center; gap: 0.8rem; margin-top: 1rem; font-size: 0.75rem;">
                                     <span>Less</span>
                                     <div style="display: flex; gap: 4px;">
                                         <div style="width: 20px; height: 20px; background: rgba(255,255,255,0.1); border-radius: 4px;"></div>
@@ -1792,17 +1731,17 @@
                                 <div class="stat-card">
                                     <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Daily XP Rate</div>
                                     <div style="font-size: 1.6rem; font-weight: bold;" id="dailyXPRate">0</div>
-                                    <div style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">XP/user/day</div>
+                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">XP/user/day</div>
                                 </div>
                                 <div class="stat-card">
                                     <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">XP Inflation</div>
                                     <div style="font-size: 1.6rem; font-weight: bold; color: #FF9500;" id="xpInflation">+0%</div>
-                                    <div style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">vs. last month</div>
+                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">vs. last month</div>
                                 </div>
                                 <div class="stat-card">
                                     <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Avg Level</div>
                                     <div style="font-size: 1.6rem; font-weight: bold;" id="avgLevel">1</div>
-                                    <div style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">Platform average</div>
+                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">Platform average</div>
                                 </div>
                             </div>
                             
@@ -1846,6 +1785,219 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Growth Page -->
+            <div id="growthPage" class="page-content" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title">Platform Growth</div>
+                    <div class="section-subtitle">User acquisition trends and cohort retention analysis</div>
+                </div>
+
+                <div class="kpi-grid" id="growthKPIs">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="growthTotalUsers">--</div>
+                        <div class="kpi-label">Total Users</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="growthNewMonth">--</div>
+                        <div class="kpi-label">New This Month</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="growthNewWeek">--</div>
+                        <div class="kpi-label">New This Week</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="growthRate">--</div>
+                        <div class="kpi-label">Growth Rate</div>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="margin-bottom: var(--space-md);">
+                    <div class="chart-card">
+                        <div class="chart-title">User Growth Over Time</div>
+                        <div class="chart-container chart-lg">
+                            <canvas id="userGrowthChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Signups by Day of Week</div>
+                        <div class="chart-container chart-lg">
+                            <canvas id="signupDayChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-title">Cohort Retention</div>
+                    <div class="chart-description">Percentage of users still active in months following their signup month</div>
+                    <div id="cohortTable" style="overflow-x: auto;">
+                        <p style="color: rgba(255,255,255,0.5); text-align: center;">Loading cohort data...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workouts Page -->
+            <div id="workoutsPage" class="page-content" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title">Workout Analytics</div>
+                    <div class="section-subtitle">Activity types, duration trends, and calories burned</div>
+                </div>
+
+                <div class="kpi-grid" id="workoutKPIs">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="workoutTotalSessions">--</div>
+                        <div class="kpi-label">Sessions This Week</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="workoutAvgDuration">--</div>
+                        <div class="kpi-label">Avg Duration (min)</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="workoutTotalCal">--</div>
+                        <div class="kpi-label">Total Calories Burned</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="workoutMostPopular">--</div>
+                        <div class="kpi-label">Most Popular</div>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="margin-bottom: var(--space-md);">
+                    <div class="chart-card">
+                        <div class="chart-title">Activity Type Breakdown</div>
+                        <div class="chart-container chart-md">
+                            <canvas id="workoutTypesChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Top Activities Ranked</div>
+                        <div class="chart-container chart-md">
+                            <canvas id="topActivitiesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="chart-card">
+                        <div class="chart-title">Workout Minutes Trend (7 Days)</div>
+                        <div class="chart-container chart-md">
+                            <canvas id="workoutMinutesTrendChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Calories Burned Trend (7 Days)</div>
+                        <div class="chart-container chart-md">
+                            <canvas id="workoutCaloriesTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nutrition Page -->
+            <div id="nutritionPage" class="page-content" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title">Nutrition Intelligence</div>
+                    <div class="section-subtitle">Food logging patterns, macros analysis, and dietary trends</div>
+                </div>
+
+                <div class="kpi-grid" id="nutritionKPIs">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="nutritionTotalMeals">--</div>
+                        <div class="kpi-label">Total Meals Logged</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="nutritionAvgCal">--</div>
+                        <div class="kpi-label">Avg Calories/Day</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="nutritionTopFood">--</div>
+                        <div class="kpi-label">Most Logged Food</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="nutritionConsistency">--</div>
+                        <div class="kpi-label">Logging Consistency</div>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="margin-bottom: var(--space-md);">
+                    <div class="chart-card">
+                        <div class="chart-title">Top 15 Most Logged Foods</div>
+                        <div class="chart-container chart-lg">
+                            <canvas id="topFoodsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Meal Timing Breakdown</div>
+                        <div class="chart-container chart-md">
+                            <canvas id="mealTimingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="chart-card">
+                        <div class="chart-title">Macros vs Goals (Avg per Meal)</div>
+                        <div class="chart-container chart-md">
+                            <canvas id="macrosRadarChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Daily Calorie Trend (7 Days)</div>
+                        <div class="chart-container chart-md">
+                            <canvas id="dailyCalorieTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weight Page -->
+            <div id="weightPage" class="page-content" style="display: none;">
+                <div class="section-header">
+                    <div class="section-title">Weight Tracking</div>
+                    <div class="section-subtitle">Weight change distribution and individual progress</div>
+                </div>
+
+                <div class="kpi-grid" id="weightKPIs">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="weightUsersTracking">--</div>
+                        <div class="kpi-label">Users Tracking</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="weightAvgChange">--</div>
+                        <div class="kpi-label">Avg Change (kg)</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="weightBiggestLoss">--</div>
+                        <div class="kpi-label">Biggest Loss (kg)</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="weightBiggestGain">--</div>
+                        <div class="kpi-label">Biggest Gain (kg)</div>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="margin-bottom: var(--space-md);">
+                    <div class="chart-card">
+                        <div class="chart-title">Weight Change Distribution</div>
+                        <div class="chart-container chart-md">
+                            <canvas id="weightDistChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Platform Avg Weight Trend</div>
+                        <div class="chart-container chart-md">
+                            <canvas id="weightTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-title">User Weight Progress</div>
+                    <div id="weightProgressTable" style="overflow-x: auto; max-height: 500px; overflow-y: auto;">
+                        <p style="color: rgba(255,255,255,0.5); text-align: center;">Loading weight data...</p>
                     </div>
                 </div>
             </div>
@@ -2254,6 +2406,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/insights.js"></script>
 
     <script>
         console.log('Dashboard script starting...');
@@ -2415,8 +2568,35 @@
         let currentView = 'aggregate';
         let feedListeners = [];
         let feedItems = [];
-        let feedItemKeys = new Set(); // Track unique feed items
+        let feedItemKeys = new Set();
         let currentFeedFilter = 'all';
+
+        // Chart.js Global Defaults
+        function initChartDefaults() {
+            Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+            Chart.defaults.font.size = 12;
+            Chart.defaults.color = 'rgba(255,255,255,0.7)';
+            Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(20,20,40,0.95)';
+            Chart.defaults.plugins.tooltip.borderColor = 'rgba(102,126,234,0.5)';
+            Chart.defaults.plugins.tooltip.borderWidth = 1;
+            Chart.defaults.plugins.tooltip.cornerRadius = 8;
+            Chart.defaults.plugins.tooltip.padding = 10;
+            Chart.defaults.plugins.tooltip.titleFont = { weight: '600' };
+            Chart.defaults.plugins.legend.labels.usePointStyle = true;
+            Chart.defaults.plugins.legend.labels.padding = 16;
+            Chart.defaults.elements.bar.borderRadius = 6;
+            Chart.defaults.scale.grid = { color: 'rgba(255,255,255,0.06)' };
+        }
+        initChartDefaults();
+
+        // Debug panel toggle (Ctrl+Shift+D)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                e.preventDefault();
+                const panel = document.getElementById('debugPanel');
+                if (panel) panel.classList.toggle('visible');
+            }
+        });
 
         // Prevent chart expansion with MutationObserver
         function preventChartExpansion() {
@@ -2578,6 +2758,18 @@
                             break;
                         case 'analytics':
                             loadAnalyticsPage();
+                            break;
+                        case 'growth':
+                            loadGrowthPage();
+                            break;
+                        case 'workouts':
+                            loadWorkoutsPage();
+                            break;
+                        case 'nutrition':
+                            loadNutritionPage();
+                            break;
+                        case 'weight':
+                            loadWeightPage();
                             break;
                         case 'socialmedia':
                             loadSocialMediaPage();
@@ -2960,75 +3152,19 @@
             }
         }
 
-        // Calculate historical data for trends and averages
+        // Calculate historical data for trends and averages (uses real Firestore data)
         async function calculateHistoricalData() {
-            debugLog('DATA', 'Calculating historical data...');
-            
-            const historicalData = {
-                steps: { days7: [], days30: [], avg7: 0, avg30: 0 },
-                calories: { days7: [], days30: [], avg7: 0, avg30: 0 },
-                foods: { days7: [], days30: [], avg7: 0, avg30: 0 },
-                activeUsers: { days7: [], days30: [], avg7: 0, avg30: 0 }
-            };
-            
+            debugLog('DATA', 'Calculating historical data from Firestore...');
             try {
-                // Get date ranges
-                const today = new Date();
-                const dates7 = [];
-                const dates30 = [];
-                
-                for (let i = 0; i < 30; i++) {
-                    const date = new Date(today);
-                    date.setDate(date.getDate() - i);
-                    const dateStr = getLocalDateString(date);
-                    
-                    if (i < 7) dates7.push(dateStr);
-                    dates30.push(dateStr);
-                }
-                
-                // Load historical data for each user
-                const users = dataCache.users || [];
-                
-                for (const dateStr of dates30) {
-                    let daySteps = 0;
-                    let dayCalories = 0;
-                    let dayFoods = 0;
-                    let dayActiveUsers = 0;
-                    
-                    // This is simplified - in production you'd fetch from Firebase
-                    // For now, we'll use random data for demonstration
-                    daySteps = Math.floor(Math.random() * 15000) + 5000;
-                    dayCalories = Math.floor(Math.random() * 500) + 200;
-                    dayFoods = Math.floor(Math.random() * 10) + 2;
-                    dayActiveUsers = Math.floor(Math.random() * users.length);
-                    
-                    if (dates7.includes(dateStr)) {
-                        historicalData.steps.days7.push(daySteps);
-                        historicalData.calories.days7.push(dayCalories);
-                        historicalData.foods.days7.push(dayFoods);
-                        historicalData.activeUsers.days7.push(dayActiveUsers);
-                    }
-                    
-                    historicalData.steps.days30.push(daySteps);
-                    historicalData.calories.days30.push(dayCalories);
-                    historicalData.foods.days30.push(dayFoods);
-                    historicalData.activeUsers.days30.push(dayActiveUsers);
-                }
-                
-                // Calculate averages
-                historicalData.steps.avg7 = Math.round(historicalData.steps.days7.reduce((a,b) => a+b, 0) / 7);
-                historicalData.steps.avg30 = Math.round(historicalData.steps.days30.reduce((a,b) => a+b, 0) / 30);
-                historicalData.calories.avg7 = Math.round(historicalData.calories.days7.reduce((a,b) => a+b, 0) / 7);
-                historicalData.calories.avg30 = Math.round(historicalData.calories.days30.reduce((a,b) => a+b, 0) / 30);
-                historicalData.foods.avg7 = Math.round(historicalData.foods.days7.reduce((a,b) => a+b, 0) / 7);
-                historicalData.foods.avg30 = Math.round(historicalData.foods.days30.reduce((a,b) => a+b, 0) / 30);
-                historicalData.activeUsers.avg7 = Math.round(historicalData.activeUsers.days7.reduce((a,b) => a+b, 0) / 7);
-                historicalData.activeUsers.avg30 = Math.round(historicalData.activeUsers.days30.reduce((a,b) => a+b, 0) / 30);
-                
-                return historicalData;
+                return await ROVIInsights.computeRealHistoricalData();
             } catch (error) {
                 console.error('Error calculating historical data:', error);
-                return historicalData;
+                return {
+                    steps: { days7: [], days30: [], avg7: 0, avg30: 0 },
+                    calories: { days7: [], days30: [], avg7: 0, avg30: 0 },
+                    foods: { days7: [], days30: [], avg7: 0, avg30: 0 },
+                    activeUsers: { days7: [], days30: [], avg7: 0, avg30: 0 }
+                };
             }
         }
         
@@ -3061,13 +3197,21 @@
             createTrendCharts(historical);
         }
         
-        // Create sparkline mini charts
+        // Create sparkline mini charts with gradient fill
         function createSparklineChart(canvasId, data, color) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
-            
+
+            // Destroy existing chart if any
+            const existing = Chart.getChart(canvas);
+            if (existing) existing.destroy();
+
             const ctx = canvas.getContext('2d');
-            const chart = new Chart(ctx, {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 60);
+            gradient.addColorStop(0, color.replace(')', ', 0.3)').replace('rgb', 'rgba'));
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+
+            new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: data.map((_, i) => ''),
@@ -3075,48 +3219,106 @@
                         data: data,
                         borderColor: color,
                         borderWidth: 2,
-                        fill: false,
+                        fill: true,
+                        backgroundColor: gradient,
                         pointRadius: 0,
+                        pointHoverRadius: 4,
+                        pointHoverBackgroundColor: color,
                         tension: 0.4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { enabled: false }
-                    },
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+        }
+
+        // Helper to create a small trend line chart
+        function createMiniTrendChart(canvasId, data, labels, color) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+
+            const existing = Chart.getChart(canvas);
+            if (existing) existing.destroy();
+
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 140);
+            gradient.addColorStop(0, color.replace(')', ', 0.25)').replace('rgb', 'rgba'));
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels || data.map((_, i) => `Day ${i + 1}`),
+                    datasets: [{
+                        data: data,
+                        borderColor: color,
+                        borderWidth: 2,
+                        fill: true,
+                        backgroundColor: gradient,
+                        pointRadius: 2,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: color,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: { display: false },
-                        y: { display: false }
+                        x: { ticks: { maxTicksLimit: 7, font: { size: 10 } } },
+                        y: { ticks: { maxTicksLimit: 4, font: { size: 10 } } }
                     }
                 }
             });
         }
-        
+
+        // Update trend percentage badge
+        function updateTrendBadge(elementId, percentage) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const sign = percentage > 0 ? '+' : '';
+            el.textContent = `${sign}${percentage}%`;
+            el.className = 'trend-indicator ' +
+                (percentage > 0 ? 'trend-up' : percentage < 0 ? 'trend-down' : 'trend-neutral');
+        }
+
         // Create trend visualization charts
         function createTrendCharts(historical) {
-            // Weekly Progress Chart
+            const dayLabels = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                dayLabels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+            }
+
+            // Weekly Progress Chart (bar)
             const weeklyCtx = document.getElementById('weeklyProgressChart');
             if (weeklyCtx) {
+                const existing = Chart.getChart(weeklyCtx);
+                if (existing) existing.destroy();
+
                 new Chart(weeklyCtx, {
                     type: 'bar',
                     data: {
-                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        labels: dayLabels,
                         datasets: [
                             {
                                 label: 'Steps',
                                 data: historical.steps.days7,
-                                backgroundColor: 'rgba(34, 197, 94, 0.5)',
-                                borderColor: 'rgba(34, 197, 94, 1)',
+                                backgroundColor: 'rgba(34,211,165,0.5)',
+                                borderColor: '#22d3a5',
                                 borderWidth: 1
                             },
                             {
                                 label: 'Calories',
-                                data: historical.calories.days7.map(v => v * 10), // Scale for visibility
-                                backgroundColor: 'rgba(239, 68, 68, 0.5)',
-                                borderColor: 'rgba(239, 68, 68, 1)',
+                                data: historical.calories.days7.map(v => v * 10),
+                                backgroundColor: 'rgba(239,68,68,0.5)',
+                                borderColor: '#ef4444',
                                 borderWidth: 1
                             }
                         ]
@@ -3124,63 +3326,55 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: true,
-                                labels: { color: 'white' }
-                            }
-                        },
-                        scales: {
-                            x: { 
-                                ticks: { color: 'rgba(255, 255, 255, 0.7)' },
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                            },
-                            y: { 
-                                ticks: { color: 'rgba(255, 255, 255, 0.7)' },
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                            }
-                        }
+                        plugins: { legend: { display: true } },
+                        scales: { x: {}, y: {} }
                     }
                 });
             }
-            
-            // Goal Progress Chart (Radial)
+
+            // Goal Progress Chart (Doughnut)
             const goalCtx = document.getElementById('goalProgressChart');
             if (goalCtx) {
-                const todaySteps = parseInt(document.getElementById('totalStepsToday').textContent) || 0;
+                const existing = Chart.getChart(goalCtx);
+                if (existing) existing.destroy();
+
+                const todaySteps = parseInt(document.getElementById('totalStepsToday')?.textContent) || 0;
                 const stepGoal = 10000;
                 const progress = Math.min((todaySteps / stepGoal) * 100, 100);
-                
+
                 new Chart(goalCtx, {
                     type: 'doughnut',
                     data: {
                         labels: ['Completed', 'Remaining'],
                         datasets: [{
                             data: [progress, 100 - progress],
-                            backgroundColor: [
-                                'rgba(34, 197, 94, 0.8)',
-                                'rgba(255, 255, 255, 0.1)'
-                            ],
+                            backgroundColor: ['rgba(34,211,165,0.8)', 'rgba(255,255,255,0.1)'],
                             borderWidth: 0
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        cutout: '70%',
+                        cutout: '65%',
                         plugins: {
                             legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return context.label + ': ' + context.parsed.toFixed(0) + '%';
-                                    }
-                                }
-                            }
+                            tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed.toFixed(0) + '%' } }
                         }
                     }
                 });
             }
+
+            // Initialize the 4 trend charts with real data
+            createMiniTrendChart('stepsTrendChart', historical.steps.days7, dayLabels, '#22d3a5');
+            createMiniTrendChart('caloriesTrendChart', historical.calories.days7, dayLabels, '#ef4444');
+            createMiniTrendChart('engagementTrendChart', historical.activeUsers.days7, dayLabels, '#a855f7');
+            createMiniTrendChart('foodTrendChart', historical.foods.days7, dayLabels, '#3b82f6');
+
+            // Update trend percentage badges
+            updateTrendBadge('stepsTrendPct', ROVIInsights.computeTrendPercentage(historical.steps.days7));
+            updateTrendBadge('caloriesTrendPct', ROVIInsights.computeTrendPercentage(historical.calories.days7));
+            updateTrendBadge('engagementTrendPct', ROVIInsights.computeTrendPercentage(historical.activeUsers.days7));
+            updateTrendBadge('foodTrendPct', ROVIInsights.computeTrendPercentage(historical.foods.days7));
         }
 
         async function updateUIFromCache() {
@@ -4686,7 +4880,7 @@
                             <td>
                                 <div>
                                     <div style="font-weight: 600;">${user.name}</div>
-                                    <div style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">${user.email}</div>
+                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">${user.email}</div>
                                 </div>
                             </td>
                             <td>
@@ -4697,13 +4891,13 @@
                             <td>
                                 <div style="width: 200px;">
                                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                                        <span style="font-size: 0.6rem; color: rgba(255,255,255,0.6);">Progress</span>
-                                        <span style="font-size: 0.6rem; color: rgba(255,255,255,0.6);">${user.levelProgress}/${user.levelRequirement} XP</span>
+                                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">Progress</span>
+                                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">${user.levelProgress}/${user.levelRequirement} XP</span>
                                     </div>
                                     <div style="background: rgba(255,255,255,0.1); border-radius: 8px; height: 20px; overflow: hidden; position: relative;">
                                         <div style="background: linear-gradient(90deg, #FFD700, #FFA500); height: 100%; width: ${user.progressPercent}%; transition: width 0.3s ease;">
                                         </div>
-                                        <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.6rem; font-weight: bold; text-shadow: 0 0 4px rgba(0,0,0,0.5);">
+                                        <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.75rem; font-weight: bold; text-shadow: 0 0 4px rgba(0,0,0,0.5);">
                                             ${Math.round(user.progressPercent)}%
                                         </span>
                                     </div>
@@ -4910,7 +5104,7 @@
                                     <span>${transaction.icon}</span>
                                     <div>
                                         <div style="font-weight: 600;">${transaction.userName}</div>
-                                        <div style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">${transaction.userId.substring(0, 8)}...</div>
+                                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">${transaction.userId.substring(0, 8)}...</div>
                                     </div>
                                 </div>
                             </td>
@@ -5080,7 +5274,7 @@
                                 </div>
                                 <div style="text-align: right;">
                                     <div style="font-size: 1.25rem; font-weight: bold;">${formatNumber(user.totalXP || 0)} XP</div>
-                                    <span style="padding: 0.25rem 0.5rem; background: rgba(255,152,0,0.2); border-radius: 4px; font-size: 0.6rem;">
+                                    <span style="padding: 0.25rem 0.5rem; background: rgba(255,152,0,0.2); border-radius: 4px; font-size: 0.75rem;">
                                         ${user.severity || 'Low'}
                                     </span>
                                 </div>
@@ -5126,7 +5320,7 @@
                                         Date: ${anomaly.detectedDate ? new Date(anomaly.detectedDate.seconds * 1000).toLocaleDateString() : 'Unknown'}
                                     </p>
                                 </div>
-                                <span style="padding: 0.25rem 0.5rem; background: ${anomaly.resolved ? 'rgba(52,199,89,0.2)' : 'rgba(255,59,48,0.2)'}; border-radius: 4px; font-size: 0.6rem;">
+                                <span style="padding: 0.25rem 0.5rem; background: ${anomaly.resolved ? 'rgba(52,199,89,0.2)' : 'rgba(255,59,48,0.2)'}; border-radius: 4px; font-size: 0.75rem;">
                                     ${anomaly.resolved ? 'Resolved' : 'Active'}
                                 </span>
                             </div>
@@ -5469,44 +5663,41 @@
             }
         }
         
-        function generateStreakHeatmap() {
+        async function generateStreakHeatmap() {
             const heatmapContainer = document.getElementById('streakHeatmap');
             if (!heatmapContainer) return;
-            
-            let html = '';
-            const today = new Date();
-            
-            // Generate 30 days of boxes
-            for (let i = 29; i >= 0; i--) {
-                const date = new Date(today);
-                date.setDate(date.getDate() - i);
-                
-                // Random intensity for demo (in real app, would use actual data)
-                const intensity = Math.random();
-                let color = 'rgba(255,255,255,0.1)';
-                
-                if (intensity > 0.8) color = '#22d3a5';
-                else if (intensity > 0.6) color = 'rgba(34,211,165,0.9)';
-                else if (intensity > 0.4) color = 'rgba(34,211,165,0.6)';
-                else if (intensity > 0.2) color = 'rgba(34,211,165,0.3)';
-                
-                html += `
-                    <div style="
-                        width: 100%;
-                        aspect-ratio: 1;
-                        background: ${color};
-                        border-radius: 4px;
-                        cursor: pointer;
-                        transition: transform 0.2s;
-                    " 
-                    onmouseover="this.style.transform='scale(1.1)'"
-                    onmouseout="this.style.transform='scale(1)'"
-                    title="${date.toLocaleDateString()}">
-                    </div>
-                `;
+
+            try {
+                const heatmapData = await ROVIInsights.computeStreakHeatmapData();
+                let html = '';
+
+                heatmapData.forEach(day => {
+                    let color = 'rgba(255,255,255,0.1)';
+                    if (day.intensity > 0.8) color = '#22d3a5';
+                    else if (day.intensity > 0.6) color = 'rgba(34,211,165,0.9)';
+                    else if (day.intensity > 0.4) color = 'rgba(34,211,165,0.6)';
+                    else if (day.intensity > 0.2) color = 'rgba(34,211,165,0.3)';
+
+                    html += `
+                        <div style="
+                            width: 100%;
+                            aspect-ratio: 1;
+                            background: ${color};
+                            border-radius: 4px;
+                            cursor: pointer;
+                            transition: transform 0.2s;
+                        "
+                        onmouseover="this.style.transform='scale(1.1)'"
+                        onmouseout="this.style.transform='scale(1)'"
+                        title="${new Date(day.date).toLocaleDateString()} — ${day.count} active users">
+                        </div>
+                    `;
+                });
+
+                heatmapContainer.innerHTML = html;
+            } catch (error) {
+                console.error('Heatmap error:', error);
             }
-            
-            heatmapContainer.innerHTML = html;
         }
         
         function displayAtRiskUsers(users) {
@@ -5537,11 +5728,11 @@
                     ">
                         <div>
                             <div style="font-weight: 600;">${user.name}</div>
-                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">
+                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">
                                 ${user.daysInactive} days inactive • Last streak: ${user.lastStreak} days
                             </div>
                         </div>
-                        <button class="btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.6rem;">
+                        <button class="btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
                             Send Reminder
                         </button>
                     </div>
@@ -5637,7 +5828,7 @@
                             </div>
                         </div>
                         ${dropoff > 0 ? `
-                            <div style="text-align: right; color: #FF9500; font-size: 0.6rem; margin-top: 0.25rem;">
+                            <div style="text-align: right; color: #FF9500; font-size: 0.75rem; margin-top: 0.25rem;">
                                 ↓ ${dropoff} dropped off
                             </div>
                         ` : ''}
@@ -5646,8 +5837,40 @@
             });
             
             funnelContainer.innerHTML = html;
+
+            // Feature Adoption Chart (real data)
+            const faCtx = document.getElementById('featureAdoptionChart');
+            if (faCtx) {
+                const existing = Chart.getChart(faCtx);
+                if (existing) existing.destroy();
+                try {
+                    const adoption = await ROVIInsights.computeFeatureAdoption();
+                    new Chart(faCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: adoption.labels,
+                            datasets: [{
+                                label: 'Adoption %',
+                                data: adoption.percentages,
+                                backgroundColor: ['#667eea','#22d3a5','#FF9500','#a855f7','#3b82f6','#ef4444'],
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                x: { max: 100, ticks: { callback: v => v + '%' } },
+                                y: {}
+                            }
+                        }
+                    });
+                } catch (e) { console.error('Feature adoption error:', e); }
+            }
         }
-        
+
         async function loadGoalIntelligence() {
             const container = document.getElementById('goalPredictions');
             if (!container) return;
@@ -5677,14 +5900,14 @@
                         <div style="font-size: 1.6rem; font-weight: bold; color: ${probColor};">
                             ${successProbability}%
                         </div>
-                        <div style="font-size: 0.6rem; color: rgba(255,255,255,0.6); margin-bottom: 0.5rem;">
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 0.5rem;">
                             Chance of reaching goal
                         </div>
                         <div style="font-size: 0.875rem;">
                             ${currentSteps.toLocaleString()} / ${goal.toLocaleString()} steps
                         </div>
                         ${hoursLeft > 0 && neededRate > 0 ? `
-                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem;">
+                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem;">
                                 Needs ${neededRate} steps/hour
                             </div>
                         ` : ''}
@@ -5712,58 +5935,48 @@
             updateElementText('dailyXPRate', avgXPPerUser.toString());
             updateElementText('avgLevel', avgLevel.toString());
             
-            // Create XP sources chart
+            // Create XP sources chart with real data
             const xpSourcesCtx = document.getElementById('xpSourcesChart');
             if (xpSourcesCtx) {
-                new Chart(xpSourcesCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Steps', 'Workouts', 'Food Logging', 'Challenges'],
-                        datasets: [{
-                            data: [45, 30, 20, 5],
-                            backgroundColor: ['#667eea', '#22d3a5', '#FF9500', '#FF3B30']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                labels: { color: '#FFFFFF' }
-                            }
+                const existing = Chart.getChart(xpSourcesCtx);
+                if (existing) existing.destroy();
+
+                try {
+                    const xpData = await ROVIInsights.computeXPSources();
+                    new Chart(xpSourcesCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Steps', 'Workouts', 'Food Logging', 'Challenges'],
+                            datasets: [{
+                                data: xpData.percentages,
+                                backgroundColor: ['#667eea', '#22d3a5', '#FF9500', '#FF3B30'],
+                                borderWidth: 2,
+                                borderColor: 'rgba(0,0,0,0.3)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '55%',
+                            plugins: { legend: { labels: { color: '#FFFFFF' } } }
                         }
-                    }
-                });
+                    });
+                } catch (e) {
+                    console.error('XP sources error:', e);
+                }
             }
         }
         
         async function loadPredictions() {
             const churnContainer = document.getElementById('churnRiskList');
             if (!churnContainer) return;
-            
-            // Generate churn risk analysis
-            const users = dataCache.users || [];
-            let riskUsers = [];
-            
-            users.forEach(user => {
-                const lastActive = Math.random() * 10; // Demo: random days
-                const riskScore = Math.min(99, Math.round(lastActive * 10));
-                
-                if (riskScore > 30) {
-                    riskUsers.push({
-                        name: user.name || user.email || 'Unknown',
-                        risk: riskScore,
-                        lastActive: Math.round(lastActive)
-                    });
-                }
-            });
-            
-            riskUsers.sort((a, b) => b.risk - a.risk);
-            
+
+            // Use real churn risk from user lastActive timestamps
+            const riskUsers = ROVIInsights.computeChurnRisk();
+
             let html = '<div style="display: grid; gap: 0.4rem;">';
             riskUsers.slice(0, 5).forEach(user => {
                 const color = user.risk > 70 ? '#FF3B30' : user.risk > 50 ? '#FF9500' : '#FFD60A';
-                
                 html += `
                     <div style="
                         background: rgba(255,255,255,0.05);
@@ -5775,7 +5988,7 @@
                     ">
                         <div>
                             <div style="font-weight: 600;">${user.name}</div>
-                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">
+                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">
                                 ${user.lastActive} days since last active
                             </div>
                         </div>
@@ -5785,17 +5998,21 @@
                     </div>
                 `;
             });
+            if (riskUsers.length === 0) {
+                html += '<p style="text-align: center; color: rgba(255,255,255,0.5);">No high-risk users detected</p>';
+            }
             html += '</div>';
-            
             churnContainer.innerHTML = html;
-            
-            // Tomorrow's forecast
+
+            // Tomorrow's forecast based on recent averages
             const forecastContainer = document.getElementById('tomorrowForecast');
             if (forecastContainer) {
                 const todaySteps = Object.values(dataCache.todaySteps || {}).reduce((a, b) => a + b, 0);
-                const predictedSteps = Math.round(todaySteps * (0.9 + Math.random() * 0.2));
-                const predictedActive = Math.round(users.length * 0.7);
-                
+                const users = dataCache.users || [];
+                const activeToday = Object.values(dataCache.todaySteps || {}).filter(s => s > 0).length;
+                const predictedSteps = Math.round(todaySteps * 0.95);
+                const predictedActive = Math.max(1, Math.round(activeToday * 0.9));
+
                 forecastContainer.innerHTML = `
                     <div style="display: grid; gap: 0.8rem;">
                         <div>
@@ -5807,11 +6024,520 @@
                             <div style="font-size: 1.2rem; font-weight: bold;">${predictedActive}</div>
                         </div>
                         <div>
-                            <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Confidence</div>
-                            <div style="font-size: 1.2rem; font-weight: bold; color: #22d3a5;">85%</div>
+                            <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Based On</div>
+                            <div style="font-size: 1.2rem; font-weight: bold; color: #667eea;">Recent trends</div>
                         </div>
                     </div>
                 `;
+            }
+        }
+        // ==========================================
+        // Growth Page
+        // ==========================================
+        async function loadGrowthPage() {
+            debugLog('GROWTH', 'Loading Growth page');
+            try {
+                const data = ROVIInsights.computeGrowthData();
+
+                // KPIs
+                updateElementText('growthTotalUsers', data.totalUsers.toLocaleString());
+                updateElementText('growthNewMonth', data.newThisMonth.toLocaleString());
+                updateElementText('growthNewWeek', data.newThisWeek.toLocaleString());
+                updateElementText('growthRate', (data.growthRate > 0 ? '+' : '') + data.growthRate + '%');
+
+                // User Growth Line Chart
+                const growthCtx = document.getElementById('userGrowthChart');
+                if (growthCtx) {
+                    const existing = Chart.getChart(growthCtx);
+                    if (existing) existing.destroy();
+
+                    new Chart(growthCtx, {
+                        type: 'line',
+                        data: {
+                            labels: data.monthLabels,
+                            datasets: [
+                                {
+                                    label: 'New Signups',
+                                    data: data.monthValues,
+                                    borderColor: '#FF6B00',
+                                    backgroundColor: 'rgba(255,107,0,0.1)',
+                                    fill: true,
+                                    tension: 0.3,
+                                    yAxisID: 'y'
+                                },
+                                {
+                                    label: 'Cumulative Users',
+                                    data: data.cumulativeValues,
+                                    borderColor: '#667eea',
+                                    backgroundColor: 'rgba(102,126,234,0.1)',
+                                    fill: true,
+                                    tension: 0.3,
+                                    yAxisID: 'y1'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: { mode: 'index', intersect: false },
+                            scales: {
+                                y: { position: 'left', title: { display: true, text: 'New Signups' } },
+                                y1: { position: 'right', title: { display: true, text: 'Total Users' }, grid: { drawOnChartArea: false } }
+                            }
+                        }
+                    });
+                }
+
+                // Signup Day-of-Week Bar Chart
+                const dayCtx = document.getElementById('signupDayChart');
+                if (dayCtx) {
+                    const existing = Chart.getChart(dayCtx);
+                    if (existing) existing.destroy();
+
+                    new Chart(dayCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.dayLabels,
+                            datasets: [{
+                                label: 'Signups',
+                                data: data.dayOfWeekSignups,
+                                backgroundColor: [
+                                    'rgba(255,107,0,0.4)', 'rgba(102,126,234,0.5)', 'rgba(102,126,234,0.5)',
+                                    'rgba(102,126,234,0.5)', 'rgba(102,126,234,0.5)', 'rgba(102,126,234,0.5)',
+                                    'rgba(255,107,0,0.4)'
+                                ],
+                                borderColor: '#667eea',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+                // Cohort Retention Table
+                const cohortData = ROVIInsights.computeCohortRetention();
+                const cohortContainer = document.getElementById('cohortTable');
+                if (cohortContainer && cohortData.length > 0) {
+                    let tableHtml = `<table class="glass-table">
+                        <thead><tr>
+                            <th>Cohort</th><th>Users</th><th>Month 0</th><th>Month 1</th><th>Month 2</th><th>Month 3</th>
+                        </tr></thead><tbody>`;
+
+                    cohortData.forEach(c => {
+                        tableHtml += `<tr>
+                            <td>${c.month}</td>
+                            <td>${c.total}</td>
+                            ${c.retention.map(r => {
+                                const cls = r >= 70 ? 'badge-success' : r >= 40 ? 'badge-warning' : 'badge-danger';
+                                return `<td><span class="badge ${cls}">${r}%</span></td>`;
+                            }).join('')}
+                        </tr>`;
+                    });
+
+                    tableHtml += '</tbody></table>';
+                    cohortContainer.innerHTML = tableHtml;
+                } else if (cohortContainer) {
+                    cohortContainer.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center;">No cohort data available yet</p>';
+                }
+
+            } catch (error) {
+                console.error('Growth page error:', error);
+            }
+        }
+
+        // ==========================================
+        // Workouts Page
+        // ==========================================
+        async function loadWorkoutsPage() {
+            debugLog('WORKOUTS', 'Loading Workouts page');
+            try {
+                const data = await ROVIInsights.computeWorkoutAnalytics();
+
+                // KPIs
+                updateElementText('workoutTotalSessions', data.kpis.totalSessions.toLocaleString());
+                updateElementText('workoutAvgDuration', data.kpis.avgDuration + ' min');
+                updateElementText('workoutTotalCal', data.kpis.totalCalBurned.toLocaleString());
+                updateElementText('workoutMostPopular', data.kpis.mostPopular);
+
+                // Activity Type Breakdown (Doughnut)
+                const typesCtx = document.getElementById('workoutTypesChart');
+                if (typesCtx && data.activityTypes.labels.length > 0) {
+                    const existing = Chart.getChart(typesCtx);
+                    if (existing) existing.destroy();
+
+                    const colors = ['#667eea', '#22d3a5', '#FF9500', '#FF3B30', '#a855f7', '#3b82f6', '#ec4899', '#f97316', '#14b8a6', '#8b5cf6'];
+                    new Chart(typesCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: data.activityTypes.labels.slice(0, 8),
+                            datasets: [{
+                                data: data.activityTypes.values.slice(0, 8),
+                                backgroundColor: colors.slice(0, 8),
+                                borderWidth: 2,
+                                borderColor: 'rgba(0,0,0,0.3)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '55%',
+                            plugins: { legend: { position: 'right' } }
+                        }
+                    });
+                }
+
+                // Top Activities (Horizontal Bar)
+                const topCtx = document.getElementById('topActivitiesChart');
+                if (topCtx && data.topActivities.labels.length > 0) {
+                    const existing = Chart.getChart(topCtx);
+                    if (existing) existing.destroy();
+
+                    new Chart(topCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.topActivities.labels,
+                            datasets: [{
+                                label: 'Sessions',
+                                data: data.topActivities.values,
+                                backgroundColor: 'rgba(255,107,0,0.5)',
+                                borderColor: '#FF6B00',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+                // Workout Minutes Trend (Bar)
+                const minCtx = document.getElementById('workoutMinutesTrendChart');
+                if (minCtx) {
+                    const existing = Chart.getChart(minCtx);
+                    if (existing) existing.destroy();
+
+                    const dayLabels = data.dailyMinutes.labels.map(d => new Date(d).toLocaleDateString('en-US', { weekday: 'short' }));
+                    new Chart(minCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: dayLabels,
+                            datasets: [{
+                                label: 'Minutes',
+                                data: data.dailyMinutes.values,
+                                backgroundColor: 'rgba(102,126,234,0.5)',
+                                borderColor: '#667eea',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+                // Calories Burned Trend (Line)
+                const calCtx = document.getElementById('workoutCaloriesTrendChart');
+                if (calCtx) {
+                    const existing = Chart.getChart(calCtx);
+                    if (existing) existing.destroy();
+
+                    const dayLabels = data.dailyCalories.labels.map(d => new Date(d).toLocaleDateString('en-US', { weekday: 'short' }));
+                    const ctx2d = calCtx.getContext('2d');
+                    const gradient = ctx2d.createLinearGradient(0, 0, 0, 300);
+                    gradient.addColorStop(0, 'rgba(239,68,68,0.3)');
+                    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+
+                    new Chart(calCtx, {
+                        type: 'line',
+                        data: {
+                            labels: dayLabels,
+                            datasets: [{
+                                label: 'Calories Burned',
+                                data: data.dailyCalories.values,
+                                borderColor: '#ef4444',
+                                backgroundColor: gradient,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+            } catch (error) {
+                console.error('Workouts page error:', error);
+            }
+        }
+
+        // ==========================================
+        // Nutrition Page
+        // ==========================================
+        async function loadNutritionPage() {
+            debugLog('NUTRITION', 'Loading Nutrition page');
+            try {
+                const data = await ROVIInsights.computeNutritionData();
+
+                // KPIs
+                updateElementText('nutritionTotalMeals', data.kpis.totalMeals.toLocaleString());
+                updateElementText('nutritionAvgCal', data.kpis.avgCaloriesPerDay.toLocaleString());
+                updateElementText('nutritionTopFood', data.kpis.mostLoggedFood);
+                updateElementText('nutritionConsistency', data.kpis.loggingConsistency + '%');
+
+                // Top 15 Foods (Horizontal Bar)
+                const foodsCtx = document.getElementById('topFoodsChart');
+                if (foodsCtx && data.topFoods.labels.length > 0) {
+                    const existing = Chart.getChart(foodsCtx);
+                    if (existing) existing.destroy();
+
+                    new Chart(foodsCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.topFoods.labels,
+                            datasets: [{
+                                label: 'Times Logged',
+                                data: data.topFoods.values,
+                                backgroundColor: 'rgba(255,107,0,0.5)',
+                                borderColor: '#FF6B00',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+                // Meal Timing Breakdown (Doughnut)
+                const mealCtx = document.getElementById('mealTimingChart');
+                if (mealCtx) {
+                    const existing = Chart.getChart(mealCtx);
+                    if (existing) existing.destroy();
+
+                    new Chart(mealCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Breakfast', 'Lunch', 'Dinner', 'Snacks'],
+                            datasets: [{
+                                data: [data.mealTypes.breakfast, data.mealTypes.lunch, data.mealTypes.dinner, data.mealTypes.snacks],
+                                backgroundColor: ['#FF9500', '#22d3a5', '#667eea', '#a855f7'],
+                                borderWidth: 2,
+                                borderColor: 'rgba(0,0,0,0.3)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '55%',
+                            plugins: { legend: { position: 'right' } }
+                        }
+                    });
+                }
+
+                // Macros vs Goals Radar
+                const radarCtx = document.getElementById('macrosRadarChart');
+                if (radarCtx) {
+                    const existing = Chart.getChart(radarCtx);
+                    if (existing) existing.destroy();
+
+                    new Chart(radarCtx, {
+                        type: 'radar',
+                        data: {
+                            labels: ['Protein (g)', 'Carbs (g)', 'Fat (g)'],
+                            datasets: [
+                                {
+                                    label: 'Actual Avg',
+                                    data: [data.macros.actual.protein, data.macros.actual.carbs, data.macros.actual.fat],
+                                    borderColor: '#FF6B00',
+                                    backgroundColor: 'rgba(255,107,0,0.15)',
+                                    pointBackgroundColor: '#FF6B00'
+                                },
+                                {
+                                    label: 'Platform Goals',
+                                    data: [data.macros.goals.protein, data.macros.goals.carbs, data.macros.goals.fat],
+                                    borderColor: '#667eea',
+                                    backgroundColor: 'rgba(102,126,234,0.15)',
+                                    pointBackgroundColor: '#667eea'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                r: {
+                                    ticks: { backdropColor: 'transparent' },
+                                    grid: { color: 'rgba(255,255,255,0.08)' },
+                                    angleLines: { color: 'rgba(255,255,255,0.08)' }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Daily Calorie Trend (Line)
+                const calTrendCtx = document.getElementById('dailyCalorieTrendChart');
+                if (calTrendCtx) {
+                    const existing = Chart.getChart(calTrendCtx);
+                    if (existing) existing.destroy();
+
+                    const dayLabels = data.dailyCalories.labels.map(d => new Date(d).toLocaleDateString('en-US', { weekday: 'short' }));
+                    const ctx2d = calTrendCtx.getContext('2d');
+                    const gradient = ctx2d.createLinearGradient(0, 0, 0, 300);
+                    gradient.addColorStop(0, 'rgba(255,107,0,0.3)');
+                    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+
+                    new Chart(calTrendCtx, {
+                        type: 'line',
+                        data: {
+                            labels: dayLabels,
+                            datasets: [{
+                                label: 'Calories Consumed',
+                                data: data.dailyCalories.values,
+                                borderColor: '#FF6B00',
+                                backgroundColor: gradient,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+            } catch (error) {
+                console.error('Nutrition page error:', error);
+            }
+        }
+
+        // ==========================================
+        // Weight Page
+        // ==========================================
+        async function loadWeightPage() {
+            debugLog('WEIGHT', 'Loading Weight page');
+            try {
+                const data = await ROVIInsights.computeWeightData();
+
+                // KPIs
+                updateElementText('weightUsersTracking', data.kpis.usersTracking.toLocaleString());
+                updateElementText('weightAvgChange', data.kpis.avgChange + ' kg');
+                updateElementText('weightBiggestLoss', data.kpis.biggestLoss + ' kg');
+                updateElementText('weightBiggestGain', '+' + data.kpis.biggestGain + ' kg');
+
+                // Weight Change Distribution (Bar)
+                const distCtx = document.getElementById('weightDistChart');
+                if (distCtx) {
+                    const existing = Chart.getChart(distCtx);
+                    if (existing) existing.destroy();
+
+                    const distLabels = Object.keys(data.distribution);
+                    const distValues = Object.values(data.distribution);
+                    const distColors = ['#22d3a5', '#34d399', '#a3a3a3', '#f97316', '#ef4444'];
+
+                    new Chart(distCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: distLabels,
+                            datasets: [{
+                                label: 'Users',
+                                data: distValues,
+                                backgroundColor: distColors,
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+                // Platform Avg Weight Trend (Line)
+                const trendCtx = document.getElementById('weightTrendChart');
+                if (trendCtx && data.weeklyTrend.labels.length > 0) {
+                    const existing = Chart.getChart(trendCtx);
+                    if (existing) existing.destroy();
+
+                    const ctx2d = trendCtx.getContext('2d');
+                    const gradient = ctx2d.createLinearGradient(0, 0, 0, 300);
+                    gradient.addColorStop(0, 'rgba(102,126,234,0.3)');
+                    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+
+                    new Chart(trendCtx, {
+                        type: 'line',
+                        data: {
+                            labels: data.weeklyTrend.labels,
+                            datasets: [{
+                                label: 'Avg Weight (kg)',
+                                data: data.weeklyTrend.values,
+                                borderColor: '#667eea',
+                                backgroundColor: gradient,
+                                fill: true,
+                                tension: 0.3,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+                // User Weight Progress Table
+                const tableContainer = document.getElementById('weightProgressTable');
+                if (tableContainer) {
+                    if (data.userWeights.length > 0) {
+                        let tableHtml = `<table class="glass-table">
+                            <thead><tr>
+                                <th>User</th><th>Start</th><th>Current</th><th>Change</th>
+                            </tr></thead><tbody>`;
+
+                        data.userWeights.forEach(u => {
+                            const badgeCls = u.delta < -2 ? 'badge-success' : u.delta > 2 ? 'badge-danger' : 'badge-neutral';
+                            const sign = u.delta > 0 ? '+' : '';
+                            tableHtml += `<tr>
+                                <td>${u.name}</td>
+                                <td>${u.startWeight} kg</td>
+                                <td>${u.currentWeight} kg</td>
+                                <td><span class="badge ${badgeCls}">${sign}${u.delta} kg</span></td>
+                            </tr>`;
+                        });
+
+                        tableHtml += '</tbody></table>';
+                        tableContainer.innerHTML = tableHtml;
+                    } else {
+                        tableContainer.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center;">No weight data recorded yet</p>';
+                    }
+                }
+
+            } catch (error) {
+                console.error('Weight page error:', error);
             }
         }
     </script>
@@ -6091,6 +6817,10 @@
             { icon: '👥', title: 'Go to Users', action: () => navigateToPage('users'), keywords: 'people members accounts' },
             { icon: '⭐', title: 'Go to XP Admin', action: () => navigateToPage('xpadmin'), keywords: 'points experience gamification' },
             { icon: '📈', title: 'Go to Analytics', action: () => navigateToPage('analytics'), keywords: 'stats data metrics insights' },
+            { icon: '📈', title: 'Go to Growth', action: () => navigateToPage('growth'), keywords: 'signups cohort retention' },
+            { icon: '💪', title: 'Go to Workouts', action: () => navigateToPage('workouts'), keywords: 'exercise activity fitness' },
+            { icon: '🥗', title: 'Go to Nutrition', action: () => navigateToPage('nutrition'), keywords: 'food meals macros calories' },
+            { icon: '⚖️', title: 'Go to Weight', action: () => navigateToPage('weight'), keywords: 'weight tracking progress' },
             { icon: '📱', title: 'Go to Social Media', action: () => navigateToPage('socialmedia'), keywords: 'posts content marketing' },
             
             // Quick Actions
