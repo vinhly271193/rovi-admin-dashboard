@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROVI Admin Dashboard - Dark Premium</title>
+    <title>ROVI Admin Dashboard</title>
     <link rel="stylesheet" href="css/dark-premium.css">
     <link rel="stylesheet" href="css/rovi-design-system.css">
     <style>
@@ -15,28 +15,7 @@
             --danger-color: #FF3B30;
         }
         
-        /* Light Theme Override */
-        [data-theme="light"] body {
-            background: #f5f5f7 !important;
-            color: #1d1d1f !important;
-        }
-        
-        [data-theme="light"] .stat-card,
-        [data-theme="light"] .chart-card,
-        [data-theme="light"] .sidebar,
-        [data-theme="light"] .dashboard-header {
-            background: white !important;
-            color: #1d1d1f !important;
-            border-color: rgba(0, 0, 0, 0.1) !important;
-        }
-        
-        [data-theme="light"] .nav-item {
-            color: #1d1d1f !important;
-        }
-        
-        [data-theme="light"] .nav-item:hover {
-            background: rgba(0, 0, 0, 0.05) !important;
-        }
+        /* Light theme is the permanent default */
         
         /* Export Button Styles */
         .export-btn {
@@ -57,36 +36,7 @@
             color: white;
         }
         
-        /* Theme Toggle Button */
-        .theme-toggle {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            width: 40px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            z-index: 1001;
-            transition: all 0.3s ease;
-        }
-        
-        .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(180deg);
-        }
-        
-        [data-theme="light"] .theme-toggle {
-            background: rgba(0, 0, 0, 0.05);
-            border-color: rgba(0, 0, 0, 0.1);
-            color: #1d1d1f;
-        }
+        /* Theme toggle removed - permanent light mode */
         
         /* Back to Top Button */
         .back-to-top {
@@ -125,13 +75,13 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(4px);
             z-index: 9999;
             display: none;
             animation: fadeIn 0.2s ease;
         }
-        
+
         .command-palette {
             position: fixed;
             top: 20%;
@@ -139,22 +89,23 @@
             transform: translateX(-50%);
             width: 90%;
             max-width: 600px;
-            background: #1C1C1E;
+            background: #ffffff;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
             overflow: hidden;
             animation: slideDown 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.08);
         }
-        
+
         .command-input {
             width: 100%;
             padding: 20px;
             font-size: 18px;
             background: transparent;
             border: none;
-            color: white;
+            color: #1d1d1f;
             outline: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
         }
         
         .command-results {
@@ -172,7 +123,7 @@
         }
         
         .command-item:hover, .command-item.selected {
-            background: rgba(255, 107, 0, 0.2);
+            background: rgba(255, 107, 0, 0.1);
         }
         
         .command-item-icon {
@@ -184,6 +135,7 @@
             opacity: 0.5;
             font-size: 12px;
             font-family: monospace;
+            color: #86868b;
         }
         
         /* Quick Actions Bar */
@@ -192,13 +144,14 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: #1C1C1E;
+            background: #ffffff;
             border-radius: 12px;
             padding: 12px 20px;
             display: none;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 0, 0, 0.08);
             z-index: 1000;
             animation: slideUp 0.3s ease;
         }
@@ -209,10 +162,10 @@
         
         .quick-action-btn {
             padding: 8px 16px;
-            background: rgba(255, 107, 0, 0.2);
+            background: rgba(255, 107, 0, 0.1);
             border: 1px solid rgba(255, 107, 0, 0.3);
             border-radius: 8px;
-            color: white;
+            color: #FF6B00;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -238,11 +191,13 @@
         }
         
         .alert-item {
-            background: #1C1C1E;
+            background: #ffffff;
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #FF6B00;
+            border: 1px solid rgba(0, 0, 0, 0.06);
             border-left: 4px solid #FF6B00;
             animation: slideInRight 0.3s ease;
             display: flex;
@@ -317,13 +272,15 @@
         
         .annotation-tooltip {
             position: absolute;
-            background: #1C1C1E;
+            background: #ffffff;
             padding: 12px;
             border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.08);
             z-index: 1000;
             min-width: 200px;
             display: none;
+            color: #1d1d1f;
         }
         
         .annotation-tooltip.show {
@@ -349,7 +306,7 @@
             position: absolute;
             top: -12px;
             left: 20px;
-            background: #1C1C1E;
+            background: #ffffff;
             padding: 0 8px;
             color: #FF6B00;
             font-weight: 600;
@@ -361,15 +318,16 @@
             top: 140px;
             right: 20px;
             padding: 10px 16px;
-            background: #1C1C1E;
+            background: #ffffff;
             border: 1px solid rgba(255, 107, 0, 0.3);
             border-radius: 8px;
-            color: white;
+            color: #1d1d1f;
             cursor: pointer;
             z-index: 100;
             display: flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
         
         .comparison-toggle.active {
@@ -382,7 +340,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #1C1C1E;
+            background: #ffffff;
             border-radius: 16px;
             padding: 30px;
             max-width: 500px;
@@ -390,6 +348,9 @@
             overflow-y: auto;
             z-index: 10000;
             display: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: #1d1d1f;
         }
         
         .shortcuts-modal.show {
@@ -400,15 +361,16 @@
             display: flex;
             justify-content: space-between;
             padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
         }
-        
+
         .shortcut-key {
-            background: rgba(255, 255, 255, 0.1);
+            background: #f2f2f7;
             padding: 4px 8px;
             border-radius: 4px;
             font-family: monospace;
             font-size: 12px;
+            color: #1d1d1f;
         }
         
         /* Animations */
@@ -485,13 +447,13 @@
         
         /* Social Feed Styles */
         .social-feed-container {
-            background: var(--glass-dark);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
             border-radius: 16px;
             margin-bottom: 1rem;
             overflow: hidden;
             animation: slideUp 0.5s ease-out;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
         
         @keyframes slideUp {
@@ -507,18 +469,18 @@
         
         .feed-header {
             padding: 0.8rem;
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(167, 139, 250, 0.05);
+            background: #f9f9f9;
         }
-        
+
         .feed-title {
             display: flex;
             align-items: center;
             gap: 0.4rem;
-            color: white;
+            color: #1d1d1f;
             font-size: 0.8rem;
             font-weight: 600;
             margin: 0;
@@ -555,9 +517,9 @@
         }
         
         .feed-filter {
-            background: var(--glass-dark);
-            color: var(--text-secondary);
-            border: 1px solid var(--glass-border);
+            background: #f2f2f7;
+            color: #86868b;
+            border: 1px solid rgba(0, 0, 0, 0.06);
             padding: 0.3rem 0.8rem;
             border-radius: 16px;
             font-size: 0.75rem;
@@ -565,11 +527,11 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .feed-filter:hover {
-            background: rgba(167, 139, 250, 0.1);
-            color: white;
-            border-color: rgba(167, 139, 250, 0.3);
+            background: #e5e5ea;
+            color: #1d1d1f;
+            border-color: rgba(0, 0, 0, 0.1);
         }
         
         .feed-filter.active {
@@ -595,8 +557,8 @@
         }
         
         .feed-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.04);
             border-radius: 8px;
             padding: 0.75rem;
             margin-bottom: 0.5rem;
@@ -618,8 +580,8 @@
         }
         
         .feed-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(167, 139, 250, 0.2);
+            background: #f9f9f9;
+            border-color: rgba(0, 122, 255, 0.15);
             transform: translateX(5px);
         }
         
@@ -629,7 +591,7 @@
         
         @keyframes newItemGlow {
             0% {
-                box-shadow: 0 0 20px rgba(167, 139, 250, 0.5);
+                box-shadow: 0 0 20px rgba(0, 122, 255, 0.2);
             }
             100% {
                 box-shadow: none;
@@ -654,7 +616,7 @@
         }
         
         .feed-user {
-            color: white;
+            color: #1d1d1f;
             font-weight: 600;
             font-size: 0.68rem;
             margin-bottom: 0.2rem;
@@ -758,20 +720,20 @@
         }
         
         .food-item {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.06);
             border-radius: 8px;
             padding: 0.8rem;
             text-align: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
-        
+
         .food-item:hover {
             transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            background: #f9f9f9;
         }
         
         .food-emoji {
@@ -787,13 +749,13 @@
         
         .food-name {
             font-weight: 600;
-            color: white;
+            color: #1d1d1f;
             margin-bottom: 0.25rem;
         }
         What 
         .food-stats {
             font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.8);
+            color: #86868b;
         }
         
         /* Loading States */
@@ -803,7 +765,7 @@
             justify-content: center;
             gap: 0.8rem;
             padding: 1.6rem;
-            color: white;
+            color: #86868b;
         }
         
         /* Fix spacing for leaderboard sections */
@@ -817,9 +779,9 @@
         
         .cache-info {
             font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.7);
+            color: #86868b;
             padding: 0.5rem;
-            background: rgba(255, 255, 255, 0.1);
+            background: #f5f5f7;
             border-radius: 8px;
             margin-top: 0.5rem;
             text-align: center;
@@ -828,34 +790,34 @@
         /* Data Table */
         .data-table {
             width: 100%;
-            background: rgba(255, 255, 255, 0.05);
+            background: #ffffff;
             border-radius: 8px;
             overflow: hidden;
-            color: white;
+            color: #1d1d1f;
         }
-        
+
         .data-table thead {
-            background: rgba(255, 255, 255, 0.1);
+            background: #f5f5f7;
         }
-        
+
         .data-table th {
             padding: 0.8rem;
             text-align: left;
             font-weight: 600;
-            color: white;
+            color: #86868b;
             text-transform: uppercase;
             font-size: 0.75rem;
             letter-spacing: 1px;
         }
-        
+
         .data-table td {
             padding: 0.8rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.9);
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            color: #1d1d1f;
         }
-        
+
         .data-table tr:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: #f9f9f9;
         }
         
         /* Sparkline Chart Styles */
@@ -926,10 +888,6 @@
     </style>
 </head>
 <body>
-    <!-- Dark Mode Glow Effects -->
-    <div class="glow-orb glow-purple"></div>
-    <div class="glow-orb glow-blue"></div>
-    
     <!-- Command Palette -->
     <div class="command-palette-overlay" id="commandPaletteOverlay">
         <div class="command-palette">
@@ -1064,8 +1022,8 @@
                 <div class="cache-info">
                     Cache: <span id="cacheStatus">Empty</span>
                 </div>
-                <div class="debug-panel" id="debugPanel" style="margin-top: 1rem; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 8px; max-height: 160px; overflow-y: auto; font-size: 0.75rem; color: rgba(255,255,255,0.7);">
-                    <div style="color: rgba(255,255,255,0.5);">Debug logs...</div>
+                <div class="debug-panel" id="debugPanel" style="margin-top: 1rem; padding: 0.5rem; background: #f5f5f7; border-radius: 8px; max-height: 160px; overflow-y: auto; font-size: 0.75rem; color: #86868b;">
+                    <div style="color: #aeaeb2;">Debug logs...</div>
                 </div>
             </div>
         </nav>
@@ -1354,14 +1312,14 @@
                 <div class="chart-card" style="margin-bottom: 0.5rem;">
                     <div style="display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
                         <label style="color: var(--text-secondary); font-size: 0.875rem;">Time Frame:</label>
-                        <select id="timeFrameSelector" style="background: var(--glass-dark); color: white; border: 1px solid var(--glass-border); padding: 0.5rem; border-radius: 8px;">
+                        <select id="timeFrameSelector" style="background: #f5f5f7; color: #1d1d1f; border: 1px solid rgba(0,0,0,0.08); padding: 0.5rem; border-radius: 8px;">
                             <option value="today">Today</option>
                             <option value="week" selected>Last 7 Days</option>
                             <option value="month">Last 30 Days</option>
                             <option value="all">All Time</option>
                         </select>
                         <label style="color: var(--text-secondary); font-size: 0.875rem;">View:</label>
-                        <select id="viewSelector" style="background: var(--glass-dark); color: white; border: 1px solid var(--glass-border); padding: 0.5rem; border-radius: 8px;">
+                        <select id="viewSelector" style="background: #f5f5f7; color: #1d1d1f; border: 1px solid rgba(0,0,0,0.08); padding: 0.5rem; border-radius: 8px;">
                             <option value="aggregate">Aggregated</option>
                             <option value="individual">Individual Users</option>
                             <option value="comparison">User Comparison</option>
@@ -1574,7 +1532,7 @@
                                 <input type="text" 
                                        id="xpUserSearchInput" 
                                        placeholder="Enter User ID to investigate..." 
-                                       style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white;"
+                                       style="width: 100%; padding: 0.75rem; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; color: #1d1d1f;"
                                        onkeypress="if(event.key==='Enter') investigateXPUser()">
                                 <button class="btn-primary" style="margin-top: 1rem; width: 100%;" onclick="investigateXPUser()">
                                     🔍 Investigate User
@@ -1634,24 +1592,24 @@
                         <div id="streaksTab" class="analytics-tab-content">
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.8rem; margin: 1.2rem 0;">
                                 <div class="stat-card">
-                                    <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Active Streaks</div>
+                                    <div style="font-size: 0.875rem; color: #86868b;">Active Streaks</div>
                                     <div style="font-size: 1.6rem; font-weight: bold;" id="activeStreaksCount">0</div>
                                     <div style="font-size: 0.75rem; color: #22d3a5;">↑ 12% from last week</div>
                                 </div>
                                 <div class="stat-card">
-                                    <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Longest Current</div>
+                                    <div style="font-size: 0.875rem; color: #86868b;">Longest Current</div>
                                     <div style="font-size: 1.6rem; font-weight: bold;" id="longestStreak">0 days</div>
-                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">User: <span id="longestStreakUser">-</span></div>
+                                    <div style="font-size: 0.75rem; color: #aeaeb2;">User: <span id="longestStreakUser">-</span></div>
                                 </div>
                                 <div class="stat-card">
-                                    <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">At Risk</div>
+                                    <div style="font-size: 0.875rem; color: #86868b;">At Risk</div>
                                     <div style="font-size: 1.6rem; font-weight: bold; color: #FF9500;" id="atRiskCount">0</div>
                                     <div style="font-size: 0.75rem; color: #FF9500;">3+ days inactive</div>
                                 </div>
                                 <div class="stat-card">
-                                    <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Avg Streak</div>
+                                    <div style="font-size: 0.875rem; color: #86868b;">Avg Streak</div>
                                     <div style="font-size: 1.6rem; font-weight: bold;" id="avgStreak">0 days</div>
-                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">Platform average</div>
+                                    <div style="font-size: 0.75rem; color: #aeaeb2;">Platform average</div>
                                 </div>
                             </div>
                             
@@ -1664,7 +1622,7 @@
                                 <div style="display: flex; align-items: center; gap: 0.8rem; margin-top: 1rem; font-size: 0.75rem;">
                                     <span>Less</span>
                                     <div style="display: flex; gap: 4px;">
-                                        <div style="width: 20px; height: 20px; background: rgba(255,255,255,0.1); border-radius: 4px;"></div>
+                                        <div style="width: 20px; height: 20px; background: #f2f2f7; border-radius: 4px;"></div>
                                         <div style="width: 20px; height: 20px; background: rgba(34,211,165,0.3); border-radius: 4px;"></div>
                                         <div style="width: 20px; height: 20px; background: rgba(34,211,165,0.6); border-radius: 4px;"></div>
                                         <div style="width: 20px; height: 20px; background: rgba(34,211,165,0.9); border-radius: 4px;"></div>
@@ -1687,7 +1645,7 @@
                         <div id="funnelTab" class="analytics-tab-content" style="display: none;">
                             <div style="margin: 1.6rem 0;">
                                 <h4 style="margin-bottom: 1rem;">Today's Engagement Funnel</h4>
-                                <div id="engagementFunnel" style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 1.2rem;">
+                                <div id="engagementFunnel" style="background: #f5f5f7; border-radius: 8px; padding: 1.2rem;">
                                     <!-- Will be populated by JavaScript -->
                                 </div>
                             </div>
@@ -1729,19 +1687,19 @@
                         <div id="xphealthTab" class="analytics-tab-content" style="display: none;">
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; margin: 1.6rem 0;">
                                 <div class="stat-card">
-                                    <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Daily XP Rate</div>
+                                    <div style="font-size: 0.875rem; color: #86868b;">Daily XP Rate</div>
                                     <div style="font-size: 1.6rem; font-weight: bold;" id="dailyXPRate">0</div>
-                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">XP/user/day</div>
+                                    <div style="font-size: 0.75rem; color: #aeaeb2;">XP/user/day</div>
                                 </div>
                                 <div class="stat-card">
-                                    <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">XP Inflation</div>
+                                    <div style="font-size: 0.875rem; color: #86868b;">XP Inflation</div>
                                     <div style="font-size: 1.6rem; font-weight: bold; color: #FF9500;" id="xpInflation">+0%</div>
-                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">vs. last month</div>
+                                    <div style="font-size: 0.75rem; color: #aeaeb2;">vs. last month</div>
                                 </div>
                                 <div class="stat-card">
-                                    <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Avg Level</div>
+                                    <div style="font-size: 0.875rem; color: #86868b;">Avg Level</div>
                                     <div style="font-size: 1.6rem; font-weight: bold;" id="avgLevel">1</div>
-                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">Platform average</div>
+                                    <div style="font-size: 0.75rem; color: #aeaeb2;">Platform average</div>
                                 </div>
                             </div>
                             
@@ -1773,7 +1731,7 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
                                 <div>
                                     <h4 style="margin-bottom: 1rem;">Tomorrow's Forecast</h4>
-                                    <div id="tomorrowForecast" style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 1.2rem;">
+                                    <div id="tomorrowForecast" style="background: #f5f5f7; border-radius: 8px; padding: 1.2rem;">
                                         <!-- Will be populated by JavaScript -->
                                     </div>
                                 </div>
@@ -1834,7 +1792,7 @@
                     <div class="chart-title">Cohort Retention</div>
                     <div class="chart-description">Percentage of users still active in months following their signup month</div>
                     <div id="cohortTable" style="overflow-x: auto;">
-                        <p style="color: rgba(255,255,255,0.5); text-align: center;">Loading cohort data...</p>
+                        <p style="color: #aeaeb2; text-align: center;">Loading cohort data...</p>
                     </div>
                 </div>
             </div>
@@ -1997,7 +1955,7 @@
                 <div class="chart-card">
                     <div class="chart-title">User Weight Progress</div>
                     <div id="weightProgressTable" style="overflow-x: auto; max-height: 500px; overflow-y: auto;">
-                        <p style="color: rgba(255,255,255,0.5); text-align: center;">Loading weight data...</p>
+                        <p style="color: #aeaeb2; text-align: center;">Loading weight data...</p>
                     </div>
                 </div>
             </div>
@@ -2009,7 +1967,7 @@
                         display: flex;
                         gap: 10px;
                         margin-bottom: 25px;
-                        background: rgba(255,255,255,0.05);
+                        background: #f5f5f7;
                         padding: 10px;
                         border-radius: 12px;
                     }
@@ -2021,7 +1979,7 @@
                         border-radius: 8px;
                         cursor: pointer;
                         background: transparent;
-                        color: rgba(255,255,255,0.6);
+                        color: #86868b;
                         border: none;
                         font-size: 14px;
                         font-weight: 600;
@@ -2049,10 +2007,11 @@
                     }
                     
                     .post-preview-card {
-                        background: #1C1C1E;
+                        background: #ffffff;
                         border-radius: 16px;
                         overflow: hidden;
-                        border: 1px solid rgba(255,255,255,0.1);
+                        border: 1px solid rgba(0,0,0,0.08);
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
                         transition: transform 0.3s ease;
                     }
                     
@@ -2273,7 +2232,7 @@
                         margin-top: 12px;
                         border-left: 4px solid var(--primary-color);
                         font-size: 12px;
-                        color: rgba(255,255,255,0.8);
+                        color: #1d1d1f;
                     }
                     
                     .stat-preview {
@@ -2312,25 +2271,25 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
                         <div class="chart-card">
                             <h4>🏃 Workout Achievement Post</h4>
-                            <p style="color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 15px;">Generate motivational post based on workout data</p>
-                            <input type="number" id="caloriesBurned" placeholder="Calories Burned (e.g., 500)" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; margin-bottom: 10px;">
-                            <input type="number" id="workoutDuration" placeholder="Duration in minutes (e.g., 45)" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; margin-bottom: 10px;">
+                            <p style="color: #86868b; font-size: 14px; margin-bottom: 15px;">Generate motivational post based on workout data</p>
+                            <input type="number" id="caloriesBurned" placeholder="Calories Burned (e.g., 500)" style="width: 100%; padding: 10px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1d1d1f; margin-bottom: 10px;">
+                            <input type="number" id="workoutDuration" placeholder="Duration in minutes (e.g., 45)" style="width: 100%; padding: 10px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1d1d1f; margin-bottom: 10px;">
                             <button class="btn-copy" onclick="generateWorkoutPost()">Generate Post</button>
                         </div>
                         
                         <div class="chart-card">
                             <h4>📊 Weekly Progress Report</h4>
-                            <p style="color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 15px;">Create data-driven progress update</p>
-                            <input type="number" id="weeklySteps" placeholder="Total Weekly Steps (e.g., 70000)" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; margin-bottom: 10px;">
-                            <input type="number" id="xpEarned" placeholder="XP Earned (e.g., 1200)" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; margin-bottom: 10px;">
+                            <p style="color: #86868b; font-size: 14px; margin-bottom: 15px;">Create data-driven progress update</p>
+                            <input type="number" id="weeklySteps" placeholder="Total Weekly Steps (e.g., 70000)" style="width: 100%; padding: 10px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1d1d1f; margin-bottom: 10px;">
+                            <input type="number" id="xpEarned" placeholder="XP Earned (e.g., 1200)" style="width: 100%; padding: 10px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1d1d1f; margin-bottom: 10px;">
                             <button class="btn-copy" onclick="generateProgressPost()">Generate Post</button>
                         </div>
                         
                         <div class="chart-card">
                             <h4>🥗 Nutrition Insights</h4>
-                            <p style="color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 15px;">Share science-backed nutrition facts</p>
-                            <input type="number" id="proteinIntake" placeholder="Protein in grams (e.g., 120)" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; margin-bottom: 10px;">
-                            <input type="number" id="waterIntake" placeholder="Water in liters (e.g., 3.5)" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; margin-bottom: 10px;">
+                            <p style="color: #86868b; font-size: 14px; margin-bottom: 15px;">Share science-backed nutrition facts</p>
+                            <input type="number" id="proteinIntake" placeholder="Protein in grams (e.g., 120)" style="width: 100%; padding: 10px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1d1d1f; margin-bottom: 10px;">
+                            <input type="number" id="waterIntake" placeholder="Water in liters (e.g., 3.5)" style="width: 100%; padding: 10px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1d1d1f; margin-bottom: 10px;">
                             <button class="btn-copy" onclick="generateNutritionPost()">Generate Post</button>
                         </div>
                     </div>
@@ -2575,9 +2534,11 @@
         function initChartDefaults() {
             Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
             Chart.defaults.font.size = 12;
-            Chart.defaults.color = 'rgba(255,255,255,0.7)';
-            Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(20,20,40,0.95)';
-            Chart.defaults.plugins.tooltip.borderColor = 'rgba(102,126,234,0.5)';
+            Chart.defaults.color = '#86868b';
+            Chart.defaults.plugins.tooltip.backgroundColor = '#ffffff';
+            Chart.defaults.plugins.tooltip.titleColor = '#1d1d1f';
+            Chart.defaults.plugins.tooltip.bodyColor = '#86868b';
+            Chart.defaults.plugins.tooltip.borderColor = 'rgba(0,0,0,0.1)';
             Chart.defaults.plugins.tooltip.borderWidth = 1;
             Chart.defaults.plugins.tooltip.cornerRadius = 8;
             Chart.defaults.plugins.tooltip.padding = 10;
@@ -2585,7 +2546,7 @@
             Chart.defaults.plugins.legend.labels.usePointStyle = true;
             Chart.defaults.plugins.legend.labels.padding = 16;
             Chart.defaults.elements.bar.borderRadius = 6;
-            Chart.defaults.scale.grid = { color: 'rgba(255,255,255,0.06)' };
+            Chart.defaults.scale.grid = { color: 'rgba(0,0,0,0.06)' };
         }
         initChartDefaults();
 
@@ -3348,7 +3309,7 @@
                         labels: ['Completed', 'Remaining'],
                         datasets: [{
                             data: [progress, 100 - progress],
-                            backgroundColor: ['rgba(34,211,165,0.8)', 'rgba(255,255,255,0.1)'],
+                            backgroundColor: ['rgba(34,211,165,0.8)', 'rgba(0,0,0,0.06)'],
                             borderWidth: 0
                         }]
                     },
@@ -3657,7 +3618,7 @@
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
                             titleColor: '#f9fafb',
                             bodyColor: '#d1d5db',
-                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderColor: 'rgba(0, 0, 0, 0.06)',
                             borderWidth: 1,
                             padding: 12,
                             displayColors: false,
@@ -3681,7 +3642,7 @@
                                 }
                             },
                             grid: {
-                                color: 'rgba(255, 255, 255, 0.05)',
+                                color: 'rgba(0, 0, 0, 0.04)',
                                 drawBorder: false
                             }
                         },
@@ -3693,7 +3654,7 @@
                                 }
                             },
                             grid: {
-                                color: 'rgba(255, 255, 255, 0.05)',
+                                color: 'rgba(0, 0, 0, 0.04)',
                                 drawBorder: false
                             }
                         }
@@ -3742,13 +3703,13 @@
                         data: [activeUsers, inactiveUsers],
                         backgroundColor: [
                             '#34d399',
-                            'rgba(255, 255, 255, 0.05)'
+                            'rgba(0, 0, 0, 0.04)'
                         ],
-                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderColor: 'rgba(0, 0, 0, 0.06)',
                         borderWidth: 2,
                         hoverBackgroundColor: [
                             '#10b981',
-                            'rgba(255, 255, 255, 0.1)'
+                            'rgba(0, 0, 0, 0.06)'
                         ]
                     }]
                 },
@@ -3777,7 +3738,7 @@
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
                             titleColor: '#f9fafb',
                             bodyColor: '#d1d5db',
-                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderColor: 'rgba(0, 0, 0, 0.06)',
                             borderWidth: 1
                         }
                     },
@@ -3841,7 +3802,7 @@
                             y: {
                                 beginAtZero: true,
                                 ticks: { color: '#9ca3af' },
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                                grid: { color: 'rgba(0, 0, 0, 0.04)' }
                             },
                             x: {
                                 ticks: { color: '#9ca3af', maxRotation: 45, minRotation: 45 },
@@ -3936,7 +3897,7 @@
                             y: {
                                 beginAtZero: true,
                                 ticks: { color: '#9ca3af' },
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                                grid: { color: 'rgba(0, 0, 0, 0.04)' }
                             },
                             x: {
                                 ticks: { color: '#9ca3af' },
@@ -4332,8 +4293,8 @@
                         <div style="display: flex; align-items: center; gap: 0.8rem;">
                             <span class="leaderboard-rank ${rankClass}">${index + 1}</span>
                             <div>
-                                <strong style="color: white;">${user?.name || user?.email || userId.substring(0, 8) + '...'}</strong>
-                                <div style="color: rgba(255, 255, 255, 0.7); font-size: 0.875rem;">
+                                <strong style="color: #1d1d1f;">${user?.name || user?.email || userId.substring(0, 8) + '...'}</strong>
+                                <div style="color: #86868b; font-size: 0.875rem;">
                                     ${steps.toLocaleString()} steps today
                                 </div>
                             </div>
@@ -4390,7 +4351,7 @@
                     
                 case 'calories':
                     html = `<h3>Calories Burned Leaders (${today})</h3>`;
-                    html += '<p style="color: rgba(255,255,255,0.7); font-size: 0.875rem;">Showing calories burned from activities logged today</p>';
+                    html += '<p style="color: #86868b; font-size: 0.875rem;">Showing calories burned from activities logged today</p>';
                     
                     // Load calories data from activityLog
                     if (!dataCache.calories[today]) {
@@ -4603,7 +4564,7 @@
                     html += '<table class="data-table"><thead><tr><th>Rank</th><th>Name</th><th>Avg Calories</th><th>Times Logged</th><th>Users</th></tr></thead><tbody>';
                     
                     if (top20PopularFoods.length === 0) {
-                        html += '<tr><td colspan="5" style="text-align: center; color: rgba(255,255,255,0.7); padding: 1.6rem;">No foods logged yet</td></tr>';
+                        html += '<tr><td colspan="5" style="text-align: center; color: #86868b; padding: 1.6rem;">No foods logged yet</td></tr>';
                     } else {
                         top20PopularFoods.forEach((food, index) => {
                             const avgCalories = food.totalLogs > 0 ? Math.round(food.totalCalories / food.totalLogs) : 0;
@@ -4625,7 +4586,7 @@
                     html = '<h4>Recently Logged Foods (Today)</h4>';
                     const todaysFoods = Object.entries(dataCache.loggedFoods || {});
                     if (todaysFoods.length === 0) {
-                        html += '<p style="color: rgba(255,255,255,0.7); text-align: center; padding: 1.6rem;">No foods logged today yet</p>';
+                        html += '<p style="color: #86868b; text-align: center; padding: 1.6rem;">No foods logged today yet</p>';
                     } else {
                         html += '<div class="foods-grid">';
                         todaysFoods.slice(-20).reverse().forEach(([name, data]) => {
@@ -4666,7 +4627,7 @@
                 case 'search':
                     html = `
                         <div style="margin: 0.8rem 0;">
-                            <input type="text" id="foodSearch" placeholder="Search user-logged foods..." style="width: 100%; padding: 0.75rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: white;">
+                            <input type="text" id="foodSearch" placeholder="Search user-logged foods..." style="width: 100%; padding: 0.75rem; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; color: #1d1d1f;">
                         </div>
                         <div id="searchResults"></div>
                     `;
@@ -4675,21 +4636,21 @@
                         if (searchInput) {
                             const userFoods = Object.values(dataCache.userFoodHistory || {});
                             // Show initial message
-                            document.getElementById('searchResults').innerHTML = '<p style="color: rgba(255, 255, 255, 0.7);">Type to search ' + userFoods.length + ' user-logged foods...</p>';
+                            document.getElementById('searchResults').innerHTML = '<p style="color: #86868b;">Type to search ' + userFoods.length + ' user-logged foods...</p>';
                             
                             searchInput.addEventListener('input', (e) => {
                                 const query = e.target.value.toLowerCase();
                                 if (!query) {
-                                    document.getElementById('searchResults').innerHTML = '<p style="color: rgba(255, 255, 255, 0.7);">Type to search...</p>';
+                                    document.getElementById('searchResults').innerHTML = '<p style="color: #86868b;">Type to search...</p>';
                                     return;
                                 }
                                 const filtered = userFoods.filter(f => 
                                     f.name.toLowerCase().includes(query)
                                 );
                                 
-                                let resultsHtml = `<p style="color: rgba(255, 255, 255, 0.7);">Found ${filtered.length} items</p><div class="foods-grid">`;
+                                let resultsHtml = `<p style="color: #86868b;">Found ${filtered.length} items</p><div class="foods-grid">`;
                                 if (filtered.length === 0) {
-                                    resultsHtml += '<p style="color: rgba(255, 255, 255, 0.5); grid-column: 1/-1; text-align: center; padding: 1.6rem;">No foods match your search</p>';
+                                    resultsHtml += '<p style="color: #aeaeb2; grid-column: 1/-1; text-align: center; padding: 1.6rem;">No foods match your search</p>';
                                 } else {
                                     filtered.slice(0, 20).forEach(food => {
                                         const avgCalories = food.totalLogs > 0 ? Math.round(food.totalCalories / food.totalLogs) : 0;
@@ -4855,7 +4816,7 @@
                 
                 // Display leaderboard
                 if (leaderboardData.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.5);">No users found</p>';
+                    container.innerHTML = '<p style="text-align: center; color: #aeaeb2;">No users found</p>';
                     return;
                 }
                 
@@ -4880,7 +4841,7 @@
                             <td>
                                 <div>
                                     <div style="font-weight: 600;">${user.name}</div>
-                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">${user.email}</div>
+                                    <div style="font-size: 0.75rem; color: #aeaeb2;">${user.email}</div>
                                 </div>
                             </td>
                             <td>
@@ -4891,10 +4852,10 @@
                             <td>
                                 <div style="width: 200px;">
                                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">Progress</span>
-                                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">${user.levelProgress}/${user.levelRequirement} XP</span>
+                                        <span style="font-size: 0.75rem; color: #86868b;">Progress</span>
+                                        <span style="font-size: 0.75rem; color: #86868b;">${user.levelProgress}/${user.levelRequirement} XP</span>
                                     </div>
-                                    <div style="background: rgba(255,255,255,0.1); border-radius: 8px; height: 20px; overflow: hidden; position: relative;">
+                                    <div style="background: #f2f2f7; border-radius: 8px; height: 20px; overflow: hidden; position: relative;">
                                         <div style="background: linear-gradient(90deg, #FFD700, #FFA500); height: 100%; width: ${user.progressPercent}%; transition: width 0.3s ease;">
                                         </div>
                                         <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.75rem; font-weight: bold; text-shadow: 0 0 4px rgba(0,0,0,0.5);">
@@ -4922,18 +4883,18 @@
                 const maxLevel = Math.max(...leaderboardData.map(u => u.level));
                 
                 html += `
-                    <div style="margin-top: 2rem; padding: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                    <div style="margin-top: 2rem; padding: 0.8rem; background: #f5f5f7; border-radius: 8px;">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; text-align: center;">
                             <div>
-                                <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Total Users</div>
+                                <div style="font-size: 0.875rem; color: #86868b;">Total Users</div>
                                 <div style="font-size: 1.2rem; font-weight: bold;">${leaderboardData.length}</div>
                             </div>
                             <div>
-                                <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Average XP</div>
+                                <div style="font-size: 0.875rem; color: #86868b;">Average XP</div>
                                 <div style="font-size: 1.2rem; font-weight: bold; color: #FFD700;">${avgXP.toLocaleString()}</div>
                             </div>
                             <div>
-                                <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Highest Level</div>
+                                <div style="font-size: 0.875rem; color: #86868b;">Highest Level</div>
                                 <div style="font-size: 1.2rem; font-weight: bold; color: #FFA500;">Lv ${maxLevel}</div>
                             </div>
                         </div>
@@ -5088,7 +5049,7 @@
                 
                 // Display transactions
                 if (allTransactions.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.5);">No recent XP transactions found</p>';
+                    container.innerHTML = '<p style="text-align: center; color: #aeaeb2;">No recent XP transactions found</p>';
                     return;
                 }
                 
@@ -5104,7 +5065,7 @@
                                     <span>${transaction.icon}</span>
                                     <div>
                                         <div style="font-weight: 600;">${transaction.userName}</div>
-                                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">${transaction.userId.substring(0, 8)}...</div>
+                                        <div style="font-size: 0.75rem; color: #aeaeb2;">${transaction.userId.substring(0, 8)}...</div>
                                     </div>
                                 </div>
                             </td>
@@ -5203,15 +5164,15 @@
                 }
                 
                 resultsContainer.innerHTML = `
-                    <div style="background: rgba(255,255,255,0.05); padding: 1.2rem; border-radius: 8px;">
+                    <div style="background: #f5f5f7; padding: 1.2rem; border-radius: 8px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
                             <div>
                                 <h4>${userData.displayName || userData.name || 'Unknown User'}</h4>
-                                <p style="color: rgba(255,255,255,0.6);">User ID: ${userId}</p>
+                                <p style="color: #86868b;">User ID: ${userId}</p>
                             </div>
                             <div style="text-align: right;">
                                 <div style="font-size: 1.2rem; font-weight: bold;">${formatNumber(userData.xp || 0)} XP</div>
-                                <p style="color: rgba(255,255,255,0.6);">Level ${userData.level || 1}</p>
+                                <p style="color: #86868b;">Level ${userData.level || 1}</p>
                             </div>
                         </div>
                         
@@ -5254,7 +5215,7 @@
                     .get();
                 
                 if (snapshot.empty) {
-                    container.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.5);">No flagged users found</p>';
+                    container.innerHTML = '<p style="text-align: center; color: #aeaeb2;">No flagged users found</p>';
                     return;
                 }
                 
@@ -5262,11 +5223,11 @@
                 snapshot.forEach(doc => {
                     const user = doc.data();
                     html += `
-                        <div style="background: rgba(255,255,255,0.05); padding: 0.8rem; border-radius: 8px;">
+                        <div style="background: #f5f5f7; padding: 0.8rem; border-radius: 8px;">
                             <div style="display: flex; justify-content: space-between;">
                                 <div>
                                     <strong>${user.userName || 'Unknown User'}</strong>
-                                    <p style="color: rgba(255,255,255,0.6); font-size: 0.875rem;">
+                                    <p style="color: #86868b; font-size: 0.875rem;">
                                         ID: ${user.userId}<br>
                                         Reason: ${user.flagReason}<br>
                                         Date: ${user.flaggedDate ? new Date(user.flaggedDate.seconds * 1000).toLocaleDateString() : 'Unknown'}
@@ -5301,7 +5262,7 @@
                     .get();
                 
                 if (snapshot.empty) {
-                    container.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.5);">No anomalies detected</p>';
+                    container.innerHTML = '<p style="text-align: center; color: #aeaeb2;">No anomalies detected</p>';
                     return;
                 }
                 
@@ -5309,11 +5270,11 @@
                 snapshot.forEach(doc => {
                     const anomaly = doc.data();
                     html += `
-                        <div style="background: rgba(255,255,255,0.05); padding: 0.8rem; border-radius: 8px;">
+                        <div style="background: #f5f5f7; padding: 0.8rem; border-radius: 8px;">
                             <div style="display: flex; justify-content: space-between;">
                                 <div>
                                     <strong>${anomaly.anomalyType}</strong>
-                                    <p style="color: rgba(255,255,255,0.6); font-size: 0.875rem;">
+                                    <p style="color: #86868b; font-size: 0.875rem;">
                                         ${anomaly.description}<br>
                                         User: ${anomaly.userId}<br>
                                         XP: ${anomaly.xpAmount}<br>
@@ -5362,12 +5323,12 @@
                     },
                     scales: {
                         y: {
-                            ticks: { color: 'rgba(255,255,255,0.5)' },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
+                            ticks: { color: '#86868b' },
+                            grid: { color: 'rgba(0,0,0,0.06)' }
                         },
                         x: {
-                            ticks: { color: 'rgba(255,255,255,0.5)' },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
+                            ticks: { color: '#86868b' },
+                            grid: { color: 'rgba(0,0,0,0.06)' }
                         }
                     }
                 }
@@ -5455,21 +5416,9 @@
             });
         }
         
-        // Theme Toggle Functions
-        function initTheme() {
-            const savedTheme = localStorage.getItem('dashboardTheme') || 'dark';
-            document.body.setAttribute('data-theme', savedTheme);
-        }
-        
-        function toggleTheme() {
-            const currentTheme = document.body.getAttribute('data-theme') || 'dark';
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('dashboardTheme', newTheme);
-        }
-        
-        // Initialize theme on load
-        initTheme();
+        // Light theme is permanent - remove any saved dark theme
+        document.body.removeAttribute('data-theme');
+        localStorage.removeItem('dashboardTheme');
         
         // Export Functions for specific data
         function exportXPLeaderboard() {
@@ -5527,12 +5476,6 @@
                 e.preventDefault();
                 const refreshBtn = document.getElementById('refreshBtn');
                 if (refreshBtn) refreshBtn.click();
-            }
-            
-            // T for theme toggle
-            if (e.key === 't' && !e.ctrlKey && !e.metaKey) {
-                e.preventDefault();
-                toggleTheme();
             }
             
             // ESC to close modals or clear search
@@ -5672,7 +5615,7 @@
                 let html = '';
 
                 heatmapData.forEach(day => {
-                    let color = 'rgba(255,255,255,0.1)';
+                    let color = 'rgba(0,0,0,0.06)';
                     if (day.intensity > 0.8) color = '#22d3a5';
                     else if (day.intensity > 0.6) color = 'rgba(34,211,165,0.9)';
                     else if (day.intensity > 0.4) color = 'rgba(34,211,165,0.6)';
@@ -5705,7 +5648,7 @@
             if (!container) return;
             
             if (users.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.5);">No at-risk users detected</p>';
+                container.innerHTML = '<p style="text-align: center; color: #aeaeb2;">No at-risk users detected</p>';
                 return;
             }
             
@@ -5718,7 +5661,7 @@
                 
                 html += `
                     <div style="
-                        background: rgba(255,255,255,0.05);
+                        background: #f5f5f7;
                         border-left: 4px solid ${riskColor};
                         padding: 0.75rem;
                         border-radius: 8px;
@@ -5728,7 +5671,7 @@
                     ">
                         <div>
                             <div style="font-weight: 600;">${user.name}</div>
-                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">
+                            <div style="font-size: 0.75rem; color: #aeaeb2;">
                                 ${user.daysInactive} days inactive • Last streak: ${user.lastStreak} days
                             </div>
                         </div>
@@ -5812,7 +5755,7 @@
                             <span>${stage.stage}</span>
                             <span>${stage.count} users (${stage.percent}%)</span>
                         </div>
-                        <div style="background: rgba(255,255,255,0.1); border-radius: 8px; height: 32px; overflow: hidden;">
+                        <div style="background: #f2f2f7; border-radius: 8px; height: 32px; overflow: hidden;">
                             <div style="
                                 background: linear-gradient(90deg, #667eea, #764ba2);
                                 height: 100%;
@@ -5895,19 +5838,19 @@
                                  successProbability > 40 ? '#FF9500' : '#FF3B30';
                 
                 html += `
-                    <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0.8rem;">
+                    <div style="background: #f5f5f7; border-radius: 8px; padding: 0.8rem;">
                         <div style="font-weight: 600; margin-bottom: 0.5rem;">${user.name || user.email || 'User'}</div>
                         <div style="font-size: 1.6rem; font-weight: bold; color: ${probColor};">
                             ${successProbability}%
                         </div>
-                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 0.5rem;">
+                        <div style="font-size: 0.75rem; color: #86868b; margin-bottom: 0.5rem;">
                             Chance of reaching goal
                         </div>
                         <div style="font-size: 0.875rem;">
                             ${currentSteps.toLocaleString()} / ${goal.toLocaleString()} steps
                         </div>
                         ${hoursLeft > 0 && neededRate > 0 ? `
-                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem;">
+                            <div style="font-size: 0.75rem; color: #aeaeb2; margin-top: 0.5rem;">
                                 Needs ${neededRate} steps/hour
                             </div>
                         ` : ''}
@@ -5979,7 +5922,7 @@
                 const color = user.risk > 70 ? '#FF3B30' : user.risk > 50 ? '#FF9500' : '#FFD60A';
                 html += `
                     <div style="
-                        background: rgba(255,255,255,0.05);
+                        background: #f5f5f7;
                         border-left: 4px solid ${color};
                         padding: 0.75rem;
                         border-radius: 8px;
@@ -5988,7 +5931,7 @@
                     ">
                         <div>
                             <div style="font-weight: 600;">${user.name}</div>
-                            <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">
+                            <div style="font-size: 0.75rem; color: #aeaeb2;">
                                 ${user.lastActive} days since last active
                             </div>
                         </div>
@@ -5999,7 +5942,7 @@
                 `;
             });
             if (riskUsers.length === 0) {
-                html += '<p style="text-align: center; color: rgba(255,255,255,0.5);">No high-risk users detected</p>';
+                html += '<p style="text-align: center; color: #aeaeb2;">No high-risk users detected</p>';
             }
             html += '</div>';
             churnContainer.innerHTML = html;
@@ -6016,15 +5959,15 @@
                 forecastContainer.innerHTML = `
                     <div style="display: grid; gap: 0.8rem;">
                         <div>
-                            <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Predicted Steps</div>
+                            <div style="font-size: 0.875rem; color: #86868b;">Predicted Steps</div>
                             <div style="font-size: 1.2rem; font-weight: bold;">${predictedSteps.toLocaleString()}</div>
                         </div>
                         <div>
-                            <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Expected Active Users</div>
+                            <div style="font-size: 0.875rem; color: #86868b;">Expected Active Users</div>
                             <div style="font-size: 1.2rem; font-weight: bold;">${predictedActive}</div>
                         </div>
                         <div>
-                            <div style="font-size: 0.875rem; color: rgba(255,255,255,0.6);">Based On</div>
+                            <div style="font-size: 0.875rem; color: #86868b;">Based On</div>
                             <div style="font-size: 1.2rem; font-weight: bold; color: #667eea;">Recent trends</div>
                         </div>
                     </div>
@@ -6141,7 +6084,7 @@
                     tableHtml += '</tbody></table>';
                     cohortContainer.innerHTML = tableHtml;
                 } else if (cohortContainer) {
-                    cohortContainer.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center;">No cohort data available yet</p>';
+                    cohortContainer.innerHTML = '<p style="color: #aeaeb2; text-align: center;">No cohort data available yet</p>';
                 }
 
             } catch (error) {
@@ -6384,8 +6327,8 @@
                             scales: {
                                 r: {
                                     ticks: { backdropColor: 'transparent' },
-                                    grid: { color: 'rgba(255,255,255,0.08)' },
-                                    angleLines: { color: 'rgba(255,255,255,0.08)' }
+                                    grid: { color: 'rgba(0,0,0,0.06)' },
+                                    angleLines: { color: 'rgba(0,0,0,0.06)' }
                                 }
                             }
                         }
@@ -6532,7 +6475,7 @@
                         tableHtml += '</tbody></table>';
                         tableContainer.innerHTML = tableHtml;
                     } else {
-                        tableContainer.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center;">No weight data recorded yet</p>';
+                        tableContainer.innerHTML = '<p style="color: #aeaeb2; text-align: center;">No weight data recorded yet</p>';
                     }
                 }
 
@@ -6541,11 +6484,6 @@
             }
         }
     </script>
-    <!-- Theme Toggle Button -->
-    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
-        <span id="themeIcon">🌙</span>
-    </button>
-    
     <!-- Back to Top Button -->
     <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Back to Top">
         ↑
@@ -6562,22 +6500,6 @@
             }
         });
         
-        // Update theme icon
-        function updateThemeIcon() {
-            const icon = document.getElementById('themeIcon');
-            const theme = document.body.getAttribute('data-theme') || 'dark';
-            icon.textContent = theme === 'dark' ? '🌙' : '☀️';
-        }
-        
-        // Override toggleTheme to update icon
-        const originalToggleTheme = toggleTheme;
-        toggleTheme = function() {
-            originalToggleTheme();
-            updateThemeIcon();
-        };
-        
-        // Set initial icon
-        updateThemeIcon();
         // Social Media Page Functions
         function loadSocialMediaPage() {
             debugLog('SOCIAL', 'Loading Social Media page');
@@ -6826,7 +6748,6 @@
             // Quick Actions
             { icon: '🔄', title: 'Refresh Data', action: () => location.reload(), keywords: 'reload update sync', shortcut: 'R' },
             { icon: '📥', title: 'Export Current View', action: () => exportCurrentView(), keywords: 'download csv excel save', shortcut: 'E' },
-            { icon: '🌙', title: 'Toggle Theme', action: () => toggleTheme(), keywords: 'dark light mode appearance' },
             { icon: '🚩', title: 'View Flagged Users', action: () => showFlaggedUsers(), keywords: 'suspicious problematic issues' },
             { icon: '⚠️', title: 'Show Active Anomalies', action: () => showAnomalies(), keywords: 'alerts warnings problems' },
             { icon: '📊', title: 'Generate Report', action: () => generateReport(), keywords: 'summary statistics export' },
