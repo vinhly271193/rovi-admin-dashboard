@@ -1976,13 +1976,7 @@
 
     <script>
         console.log('Dashboard script starting...');
-        
-        // Wait for DOM to be ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApp);
-        } else {
-            initializeApp();
-        }
+        // initializeApp() is called after Firebase init below
         
         function initializeApp() {
             console.log('DOM ready, initializing app...');
@@ -2089,6 +2083,13 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         debugLog('FIREBASE', 'Firebase initialized');
+
+        // Now that Firebase is ready, initialize the app
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
 
         const ADMIN_UID = 'byothLpU8SdS5SYpxlUFTOpGT0p1';
         
