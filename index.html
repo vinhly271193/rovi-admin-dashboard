@@ -5911,29 +5911,8 @@
             }
         }
         
-        // Predictive Alerts - Check patterns periodically
-        function checkForAnomalies() {
-            // Example anomaly detection
-            const randomCheck = Math.random();
-            
-            if (randomCheck < 0.1) {
-                showAlert('warning', 'Unusual Activity Detected', 
-                    'User #4821 logged unusual activity in 5 minutes',
-                    'investigateUser("4821")');
-            }
-            
-            if (randomCheck < 0.05) {
-                showAlert('critical', 'Churn Risk Alert', 
-                    '12 users showing signs of disengagement', 
-                    'showChurnRiskUsers()');
-            }
-            
-            if (randomCheck < 0.15) {
-                showAlert('success', 'Milestone Approaching', 
-                    '5 users about to reach 100-day streak!', 
-                    'showMilestoneUsers()');
-            }
-        }
+        // Anomaly checking disabled - was generating fake demo alerts
+        function checkForAnomalies() {}
         
         // ==========================================
         // IMPROVEMENT #4: Annotations System
@@ -6219,10 +6198,7 @@
                 // Start anomaly checking
                 setInterval(checkForAnomalies, 30000); // Check every 30 seconds
                 
-                // Show welcome message
-                setTimeout(() => {
-                    showAlert('success', 'Dashboard Enhanced', 'Press ⌘K to open command palette');
-                }, 2000);
+                // Welcome message removed - was firing on every page load
             }, 1000);
         });
     </script>
