@@ -429,7 +429,7 @@
         
         /* Print Styles */
         @media print {
-            .sidebar, .theme-toggle, .back-to-top, .export-btn, button {
+            .top-bar, .theme-toggle, .back-to-top, .export-btn, button {
                 display: none !important;
             }
             
@@ -963,36 +963,47 @@
 
     <!-- Dashboard -->
     <div id="dashboard" class="dashboard-container" style="display: none;">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2>ROVI Analytics</h2>
-                <span id="userEmail" style="font-size: 0.75rem; color: #718096;"></span>
-            </div>
-            <ul class="nav-menu">
-                <li class="nav-item active" data-page="overview">Overview</li>
-                <li class="nav-item" data-page="leaderboards">Leaderboards</li>
-                <li class="nav-item" data-page="foods">Food Data</li>
-                <li class="nav-item" data-page="activities">Activities</li>
-                <li class="nav-item" data-page="users">Users</li>
-                <li class="nav-item" data-page="analytics">Analytics</li>
-                <li class="nav-item" data-page="growth">Growth</li>
-                <li class="nav-item" data-page="workouts">Workouts</li>
-                <li class="nav-item" data-page="nutrition">Nutrition</li>
-                <li class="nav-item" data-page="weight">Weight</li>
-                <li class="nav-item" data-page="socialmedia">Social Media</li>
-            </ul>
-            <div class="sidebar-footer">
-                <button id="refreshBtn" class="btn-refresh">Refresh</button>
-                <button id="signOutBtn" class="btn-logout">Sign Out</button>
-                <div class="cache-info">
-                    Cache: <span id="cacheStatus">Empty</span>
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="top-bar-inner">
+                <div class="top-bar-left">
+                    <h1 class="top-bar-logo">ROVI</h1>
+                    <span class="top-bar-badge">Admin</span>
                 </div>
-                <div class="debug-panel" id="debugPanel" style="margin-top: 1rem; padding: 0.5rem; background: #f5f5f7; border-radius: 8px; max-height: 160px; overflow-y: auto; font-size: 0.75rem; color: #86868b;">
-                    <div style="color: #aeaeb2;">Debug logs...</div>
+                <nav class="pill-nav" id="pillNav">
+                    <button class="pill-nav-item active" data-page="overview">Overview</button>
+                    <button class="pill-nav-item" data-page="leaderboards">Leaderboards</button>
+                    <button class="pill-nav-item" data-page="analytics">Analytics</button>
+                    <button class="pill-nav-item" data-page="growth">Growth</button>
+                    <div class="pill-nav-more">
+                        <button class="pill-nav-item pill-nav-more-trigger" id="moreNavBtn">More</button>
+                        <div class="pill-nav-dropdown" id="moreDropdown">
+                            <button class="dropdown-item" data-page="foods">Food Data</button>
+                            <button class="dropdown-item" data-page="activities">Activities</button>
+                            <button class="dropdown-item" data-page="users">Users</button>
+                            <button class="dropdown-item" data-page="workouts">Workouts</button>
+                            <button class="dropdown-item" data-page="nutrition">Nutrition</button>
+                            <button class="dropdown-item" data-page="weight">Weight</button>
+                            <button class="dropdown-item" data-page="socialmedia">Social Media</button>
+                        </div>
+                    </div>
+                </nav>
+                <div class="top-bar-right">
+                    <div class="cache-info" style="font-size: 0.6875rem; color: #AEAEB2; margin-right: 8px;">
+                        <span id="cacheStatus">Empty</span>
+                    </div>
+                    <button class="top-bar-action" id="refreshBtn" title="Refresh">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 1v5h5M15 15v-5h-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.5 6A6 6 0 003.2 3.2L1 6m14 4l-2.2 2.8A6 6 0 012.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button class="top-bar-action" id="signOutBtn" title="Sign Out">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 14H3a1 1 0 01-1-1V3a1 1 0 011-1h3M11 11l3-3-3-3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
                 </div>
             </div>
-        </nav>
+        </header>
+        <div class="debug-panel" id="debugPanel" style="position:fixed;bottom:0;right:0;margin:1rem;padding:0.5rem;background:#f5f5f7;border-radius:8px;max-height:160px;overflow-y:auto;font-size:0.75rem;color:#86868b;z-index:9999;">
+            <div style="color: #aeaeb2;">Debug logs...</div>
+        </div>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -1003,366 +1014,176 @@
 
             <!-- Overview Page -->
             <div id="overviewPage" class="page-content">
-                
-                <!-- Real-Time Social Feed -->
-                <div class="social-feed-container">
-                    <div class="feed-header">
-                        <h3 class="feed-title">
-                            <span class="live-indicator"></span>
-                            Live Activity Feed
-                        </h3>
-                        <div class="feed-filters">
-                            <button class="feed-filter active" data-filter="all">All</button>
-                            <button class="feed-filter" data-filter="steps">Steps</button>
-                            <button class="feed-filter" data-filter="food">Food</button>
-                            <button class="feed-filter" data-filter="activity">Activities</button>
+
+                <!-- Row 1: Hero stat + small stats -->
+                <div class="bento-grid">
+                    <!-- Hero: Total Users (2x2) -->
+                    <div class="stat-card bento-2x2 stat-card-hero">
+                        <h3>Total Users</h3>
+                        <p class="stat-value" id="totalUsers">-</p>
+                        <div class="stat-change positive" id="userGrowth">
+                            <span>↑ 0%</span>
                         </div>
-                    </div>
-                    <div class="feed-description chart-description" style="margin: 0.5rem;">
-                        <strong>Purpose:</strong> Real-time stream of user activities as they happen across the platform<br>
-                        <strong>Why it's useful:</strong> Provides immediate visibility into platform health and user engagement patterns<br>
-                        <strong>Key insights:</strong> Quiet feeds indicate low engagement; bursts of activity show peak usage times; variety of activities indicates well-rounded user base
-                    </div>
-                    <div class="feed-content" id="socialFeed">
-                        <div class="feed-loading">
-                            <div class="pulse-loader">
-                                <div></div>
-                                <div></div>
-                                <div></div>
-                            </div>
-                            <span>Loading live feed...</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Stats Grid - Enhanced with more metrics -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">👥</div>
-                        <div class="stat-content">
-                            <h3>Total Users</h3>
-                            <p class="stat-value" id="totalUsers">-</p>
-                            <div class="stat-change positive" id="userGrowth" style="display: none;">
-                                <span>↑ 0%</span>
-                            </div>
-                            <div class="stat-description">
-                                <strong>Insight:</strong> <span id="weeklyUserGrowth">Platform size indicator - monitor for steady growth</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">👣</div>
-                        <div class="stat-content">
-                            <h3>Steps Today</h3>
-                            <p class="stat-value" id="totalStepsToday">-</p>
-                            <div class="stat-change" id="stepsChange">
-                                <span>vs yesterday</span>
-                            </div>
-                            <div class="stat-description">
-                                <strong>7-day avg:</strong> <span id="stepsWeekAvg">-</span><br>
-                                <strong>30-day avg:</strong> <span id="stepsMonthAvg">-</span><br>
-                                <strong style="color: var(--accent-primary);">Insight:</strong> Compare to WHO's 10K daily recommendation
-                            </div>
-                            <div style="height: 60px; max-height: 60px; overflow: hidden;">
-                                <canvas id="stepsSparkline" class="sparkline-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🔥</div>
-                        <div class="stat-content">
-                            <h3>Calories Burned Today</h3>
-                            <p class="stat-value" id="totalCaloriesBurned">-</p>
-                            <div class="stat-change" id="caloriesChange">
-                                <span>vs yesterday</span>
-                            </div>
-                            <div class="stat-description">
-                                <strong>7-day avg:</strong> <span id="caloriesWeekAvg">-</span><br>
-                                <strong>30-day avg:</strong> <span id="caloriesMonthAvg">-</span><br>
-                                <strong style="color: var(--accent-primary);">Insight:</strong> Higher burns = more active community
-                            </div>
-                            <div style="height: 60px; max-height: 60px; overflow: hidden;">
-                                <canvas id="caloriesSparkline" class="sparkline-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🍽️</div>
-                        <div class="stat-content">
-                            <h3>Foods Logged Today</h3>
-                            <p class="stat-value" id="foodsLoggedToday">-</p>
-                            <div class="stat-change" id="foodsChange">
-                                <span>vs yesterday</span>
-                            </div>
-                            <div class="stat-description">
-                                <strong>7-day avg:</strong> <span id="foodsWeekAvg">-</span><br>
-                                <strong>30-day avg:</strong> <span id="foodsMonthAvg">-</span><br>
-                                <strong style="color: var(--accent-primary);">Insight:</strong> 3+ logs/day indicates engaged nutrition tracking
-                            </div>
-                            <canvas id="foodsSparkline" class="sparkline-chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🍎</div>
-                        <div class="stat-content">
-                            <h3>Calories Consumed</h3>
-                            <p class="stat-value" id="totalCaloriesConsumed">-</p>
-                            <div class="stat-change">
-                                <span>Today's intake</span>
-                            </div>
-                            <div class="stat-description">
-                                <strong>Avg per user:</strong> <span id="avgCaloriesPerUser">-</span><br>
-                                <strong style="color: var(--accent-primary);">Insight:</strong> Monitor for healthy 1800-2500 cal range
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">✨</div>
-                        <div class="stat-content">
-                            <h3>Active Users Today</h3>
-                            <p class="stat-value" id="activeToday">-</p>
-                            <div class="stat-change" id="activeUsersChange">
-                                <span>vs yesterday</span>
-                            </div>
-                            <div class="stat-description">
-                                <strong>7-day avg:</strong> <span id="activeUsersWeekAvg">-</span><br>
-                                <strong>30-day avg:</strong> <span id="activeUsersMonthAvg">-</span><br>
-                                <strong style="color: var(--accent-primary);">Insight:</strong> Key retention metric - aim for 30%+ DAU
-                            </div>
+                        <div class="trend-chart-container">
                             <canvas id="activeUsersSparkline" class="sparkline-chart"></canvas>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">📈</div>
-                        <div class="stat-content">
-                            <h3>Active User %</h3>
-                            <p class="stat-value" id="engagementRate">0%</p>
-                            <div class="stat-change positive" style="display: none;">
-                                <span>Active today</span>
-                            </div>
-                            <div class="stat-description">
-                                <strong>What:</strong> <span id="weeklyEngagement">% of users with steps today</span><br>
-                                <strong style="color: var(--accent-primary);">Insight:</strong> Below 25% suggests engagement crisis
-                            </div>
-                        </div>
+                    <!-- Small stats (1x1 each) -->
+                    <div class="stat-card bento-1x1">
+                        <h3>Steps Today</h3>
+                        <p class="stat-value" id="totalStepsToday">-</p>
+                        <div class="stat-change" id="stepsChange"><span>vs yesterday</span></div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🏆</div>
-                        <div class="stat-content">
-                            <h3>Daily Champion</h3>
-                            <p class="stat-value" id="dailyChampion" style="font-size: 0.96rem;">-</p>
-                            <div class="stat-change">
-                                <span id="championSteps">- steps</span>
-                            </div>
-                            <div class="stat-description">
-                                <strong>Streak:</strong> <span id="championStreak">- days</span><br>
-                                <strong style="color: var(--accent-primary);">Insight:</strong> Celebrate & feature top performers
-                            </div>
+                    <div class="stat-card bento-1x1">
+                        <h3>Calories Burned</h3>
+                        <p class="stat-value" id="totalCaloriesBurned">-</p>
+                        <div class="stat-change" id="caloriesChange"><span>vs yesterday</span></div>
+                    </div>
+                    <div class="stat-card bento-1x1">
+                        <h3>Foods Logged</h3>
+                        <p class="stat-value" id="foodsLoggedToday">-</p>
+                        <div class="stat-change" id="foodsChange"><span>vs yesterday</span></div>
+                    </div>
+                    <div class="stat-card bento-1x1">
+                        <h3>Active Today</h3>
+                        <p class="stat-value" id="activeToday">-</p>
+                        <div class="stat-change" id="activeUsersChange"><span>vs yesterday</span></div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Secondary stats -->
+                <div class="bento-grid">
+                    <div class="stat-card bento-1x1">
+                        <h3>Calories Consumed</h3>
+                        <p class="stat-value" id="totalCaloriesConsumed">-</p>
+                        <div class="stat-change"><span>Today's intake</span></div>
+                    </div>
+                    <div class="stat-card bento-1x1">
+                        <h3>Engagement Rate</h3>
+                        <p class="stat-value" id="engagementRate">0%</p>
+                        <div class="stat-change"><span id="weeklyEngagement">% active today</span></div>
+                    </div>
+                    <div class="stat-card bento-1x1">
+                        <h3>Daily Champion</h3>
+                        <p class="stat-value" id="dailyChampion" style="font-size: 0.96rem;">-</p>
+                        <div class="stat-change"><span id="championSteps">- steps</span></div>
+                    </div>
+                    <div class="stat-card bento-1x1">
+                        <h3>Live Feed</h3>
+                        <div class="feed-content" id="socialFeed" style="max-height: 100px; overflow-y: auto; font-size: 0.75rem;">
+                            <div class="feed-loading"><span>Loading...</span></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- New Visualization Sections -->
-                <div class="dashboard-row grid-auto" style="margin-bottom: 1rem;">
-                    <!-- Weekly Progress Chart -->
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            Weekly Progress Overview
-                            <span class="data-scope">LAST 7 DAYS</span>
-                        </div>
-                        <div class="chart-description">
-                            <strong>Purpose:</strong> Tracks daily steps, calories burned, and activities over the past week<br>
-                            <strong>Why it's useful:</strong> Identifies patterns in user engagement and activity levels throughout the week<br>
-                            <strong>Key insights:</strong> Look for weekend vs weekday differences, declining trends that need intervention, and peak activity days for challenges
-                        </div>
-                        <div class="chart-container chart-sm">
-                            <canvas id="weeklyProgressChart"></canvas>
+                <!-- Row 3: Trend sparklines -->
+                <div class="bento-grid">
+                    <div class="chart-card bento-1x1">
+                        <div class="chart-title">Steps <span class="trend-indicator trend-up" id="stepsTrendPct">--</span></div>
+                        <div class="trend-chart-container"><canvas id="stepsTrendChart"></canvas></div>
+                    </div>
+                    <div class="chart-card bento-1x1">
+                        <div class="chart-title">Calories <span class="trend-indicator trend-neutral" id="caloriesTrendPct">--</span></div>
+                        <div class="trend-chart-container"><canvas id="caloriesTrendChart"></canvas></div>
+                    </div>
+                    <div class="chart-card bento-1x1">
+                        <div class="chart-title">Engagement <span class="trend-indicator trend-down" id="engagementTrendPct">--</span></div>
+                        <div class="trend-chart-container"><canvas id="engagementTrendChart"></canvas></div>
+                    </div>
+                    <div class="chart-card bento-1x1">
+                        <div class="chart-title">Food Logging <span class="trend-indicator trend-up" id="foodTrendPct">--</span></div>
+                        <div class="trend-chart-container"><canvas id="foodTrendChart"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Row 4: Main charts (wide + small) -->
+                <div class="bento-grid">
+                    <div class="chart-card bento-3x1">
+                        <div class="chart-title">Weekly Progress <span class="data-scope">LAST 7 DAYS</span></div>
+                        <div class="chart-container chart-sm"><canvas id="weeklyProgressChart"></canvas></div>
+                    </div>
+                    <div class="chart-card bento-1x1">
+                        <div class="chart-title">Goals <span class="data-scope">TODAY</span></div>
+                        <div class="chart-container chart-sm"><canvas id="goalProgressChart"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Row 5: Time frame selector + charts -->
+                <div class="bento-grid">
+                    <div class="chart-card bento-4x1" style="padding: 0.75rem 1.5rem;">
+                        <div style="display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
+                            <label style="color: var(--text-secondary); font-size: 0.875rem;">Time Frame:</label>
+                            <select id="timeFrameSelector" style="background: #f5f5f7; color: #1d1d1f; border: 1px solid rgba(0,0,0,0.08); padding: 0.5rem; border-radius: 8px;">
+                                <option value="today">Today</option>
+                                <option value="week" selected>Last 7 Days</option>
+                                <option value="month">Last 30 Days</option>
+                                <option value="all">All Time</option>
+                            </select>
+                            <label style="color: var(--text-secondary); font-size: 0.875rem;">View:</label>
+                            <select id="viewSelector" style="background: #f5f5f7; color: #1d1d1f; border: 1px solid rgba(0,0,0,0.08); padding: 0.5rem; border-radius: 8px;">
+                                <option value="aggregate">Aggregated</option>
+                                <option value="individual">Individual Users</option>
+                                <option value="comparison">User Comparison</option>
+                            </select>
                         </div>
                     </div>
+                </div>
 
-                    <!-- User Activity Heatmap -->
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            Activity Heatmap
-                            <span class="data-scope">LAST 30 DAYS</span>
-                        </div>
-                        <div class="chart-description">
-                            <strong>Purpose:</strong> Visual calendar showing daily activity intensity across the month<br>
-                            <strong>Why it's useful:</strong> Quickly spot inactive periods, consistency patterns, and seasonal trends<br>
-                            <strong>Key insights:</strong> Dark spots indicate low activity requiring engagement campaigns, bright areas show successful periods to replicate
-                        </div>
+                <div class="bento-grid">
+                    <div class="chart-card bento-3x1">
+                        <div class="chart-title">Steps Trend <span class="data-scope" id="stepsScope">7-day aggregate</span></div>
+                        <div class="chart-container chart-md"><canvas id="stepsChart"></canvas></div>
+                    </div>
+                    <div class="chart-card bento-1x1">
+                        <div class="chart-title">Activity Distribution <span class="data-scope" id="activityScope">Today</span></div>
+                        <div class="chart-container chart-md"><canvas id="activityChart"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Row 6: More charts -->
+                <div class="bento-grid">
+                    <div class="chart-card bento-2x1">
+                        <div class="chart-title">Food Trends <span class="data-scope" id="foodScope">Actual logs</span></div>
+                        <div class="chart-container chart-md"><canvas id="foodChart"></canvas></div>
+                    </div>
+                    <div class="chart-card bento-2x1">
+                        <div class="chart-title">Calorie Balance <span class="data-scope" id="calorieScope">7-day</span></div>
+                        <div class="chart-container chart-md"><canvas id="calorieChart"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Row 7: Heatmap + Leaderboard -->
+                <div class="bento-grid">
+                    <div class="chart-card bento-2x1">
+                        <div class="chart-title">Activity Heatmap <span class="data-scope">LAST 30 DAYS</span></div>
                         <div id="activityHeatmap" class="chart-container chart-sm" style="overflow: auto;"></div>
                     </div>
-
-                    <!-- Goal Progress -->
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            Daily Goals Progress
-                            <span class="data-scope">TODAY</span>
-                        </div>
-                        <div class="chart-description">
-                            <strong>Purpose:</strong> Real-time tracking of community progress toward daily goals (10K steps, 2K calories)<br>
-                            <strong>Why it's useful:</strong> Motivates users by showing collective achievement and identifies if goals are too easy/hard<br>
-                            <strong>Key insights:</strong> If consistently under 50%, goals may be too ambitious; over 90% suggests raising the bar
-                        </div>
-                        <div class="chart-container chart-sm">
-                            <canvas id="goalProgressChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Trend Analysis Row -->
-                <div class="dashboard-row grid-auto-sm" style="margin-bottom: 1rem;">
-                    <!-- Steps Trend -->
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            Steps Trend
-                            <span class="trend-indicator trend-up" id="stepsTrendPct">--</span>
-                        </div>
-                        <div class="chart-description">
-                            <strong>Purpose:</strong> 7-day moving average of platform-wide step counts<br>
-                            <strong>Insights:</strong> Rising trends indicate successful engagement; drops suggest intervention needed
-                        </div>
-                        <div class="trend-chart-container">
-                            <canvas id="stepsTrendChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Calories Trend -->
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            Calories Trend
-                            <span class="trend-indicator trend-neutral" id="caloriesTrendPct">--</span>
-                        </div>
-                        <div class="chart-description">
-                            <strong>Purpose:</strong> Tracks calories burned through activities and steps<br>
-                            <strong>Insights:</strong> Flat trends may indicate users need new workout challenges or motivation
-                        </div>
-                        <div class="trend-chart-container">
-                            <canvas id="caloriesTrendChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Engagement Trend -->
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            User Engagement
-                            <span class="trend-indicator trend-down" id="engagementTrendPct">--</span>
-                        </div>
-                        <div class="chart-description">
-                            <strong>Purpose:</strong> Percentage of users actively using the app daily<br>
-                            <strong>Insights:</strong> Declining engagement requires immediate attention - consider push notifications or challenges
-                        </div>
-                        <div class="trend-chart-container">
-                            <canvas id="engagementTrendChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Food Logging Trend -->
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            Food Logging
-                            <span class="trend-indicator trend-up" id="foodTrendPct">--</span>
-                        </div>
-                        <div class="chart-description">
-                            <strong>Purpose:</strong> Tracks meal logging frequency and consistency<br>
-                            <strong>Insights:</strong> Higher logging correlates with better health outcomes and app retention
-                        </div>
-                        <div class="trend-chart-container">
-                            <canvas id="foodTrendChart"></canvas>
-                        </div>
+                    <div class="chart-card bento-2x1">
+                        <div class="chart-title">Today's Top Performers <span class="data-scope">Individual users</span></div>
+                        <div id="quickLeaderboard"><div class="loading-spinner"></div> Loading...</div>
                     </div>
                 </div>
 
-                <!-- Time Frame Selector -->
-                <div class="chart-card" style="margin-bottom: 0.5rem;">
-                    <div style="display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
-                        <label style="color: var(--text-secondary); font-size: 0.875rem;">Time Frame:</label>
-                        <select id="timeFrameSelector" style="background: #f5f5f7; color: #1d1d1f; border: 1px solid rgba(0,0,0,0.08); padding: 0.5rem; border-radius: 8px;">
-                            <option value="today">Today</option>
-                            <option value="week" selected>Last 7 Days</option>
-                            <option value="month">Last 30 Days</option>
-                            <option value="all">All Time</option>
-                        </select>
-                        <label style="color: var(--text-secondary); font-size: 0.875rem;">View:</label>
-                        <select id="viewSelector" style="background: #f5f5f7; color: #1d1d1f; border: 1px solid rgba(0,0,0,0.08); padding: 0.5rem; border-radius: 8px;">
-                            <option value="aggregate">Aggregated</option>
-                            <option value="individual">Individual Users</option>
-                            <option value="comparison">User Comparison</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Charts -->
-                <div class="insights-grid">
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            Steps Trend
-                            <span class="data-scope" id="stepsScope">7-day aggregate</span>
-                        </div>
-                        <div class="chart-description">
-                            <strong>Insight:</strong> <span id="stepsInsight">Loading...</span>
-                        </div>
-                        <div class="chart-container chart-md">
-                            <canvas id="stepsChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            Activity Distribution
-                            <span class="data-scope" id="activityScope">Today</span>
-                        </div>
-                        <div class="chart-description">
-                            <strong>Insight:</strong> <span id="activityInsight">Loading...</span>
-                        </div>
-                        <div class="chart-container chart-md">
-                            <canvas id="activityChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Additional Insights Row -->
-                <div class="insights-grid">
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            Food Trends
-                            <span class="data-scope" id="foodScope">Actual logs</span>
-                        </div>
-                        <div class="chart-description">
-                            <strong>Insight:</strong> <span id="foodInsight">Loading...</span>
-                        </div>
-                        <div class="chart-container chart-md">
-                            <canvas id="foodChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-title">
-                            Calorie Balance
-                            <span class="data-scope" id="calorieScope">7-day</span>
-                        </div>
-                        <div class="chart-description">
-                            <strong>Insight:</strong> <span id="calorieInsight">Loading...</span>
-                        </div>
-                        <div class="chart-container chart-md">
-                            <canvas id="calorieChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Leaderboard -->
-                <div class="chart-card">
-                    <div class="chart-title">
-                        Today's Top Performers
-                        <span class="data-scope">Individual users</span>
-                    </div>
-                    <div class="chart-description">
-                        <strong>Purpose:</strong> Recognizes today's most active users to drive competition and motivation<br>
-                        <strong>Why it's useful:</strong> Creates positive reinforcement and social proof that encourages others to be more active<br>
-                        <strong>Key insights:</strong> Consistent top performers may be power users or potential cheaters; rotating leaders indicates healthy competition
-                    </div>
-                    <div id="quickLeaderboard">
-                        <div class="loading-spinner"></div> Loading...
-                    </div>
+                <!-- Hidden elements to preserve IDs referenced by JS -->
+                <div style="display:none;">
+                    <span id="weeklyUserGrowth"></span>
+                    <span id="stepsWeekAvg"></span>
+                    <span id="stepsMonthAvg"></span>
+                    <canvas id="stepsSparkline" class="sparkline-chart"></canvas>
+                    <span id="caloriesWeekAvg"></span>
+                    <span id="caloriesMonthAvg"></span>
+                    <canvas id="caloriesSparkline" class="sparkline-chart"></canvas>
+                    <span id="foodsWeekAvg"></span>
+                    <span id="foodsMonthAvg"></span>
+                    <canvas id="foodsSparkline" class="sparkline-chart"></canvas>
+                    <span id="activeUsersWeekAvg"></span>
+                    <span id="activeUsersMonthAvg"></span>
+                    <span id="avgCaloriesPerUser"></span>
+                    <span id="championStreak"></span>
+                    <span id="stepsInsight"></span>
+                    <span id="activityInsight"></span>
+                    <span id="foodInsight"></span>
+                    <span id="calorieInsight"></span>
                 </div>
             </div>
 
@@ -2517,58 +2338,71 @@
                 });
             }
 
-            // Navigation
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function() {
-                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                this.classList.add('active');
-                
-                const page = this.dataset.page;
+            // Pill Navigation
+            function showPage(page, label) {
                 document.querySelectorAll('.page-content').forEach(content => {
                     content.style.display = 'none';
                 });
-                
                 const pageElement = document.getElementById(page + 'Page');
                 if (pageElement) {
                     pageElement.style.display = 'block';
-                    document.getElementById('pageTitle').textContent = this.textContent.trim();
-                    
-                    // Load page-specific data
+                    // Re-trigger page animation
+                    pageElement.style.animation = 'none';
+                    pageElement.offsetHeight; // force reflow
+                    pageElement.style.animation = '';
+                    document.getElementById('pageTitle').textContent = label || page;
+
                     switch(page) {
-                        case 'leaderboards':
-                            loadLeaderboards();
-                            break;
-                        case 'foods':
-                            loadFoodDatabase();
-                            break;
-                        case 'activities':
-                            loadActivities();
-                            break;
-                        case 'users':
-                            loadUsersPage();
-                            break;
-                        case 'analytics':
-                            loadAnalyticsPage();
-                            break;
-                        case 'growth':
-                            loadGrowthPage();
-                            break;
-                        case 'workouts':
-                            loadWorkoutsPage();
-                            break;
-                        case 'nutrition':
-                            loadNutritionPage();
-                            break;
-                        case 'weight':
-                            loadWeightPage();
-                            break;
-                        case 'socialmedia':
-                            loadSocialMediaPage();
-                            break;
+                        case 'leaderboards': loadLeaderboards(); break;
+                        case 'foods': loadFoodDatabase(); break;
+                        case 'activities': loadActivities(); break;
+                        case 'users': loadUsersPage(); break;
+                        case 'analytics': loadAnalyticsPage(); break;
+                        case 'growth': loadGrowthPage(); break;
+                        case 'workouts': loadWorkoutsPage(); break;
+                        case 'nutrition': loadNutritionPage(); break;
+                        case 'weight': loadWeightPage(); break;
+                        case 'socialmedia': loadSocialMediaPage(); break;
                     }
                 }
+            }
+
+            document.getElementById('pillNav').addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-page]');
+                if (!btn) return;
+
+                // Close dropdown if open
+                const dropdown = document.getElementById('moreDropdown');
+                if (dropdown) dropdown.classList.remove('open');
+
+                // Update active states
+                document.querySelectorAll('.pill-nav-item').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.dropdown-item').forEach(d => d.classList.remove('active'));
+
+                if (btn.classList.contains('dropdown-item')) {
+                    btn.classList.add('active');
+                    document.getElementById('moreNavBtn').classList.add('active');
+                } else {
+                    btn.classList.add('active');
+                    document.getElementById('moreNavBtn').classList.remove('active');
+                }
+
+                showPage(btn.dataset.page, btn.textContent.trim());
             });
-        });
+
+            // More dropdown toggle
+            document.getElementById('moreNavBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('moreDropdown').classList.toggle('open');
+            });
+
+            // Close dropdown on outside click
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.pill-nav-more')) {
+                    const dropdown = document.getElementById('moreDropdown');
+                    if (dropdown) dropdown.classList.remove('open');
+                }
+            });
 
         // Tab functionality
         document.addEventListener('click', function(e) {
@@ -2605,8 +2439,9 @@
 
         function showDashboard(user) {
             document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'flex';
-            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('dashboard').style.display = 'block';
+            const userEmailEl = document.getElementById('userEmail');
+            if (userEmailEl) userEmailEl.textContent = user.email;
         }
 
         function showError(message) {
@@ -4678,12 +4513,12 @@
                 });
             }
             
-            // Number keys 1-6 for navigation
-            if (e.key >= '1' && e.key <= '6' && !e.ctrlKey && !e.metaKey) {
+            // Number keys 1-4 for pill nav, 5+ for dropdown items
+            if (e.key >= '1' && e.key <= '9' && !e.ctrlKey && !e.metaKey) {
                 e.preventDefault();
-                const navItems = document.querySelectorAll('.nav-item');
+                const allNavBtns = document.querySelectorAll('.pill-nav-item[data-page], .dropdown-item[data-page]');
                 const index = parseInt(e.key) - 1;
-                if (navItems[index]) navItems[index].click();
+                if (allNavBtns[index]) allNavBtns[index].click();
             }
         });
         
@@ -5961,13 +5796,9 @@
         }
         
         function navigateToPage(page) {
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.dataset.page === page) {
-                    item.classList.add('active');
-                    item.click();
-                }
-            });
+            // Find the button in pill nav or dropdown
+            const btn = document.querySelector(`.pill-nav-item[data-page="${page}"], .dropdown-item[data-page="${page}"]`);
+            if (btn) btn.click();
         }
         
         // ==========================================
