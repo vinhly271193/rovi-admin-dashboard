@@ -7,8 +7,8 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>ROVI Admin Dashboard</title>
-    <link rel="stylesheet" href="css/dark-premium.css?v=4">
-    <link rel="stylesheet" href="css/rovi-design-system.css?v=4">
+    <link rel="stylesheet" href="css/dark-premium.css?v=20260306">
+    <link rel="stylesheet" href="css/rovi-design-system.css?v=20260306">
     <style>
         /* Theme Variables */
         :root {
@@ -974,6 +974,7 @@
                     <span class="top-bar-badge">Admin</span>
                 </div>
                 <nav class="pill-nav" id="pillNav">
+                    <div class="pill-nav-indicator" id="pillNavIndicator"></div>
                     <button class="pill-nav-item active" data-page="overview">Overview</button>
                     <button class="pill-nav-item" data-page="leaderboards">Leaderboards</button>
                     <button class="pill-nav-item" data-page="analytics">Analytics</button>
@@ -1064,8 +1065,13 @@
                     </div>
                     <div class="stat-card bento-1x1">
                         <h3>Engagement Rate</h3>
-                        <p class="stat-value" id="engagementRate">0%</p>
-                        <div class="stat-change"><span id="weeklyEngagement">% active today</span></div>
+                        <div class="progress-ring-container">
+                            <div id="engagementRing"></div>
+                            <div>
+                                <p class="stat-value" id="engagementRate" style="margin-bottom:0">0%</p>
+                                <div class="stat-change"><span id="weeklyEngagement">% active today</span></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="stat-card bento-1x1">
                         <h3>Daily Champion</h3>
@@ -2351,18 +2357,59 @@
             return `${year}-${month}-${day}`;
         }
         
-        // Helper function to safely update element text content
+        // Animated number counter
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function animateValue(element, start, end, duration, suffix) {
+            if (prefersReducedMotion || duration <= 0) {
+                element.textContent = end.toLocaleString() + (suffix || '');
+                return;
+            }
+            const startTime = performance.now();
+            const easeOutQuart = t => 1 - Math.pow(1 - t, 4);
+
+            function tick(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easedProgress = easeOutQuart(progress);
+                const current = Math.round(start + (end - start) * easedProgress);
+                element.textContent = current.toLocaleString() + (suffix || '');
+                if (progress < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        }
+
+        // Helper function to safely update element text content (with animation for numbers)
         function updateElementText(id, value) {
             const element = document.getElementById(id);
-            if (element) {
-                element.textContent = value;
-            } else {
+            if (!element) {
                 if (typeof debugLog !== 'undefined') {
                     debugLog('WARN', `Element with id '${id}' not found`);
                 } else {
                     console.warn(`Element with id '${id}' not found`);
                 }
+                return;
             }
+
+            // Try to animate if it's a numeric value inside a stat/kpi card
+            const isInCard = element.closest('.stat-card, .kpi-card');
+            const strVal = String(value);
+            const numMatch = strVal.match(/^([+-]?\d[\d,]*\.?\d*)(.*)$/);
+
+            if (isInCard && numMatch) {
+                const targetNum = parseFloat(numMatch[1].replace(/,/g, ''));
+                const suffix = numMatch[2] || '';
+                const currentText = element.textContent || '0';
+                const currentMatch = currentText.match(/^([+-]?\d[\d,]*\.?\d*)/);
+                const startNum = currentMatch ? parseFloat(currentMatch[1].replace(/,/g, '')) : 0;
+
+                if (!isNaN(targetNum) && !isNaN(startNum) && targetNum !== startNum) {
+                    animateValue(element, startNum, targetNum, 800, suffix);
+                    return;
+                }
+            }
+
+            element.textContent = value;
         }
         
         let currentUser = null;
@@ -2377,7 +2424,7 @@
         let feedItemKeys = new Set();
         let currentFeedFilter = 'all';
 
-        // Chart.js Global Defaults — Minimal Apple style
+        // Chart.js Global Defaults — Animated Modern style
         function initChartDefaults() {
             Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
             Chart.defaults.font.size = 11;
@@ -2385,14 +2432,56 @@
             Chart.defaults.plugins.legend.labels.usePointStyle = true;
             Chart.defaults.plugins.legend.labels.padding = 16;
             Chart.defaults.plugins.legend.labels.font = { size: 11, weight: '500' };
-            Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(28,28,30,0.92)';
-            Chart.defaults.plugins.tooltip.titleColor = '#F5F5F7';
-            Chart.defaults.plugins.tooltip.bodyColor = '#D1D1D6';
-            Chart.defaults.plugins.tooltip.borderColor = 'rgba(255,255,255,0.08)';
-            Chart.defaults.plugins.tooltip.borderWidth = 1;
-            Chart.defaults.plugins.tooltip.padding = 10;
-            Chart.defaults.plugins.tooltip.cornerRadius = 8;
-            Chart.defaults.plugins.tooltip.displayColors = false;
+
+            // Animated chart defaults
+            Chart.defaults.animation = {
+                duration: prefersReducedMotion ? 0 : 800,
+                easing: 'easeOutQuart'
+            };
+
+            // Custom HTML tooltip (glass style)
+            Chart.defaults.plugins.tooltip.enabled = false;
+            Chart.defaults.plugins.tooltip.external = function(context) {
+                const { chart, tooltip } = context;
+                // Skip for sparkline/trend charts (small containers)
+                const isSmallChart = chart.canvas.closest('.sparkline-container, .trend-chart-container');
+                if (isSmallChart) return;
+
+                let tooltipEl = chart.canvas.parentNode.querySelector('.chart-tooltip');
+                if (!tooltipEl) {
+                    tooltipEl = document.createElement('div');
+                    tooltipEl.className = 'chart-tooltip';
+                    chart.canvas.parentNode.style.position = 'relative';
+                    chart.canvas.parentNode.appendChild(tooltipEl);
+                }
+
+                if (tooltip.opacity === 0) {
+                    tooltipEl.classList.remove('visible');
+                    return;
+                }
+
+                let html = '';
+                if (tooltip.title && tooltip.title.length) {
+                    html += `<div class="chart-tooltip-title">${tooltip.title[0]}</div>`;
+                }
+                if (tooltip.body) {
+                    tooltip.body.forEach((bodyItem, i) => {
+                        const colors = tooltip.labelColors[i] || {};
+                        const bgColor = colors.backgroundColor || '#FA4218';
+                        html += `<div class="chart-tooltip-item">
+                            <span class="chart-tooltip-dot" style="background:${bgColor}"></span>
+                            <span class="chart-tooltip-value">${bodyItem.lines.join(', ')}</span>
+                        </div>`;
+                    });
+                }
+                tooltipEl.innerHTML = html;
+                tooltipEl.classList.add('visible');
+
+                const { offsetLeft, offsetTop } = chart.canvas;
+                tooltipEl.style.left = offsetLeft + tooltip.caretX + 'px';
+                tooltipEl.style.top = offsetTop + tooltip.caretY - tooltipEl.offsetHeight - 8 + 'px';
+            };
+
             Chart.defaults.elements.line.borderWidth = 1.5;
             Chart.defaults.elements.point.radius = 0;
             Chart.defaults.elements.point.hoverRadius = 4;
@@ -2402,6 +2491,63 @@
             Chart.defaults.scale.ticks.font = { size: 10 };
         }
         initChartDefaults();
+
+        // --- Skeleton Loading Utility ---
+        function createSkeleton(type, count) {
+            let html = '';
+            for (let i = 0; i < (count || 1); i++) {
+                switch(type) {
+                    case 'stat':
+                        html += `<div class="stat-card" style="min-height:100px">
+                            <div class="skeleton skeleton-row" style="width:40%;height:0.8rem;margin-bottom:12px"></div>
+                            <div class="skeleton skeleton-stat-value"></div>
+                            <div class="skeleton skeleton-row" style="width:50%;height:0.7rem"></div>
+                        </div>`;
+                        break;
+                    case 'chart':
+                        html += `<div class="chart-card">
+                            <div class="skeleton skeleton-row" style="width:30%;height:0.9rem;margin-bottom:16px"></div>
+                            <div class="skeleton skeleton-chart"></div>
+                        </div>`;
+                        break;
+                    case 'table':
+                        html += `<div class="skeleton skeleton-row"></div>`;
+                        break;
+                }
+            }
+            return html;
+        }
+
+        // --- Progress Ring Utility ---
+        function createProgressRing(container, percentage, color, size, strokeWidth) {
+            if (!container) return;
+            size = size || 56;
+            strokeWidth = strokeWidth || 5;
+            const radius = (size - strokeWidth) / 2;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (percentage / 100) * circumference;
+
+            container.innerHTML = `
+                <svg class="progress-ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+                    <circle class="progress-ring-bg"
+                        cx="${size/2}" cy="${size/2}" r="${radius}"
+                        stroke-width="${strokeWidth}" />
+                    <circle class="progress-ring-fill"
+                        cx="${size/2}" cy="${size/2}" r="${radius}"
+                        stroke-width="${strokeWidth}"
+                        stroke="${color || '#FA4218'}"
+                        stroke-dasharray="${circumference}"
+                        stroke-dashoffset="${prefersReducedMotion ? offset : circumference}" />
+                </svg>`;
+
+            // Animate the ring fill
+            if (!prefersReducedMotion) {
+                requestAnimationFrame(() => {
+                    const fill = container.querySelector('.progress-ring-fill');
+                    if (fill) fill.style.strokeDashoffset = offset;
+                });
+            }
+        }
 
         // Debug panel toggle (Ctrl+Shift+D)
         document.addEventListener('keydown', function(e) {
@@ -2501,9 +2647,113 @@
             }
         });
 
+        // --- Nav Indicator ---
+        function updatePillIndicator() {
+            const nav = document.getElementById('pillNav');
+            const indicator = document.getElementById('pillNavIndicator');
+            if (!nav || !indicator) return;
+            const activeBtn = nav.querySelector('.pill-nav-item.active:not(.pill-nav-more-trigger)');
+            if (!activeBtn) {
+                indicator.style.opacity = '0';
+                return;
+            }
+            const navRect = nav.getBoundingClientRect();
+            const btnRect = activeBtn.getBoundingClientRect();
+            indicator.style.width = btnRect.width + 'px';
+            indicator.style.left = (btnRect.left - navRect.left) + 'px';
+            indicator.style.opacity = '1';
+        }
+
+        // --- Staggered Card Animation ---
+        function triggerStaggeredCards(pageElement) {
+            if (prefersReducedMotion) return;
+            const cards = pageElement.querySelectorAll('.stat-card, .chart-card, .kpi-card, .metric-card');
+            cards.forEach((card, i) => {
+                card.classList.remove('card-animate-in');
+                card.style.animationDelay = (i * 50) + 'ms';
+                card.offsetHeight;
+                card.classList.add('card-animate-in');
+            });
+        }
+
+        // --- Scroll Reveal ---
+        let scrollObserver = null;
+        function applyScrollReveal(pageElement) {
+            if (prefersReducedMotion) return;
+            if (scrollObserver) scrollObserver.disconnect();
+
+            const cards = pageElement.querySelectorAll('.stat-card, .chart-card, .kpi-card, .metric-card');
+            const revealTargets = Array.from(cards).slice(4);
+            revealTargets.forEach(card => {
+                card.classList.add('scroll-reveal');
+                card.classList.remove('revealed');
+            });
+
+            scrollObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                        scrollObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '-60px 0px' });
+
+            revealTargets.forEach(card => scrollObserver.observe(card));
+        }
+
+        // --- Page Transition System ---
+        let currentPageId = null;
+        function loadPageContent(page) {
+            switch(page) {
+                case 'leaderboards': loadLeaderboards(); break;
+                case 'foods': loadFoodDatabase(); break;
+                case 'activities': loadActivities(); break;
+                case 'users': loadUsersPage(); break;
+                case 'analytics': loadAnalyticsPage(); break;
+                case 'growth': loadGrowthPage(); break;
+                case 'workouts': loadWorkoutsPage(); break;
+                case 'nutrition': loadNutritionPage(); break;
+                case 'weight': loadWeightPage(); break;
+                case 'socialmedia': loadSocialMediaPage(); break;
+                case 'infrastructure': loadInfrastructurePage(); break;
+            }
+        }
+
+        function showPage(page, label) {
+            const pageElement = document.getElementById(page + 'Page');
+            if (!pageElement) return;
+
+            const outgoing = currentPageId ? document.getElementById(currentPageId + 'Page') : null;
+
+            function enterPage() {
+                document.querySelectorAll('.page-content').forEach(c => {
+                    if (c !== pageElement) c.style.display = 'none';
+                });
+                pageElement.style.display = 'block';
+                pageElement.classList.remove('exiting');
+                pageElement.style.animation = 'none';
+                pageElement.offsetHeight;
+                pageElement.style.animation = '';
+                document.getElementById('pageTitle').textContent = label || page;
+                currentPageId = page;
+
+                triggerStaggeredCards(pageElement);
+                applyScrollReveal(pageElement);
+                loadPageContent(page);
+                updatePillIndicator();
+            }
+
+            if (outgoing && outgoing !== pageElement && !prefersReducedMotion) {
+                outgoing.classList.add('exiting');
+                setTimeout(enterPage, 200);
+            } else {
+                enterPage();
+            }
+        }
+
         function setupEventListeners() {
             console.log('Setting up event listeners...');
-            
+
             // Sign In - handled by window.handleSignIn via onclick attribute
 
             // Sign Out
@@ -2513,36 +2763,6 @@
                     dataCache = { users: null, foods: null, activities: {}, calories: {}, lastFetch: null };
                     auth.signOut();
                 });
-            }
-
-            // Pill Navigation
-            function showPage(page, label) {
-                document.querySelectorAll('.page-content').forEach(content => {
-                    content.style.display = 'none';
-                });
-                const pageElement = document.getElementById(page + 'Page');
-                if (pageElement) {
-                    pageElement.style.display = 'block';
-                    // Re-trigger page animation
-                    pageElement.style.animation = 'none';
-                    pageElement.offsetHeight; // force reflow
-                    pageElement.style.animation = '';
-                    document.getElementById('pageTitle').textContent = label || page;
-
-                    switch(page) {
-                        case 'leaderboards': loadLeaderboards(); break;
-                        case 'foods': loadFoodDatabase(); break;
-                        case 'activities': loadActivities(); break;
-                        case 'users': loadUsersPage(); break;
-                        case 'analytics': loadAnalyticsPage(); break;
-                        case 'growth': loadGrowthPage(); break;
-                        case 'workouts': loadWorkoutsPage(); break;
-                        case 'nutrition': loadNutritionPage(); break;
-                        case 'weight': loadWeightPage(); break;
-                        case 'socialmedia': loadSocialMediaPage(); break;
-                        case 'infrastructure': loadInfrastructurePage(); break;
-                    }
-                }
             }
 
             document.getElementById('pillNav').addEventListener('click', (e) => {
@@ -2582,6 +2802,10 @@
                 }
             });
 
+            // Nav indicator: init + resize
+            requestAnimationFrame(updatePillIndicator);
+            window.addEventListener('resize', updatePillIndicator);
+
         // Tab functionality
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('tab-button')) {
@@ -2620,6 +2844,17 @@
             document.getElementById('dashboard').style.display = 'block';
             const userEmailEl = document.getElementById('userEmail');
             if (userEmailEl) userEmailEl.textContent = user.email;
+
+            // Initial page animations
+            currentPageId = 'overview';
+            const overviewPage = document.getElementById('overviewPage');
+            if (overviewPage) {
+                requestAnimationFrame(() => {
+                    triggerStaggeredCards(overviewPage);
+                    applyScrollReveal(overviewPage);
+                    updatePillIndicator();
+                });
+            }
         }
 
         function showError(message) {
@@ -2741,6 +2976,7 @@
                 updateElementText('avgStepsPerUser', avgSteps.toLocaleString());
                 const engagementRate = Math.round((activeUsersToday / dataCache.users.length) * 100);
                 updateElementText('engagementRate', engagementRate + '%');
+                createProgressRing(document.getElementById('engagementRing'), engagementRate, '#8B5CF6', 56, 5);
                 debugLog('STEPS', `Summary: ${totalStepsToday} total steps from ${activeUsersToday} active users`);
 
                 // Process activities
@@ -2996,7 +3232,22 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    animation: { duration: prefersReducedMotion ? 0 : 400, easing: 'easeOutQuart' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            enabled: true,
+                            external: null,
+                            backgroundColor: 'rgba(28,28,30,0.92)',
+                            titleColor: '#F5F5F7',
+                            bodyColor: '#D1D1D6',
+                            borderColor: 'rgba(255,255,255,0.08)',
+                            borderWidth: 1,
+                            padding: 8,
+                            cornerRadius: 8,
+                            displayColors: false
+                        }
+                    },
                     scales: {
                         x: { ticks: { maxTicksLimit: 7, font: { size: 10 } } },
                         y: { ticks: { maxTicksLimit: 4, font: { size: 10 } } }
@@ -3140,6 +3391,7 @@
                 const engagementRate = Math.round((activeUsers / (dataCache.users?.length || 1)) * 100);
                 debugLog('DATA', `Engagement rate: ${engagementRate}% (${activeUsers}/${dataCache.users?.length} users)`);
                 document.getElementById('engagementRate').textContent = engagementRate + '%';
+                createProgressRing(document.getElementById('engagementRing'), engagementRate, '#8B5CF6', 56, 5);
             }
             
             // Update calories stats if cached
