@@ -2912,14 +2912,7 @@
                 if (existing) existing.destroy();
 
                 const todaySteps = parseInt(document.getElementById('totalStepsToday')?.textContent) || 0;
-                // Use average user goal from Firebase, fallback to platform average
-                let stepGoal = 10000;
-                try {
-                    const settingsDoc = await db.collection('settings').doc('goals').get();
-                    if (settingsDoc.exists && settingsDoc.data().dailySteps) {
-                        stepGoal = settingsDoc.data().dailySteps;
-                    }
-                } catch(e) { debugLog('GOALS', 'Using default step goal'); }
+                const stepGoal = 10000;
                 const progress = Math.min((todaySteps / stepGoal) * 100, 100);
 
                 new Chart(goalCtx, {
