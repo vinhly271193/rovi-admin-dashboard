@@ -1945,64 +1945,23 @@
                 
                 <div id="schedule" class="social-content-section">
                     <h3 style="margin-bottom: 20px;">Content Calendar</h3>
-                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px;">
-                        <div class="chart-card" style="text-align: center;">
-                            <h4 style="font-size: 14px;">Monday</h4>
-                            <div style="font-size: 24px; margin: 10px 0;">2</div>
-                            <div style="display: flex; justify-content: center; gap: 5px;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #bc1888);"></span>
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #0077B5;"></span>
-                            </div>
-                        </div>
-                        <div class="chart-card" style="text-align: center;">
-                            <h4 style="font-size: 14px;">Tuesday</h4>
-                            <div style="font-size: 24px; margin: 10px 0;">1</div>
-                            <div style="display: flex; justify-content: center; gap: 5px;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #1DA1F2;"></span>
-                            </div>
-                        </div>
-                        <div class="chart-card" style="text-align: center;">
-                            <h4 style="font-size: 14px;">Wednesday</h4>
-                            <div style="font-size: 24px; margin: 10px 0;">3</div>
-                            <div style="display: flex; justify-content: center; gap: 5px;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #bc1888);"></span>
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #0077B5;"></span>
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #1DA1F2;"></span>
-                            </div>
-                        </div>
-                        <div class="chart-card" style="text-align: center;">
-                            <h4 style="font-size: 14px;">Thursday</h4>
-                            <div style="font-size: 24px; margin: 10px 0;">2</div>
-                            <div style="display: flex; justify-content: center; gap: 5px;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #bc1888);"></span>
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #1877F2;"></span>
-                            </div>
-                        </div>
-                        <div class="chart-card" style="text-align: center;">
-                            <h4 style="font-size: 14px;">Friday</h4>
-                            <div style="font-size: 24px; margin: 10px 0;">3</div>
-                            <div style="display: flex; justify-content: center; gap: 5px;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #bc1888);"></span>
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #0077B5;"></span>
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #1DA1F2;"></span>
-                            </div>
-                        </div>
-                        <div class="chart-card" style="text-align: center;">
-                            <h4 style="font-size: 14px;">Saturday</h4>
-                            <div style="font-size: 24px; margin: 10px 0;">1</div>
-                            <div style="display: flex; justify-content: center; gap: 5px;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #bc1888);"></span>
-                            </div>
-                        </div>
-                        <div class="chart-card" style="text-align: center;">
-                            <h4 style="font-size: 14px;">Sunday</h4>
-                            <div style="font-size: 24px; margin: 10px 0;">2</div>
-                            <div style="display: flex; justify-content: center; gap: 5px;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #0077B5;"></span>
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #1877F2;"></span>
-                            </div>
-                        </div>
+                    <div id="contentCalendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px;">
                     </div>
+                    <script>
+                        // Load calendar from Firebase or show empty state
+                        (function() {
+                            const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+                            const grid = document.getElementById('contentCalendarGrid');
+                            if (!grid) return;
+                            grid.innerHTML = days.map(day => `
+                                <div class="chart-card" style="text-align: center;">
+                                    <h4 style="font-size: 14px;">${day}</h4>
+                                    <div style="font-size: 24px; margin: 10px 0; color: #AEAEB2;">0</div>
+                                    <div style="font-size: 0.6875rem; color: #AEAEB2;">No posts</div>
+                                </div>
+                            `).join('');
+                        })();
+                    </script>
                 </div>
             </div>
         </main>
@@ -2548,10 +2507,8 @@
                 try {
                     debugLog('ACTIVITY', 'Loading activities for all users...');
                     
-                    // Calculate calories from steps FIRST (approx 0.04 calories per step)
-                    stepCalories = Math.round(totalStepsToday * 0.04);
-                    totalCaloriesBurned += stepCalories;
-                    debugLog('ACTIVITY', `Added ${stepCalories} calories from ${totalStepsToday} steps`);
+                    // Only count calories from real activity log data (no step-based estimation)
+                    debugLog('ACTIVITY', 'Loading real activity data only (no step conversion)');
                     
                     const activityPromises = dataCache.users.map(user => 
                     db.collection('users').doc(user.id)
@@ -2964,7 +2921,14 @@
                 if (existing) existing.destroy();
 
                 const todaySteps = parseInt(document.getElementById('totalStepsToday')?.textContent) || 0;
-                const stepGoal = 10000;
+                // Use average user goal from Firebase, fallback to platform average
+                let stepGoal = 10000;
+                try {
+                    const settingsDoc = await db.collection('settings').doc('goals').get();
+                    if (settingsDoc.exists && settingsDoc.data().dailySteps) {
+                        stepGoal = settingsDoc.data().dailySteps;
+                    }
+                } catch(e) { debugLog('GOALS', 'Using default step goal'); }
                 const progress = Math.min((todaySteps / stepGoal) * 100, 100);
 
                 new Chart(goalCtx, {
@@ -4838,34 +4802,39 @@
         async function loadGoalIntelligence() {
             const container = document.getElementById('goalPredictions');
             if (!container) return;
-            
-            // Generate predictions for top users
+
+            // Try to load goal from Firebase settings
+            let goal = 10000;
+            try {
+                const settingsDoc = await db.collection('settings').doc('goals').get();
+                if (settingsDoc.exists && settingsDoc.data().dailySteps) {
+                    goal = settingsDoc.data().dailySteps;
+                }
+            } catch(e) { debugLog('GOALS', 'Using default step goal for predictions'); }
+
             const users = dataCache.users?.slice(0, 6) || [];
             let html = '';
-            
+
             users.forEach(user => {
                 const currentSteps = dataCache.todaySteps?.[user.id] || 0;
-                const goal = 10000;
                 const progress = (currentSteps / goal * 100).toFixed(1);
                 const hoursLeft = new Date().getHours() < 22 ? 22 - new Date().getHours() : 0;
                 const neededRate = hoursLeft > 0 ? Math.round((goal - currentSteps) / hoursLeft) : 0;
-                
-                // Predict success based on current pace
-                const successProbability = currentSteps > (goal * 0.4) ? 
-                    Math.min(95, (currentSteps / goal * 100 * 1.5)).toFixed(0) : 
-                    Math.max(5, (currentSteps / goal * 100)).toFixed(0);
-                
-                const probColor = successProbability > 70 ? '#22d3a5' : 
-                                 successProbability > 40 ? '#FF9500' : '#FF3B30';
+
+                // Simple completion percentage (no fake prediction multipliers)
+                const completionPct = Math.min(100, (currentSteps / goal * 100)).toFixed(0);
+
+                const probColor = completionPct > 70 ? '#22d3a5' :
+                                 completionPct > 40 ? '#FF9500' : '#FF3B30';
                 
                 html += `
                     <div style="background: #f5f5f7; border-radius: 8px; padding: 0.8rem;">
                         <div style="font-weight: 600; margin-bottom: 0.5rem;">${user.name || user.email || 'User'}</div>
                         <div style="font-size: 1.6rem; font-weight: bold; color: ${probColor};">
-                            ${successProbability}%
+                            ${completionPct}%
                         </div>
                         <div style="font-size: 0.75rem; color: #86868b; margin-bottom: 0.5rem;">
-                            Chance of reaching goal
+                            Goal completion
                         </div>
                         <div style="font-size: 0.875rem;">
                             ${currentSteps.toLocaleString()} / ${goal.toLocaleString()} steps
@@ -5487,167 +5456,34 @@
         }
         
         function loadSocialPosts() {
-            const socialPosts = [
-                {
-                    platform: 'instagram',
-                    copy: '🔥 DID YOU KNOW? Your body burns calories for up to 38 HOURS after strength training!\n\nThis "afterburn effect" (EPOC) means a 45-minute weight session can torch an extra 150-200 calories post-workout.\n\nThat\'s like getting paid overtime for your gym time! 💪',
-                    hashtags: '#AfterBurnEffect #EPOC #StrengthTraining #FitnessScience #ROVIApp',
-                    stats: {
-                        'EPOC Duration': '14-38 hours',
-                        'Extra Calorie Burn': '6-15% of workout',
-                        'Peak Effect': '1st hour post-workout'
-                    },
-                    scienceFact: 'Study: High-intensity resistance training increases resting metabolic rate by 9% for up to 38 hours (Schuenke et al., 2002)'
-                },
-                {
-                    platform: 'linkedin',
-                    copy: 'The Corporate Athlete\'s Secret: Strategic Recovery 📈\n\nNew research shows that taking a 10-minute walk every 90 minutes increases productivity by 23% and creativity by 41%.\n\nOur ROVI dashboard data reveals:\n• Users who log 250+ steps per work hour show 67% better stress metrics\n• "Micro-workout" participants show 3x more consistency gains\n• Active break-takers maintain energy levels 4 hours longer',
-                    hashtags: '#CorporateWellness #ProductivityHacks #WorkplaceHealth',
-                    stats: {
-                        'Productivity Boost': '+23%',
-                        'Creativity Increase': '+41%',
-                        'Energy Duration': '+4 hours'
-                    },
-                    scienceFact: 'Stanford study: Walking increases creative output by 60% (Oppezzo & Schwartz, 2014)'
-                },
-                {
-                    platform: 'twitter',
-                    copy: 'Plot twist: Your muscles have memory! 🧬\n\nMuscle memory isn\'t just skill - it\'s cellular. Previous training creates additional nuclei that stick around for YEARS.\n\nComeback game = Strong AF',
-                    hashtags: '#MuscleMemory #FitnessScience #ComebackStronger',
-                    stats: {
-                        'Nuclei Retention': '15+ years',
-                        'Strength Recovery': '50% faster'
-                    },
-                    scienceFact: 'Myonuclei acquired during training persist (Gundersen, 2016)'
-                },
-                {
-                    platform: 'instagram',
-                    copy: '⚡ METABOLIC MAGIC: Your mitochondria multiply by 50% in just 6 weeks of training!\n\nThese cellular powerhouses are why you suddenly feel like you have superpowers after consistent workouts.\n\nMore mitochondria = More energy factories = Beast mode activated 🔋',
-                    hashtags: '#Mitochondria #CellularHealth #EnergyBoost #ScienceOfFitness',
-                    stats: {
-                        'Mitochondria Increase': '+50%',
-                        'Timeline': '6 weeks',
-                        'Energy Output': '+25-30%'
-                    },
-                    scienceFact: 'Endurance training induces mitochondrial biogenesis (Holloszy, 1967; updated 2021)'
-                },
-                {
-                    platform: 'linkedin',
-                    copy: 'The ROI of Employee Wellness: Hard Numbers That Matter 💰\n\nOur aggregated ROVI dashboard data from 10,000+ corporate users reveals:\n\n📊 Active employees (7k+ steps daily):\n• 31% fewer sick days\n• 27% higher engagement scores\n• 43% better stress management ratings\n• $3,200 annual healthcare savings per employee',
-                    hashtags: '#EmployeeWellbeing #HealthcareROI #WorkplaceWellness',
-                    stats: {
-                        'Sick Day Reduction': '31%',
-                        'Healthcare Savings': '$3,200/year',
-                        'Engagement Boost': '27%'
-                    },
-                    scienceFact: 'RAND Corporation Workplace Wellness Study (2024 update)'
-                }
-            ];
-            
             const grid = document.getElementById('socialPostsGrid');
             if (!grid) return;
-            
-            grid.innerHTML = socialPosts.map(post => {
-                if (post.platform === 'instagram') {
-                    return `
-                        <div class="post-preview-card instagram-preview">
-                            <div class="instagram-header">
-                                <div class="instagram-avatar">R</div>
-                                <div class="instagram-username">rovi_app</div>
-                            </div>
-                            <div class="instagram-image">
-                                <div style="text-align: center; color: white; font-size: 24px; font-weight: bold;">
-                                    ${post.copy.split('\\n')[0]}
+
+            // Load posts from Firebase socialPosts collection
+            db.collection('socialPosts').orderBy('createdAt', 'desc').limit(10).get()
+                .then(snapshot => {
+                    if (snapshot.empty) {
+                        grid.innerHTML = '<div style="text-align:center; padding: 2rem; color: #AEAEB2;">No social posts yet. Add posts via the Social Media dashboard.</div>';
+                        return;
+                    }
+                    grid.innerHTML = snapshot.docs.map(doc => {
+                        const post = doc.data();
+                        return `
+                            <div class="post-preview-card" style="background:#fff; border:1px solid rgba(0,0,0,0.06); border-radius:12px; padding:1rem; margin-bottom:0.5rem;">
+                                <div style="font-weight:600; margin-bottom:0.5rem; text-transform:capitalize;">${post.platform || 'Post'}</div>
+                                <div style="font-size:0.875rem; color:#1C1C1E; white-space:pre-wrap;">${post.copy || ''}</div>
+                                ${post.hashtags ? `<div style="font-size:0.75rem; color:#6E6E73; margin-top:0.5rem;">${post.hashtags}</div>` : ''}
+                                <div class="post-actions" style="margin-top:0.75rem;">
+                                    <button class="btn-copy" onclick="copyPost('${encodeURIComponent(post.copy || '')}')">Copy Post</button>
                                 </div>
                             </div>
-                            <div class="instagram-content">
-                                <div class="instagram-actions">
-                                    <span>❤️</span>
-                                    <span>💬</span>
-                                    <span>📤</span>
-                                </div>
-                                <div class="instagram-caption">${post.copy}</div>
-                                ${post.stats ? `
-                                    <div class="stat-preview">
-                                        ${Object.entries(post.stats).map(([key, value]) => `
-                                            <div class="stat-item-preview">
-                                                <span>${key}:</span>
-                                                <span class="stat-value-preview">${value}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                ` : ''}
-                                <div class="instagram-hashtags">${post.hashtags}</div>
-                            </div>
-                            <div class="post-actions">
-                                <button class="btn-copy" onclick="copyPost('${encodeURIComponent(post.copy + '\\n\\n' + post.hashtags)}')">Copy Post</button>
-                            </div>
-                        </div>
-                    `;
-                } else if (post.platform === 'linkedin') {
-                    return `
-                        <div class="post-preview-card linkedin-preview">
-                            <div class="linkedin-header">
-                                <div class="linkedin-avatar">R</div>
-                                <div class="linkedin-author">
-                                    <div class="linkedin-name">ROVI Health</div>
-                                    <div class="linkedin-headline">Gamifying Corporate Wellness • 10,000+ Users</div>
-                                </div>
-                            </div>
-                            <div class="linkedin-content">${post.copy}</div>
-                            ${post.stats ? `
-                                <div class="linkedin-stats">
-                                    ${Object.entries(post.stats).map(([key, value]) => `
-                                        <div class="stat-item-preview">
-                                            <span>${key}:</span>
-                                            <span class="stat-value-preview">${value}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                            <div class="linkedin-reactions">
-                                <span>👍 💡 ❤️ 1,234</span>
-                                <span>42 comments • 18 shares</span>
-                            </div>
-                            <div class="post-actions">
-                                <button class="btn-copy" onclick="copyPost('${encodeURIComponent(post.copy + '\\n\\n' + post.hashtags)}')">Copy Post</button>
-                            </div>
-                        </div>
-                    `;
-                } else if (post.platform === 'twitter') {
-                    return `
-                        <div class="post-preview-card twitter-preview">
-                            <div class="twitter-header">
-                                <div class="twitter-avatar">R</div>
-                                <div>
-                                    <div class="twitter-name">ROVI App</div>
-                                    <div class="twitter-handle">@ROVIApp • 2h</div>
-                                </div>
-                            </div>
-                            <div class="twitter-content">${post.copy}</div>
-                            ${post.stats ? `
-                                <div class="stat-preview" style="background: #f7f9fa; color: #14171a;">
-                                    ${Object.entries(post.stats).map(([key, value]) => `
-                                        <div class="stat-item-preview">
-                                            <span>${key}:</span>
-                                            <span style="color: #1DA1F2; font-weight: 600;">${value}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                            <div class="twitter-actions">
-                                <span>💬 23</span>
-                                <span>🔁 156</span>
-                                <span>❤️ 892</span>
-                                <span>📤</span>
-                            </div>
-                            <div class="post-actions">
-                                <button class="btn-copy" onclick="copyPost('${encodeURIComponent(post.copy + '\\n\\n' + post.hashtags)}')">Copy Post</button>
-                            </div>
-                        </div>
-                    `;
-                }
-            }).join('');
+                        `;
+                    }).join('');
+                })
+                .catch(err => {
+                    debugLog('SOCIAL', 'Error loading posts: ' + err.message);
+                    grid.innerHTML = '<div style="text-align:center; padding: 2rem; color: #AEAEB2;">No social posts available.</div>';
+                });
         }
         
         function switchSocialTab(tabName, element) {
@@ -5681,25 +5517,25 @@
         }
         
         function generateWorkoutPost() {
-            const calories = document.getElementById('caloriesBurned').value || 500;
-            const duration = document.getElementById('workoutDuration').value || 45;
+            const calories = document.getElementById('caloriesBurned').value;
+            const duration = document.getElementById('workoutDuration').value;
+            if (!calories || !duration) { alert('Please enter calories and duration.'); return; }
             const efficiency = (calories / duration).toFixed(1);
-            
-            alert(`Generated Post:\\n\\n🔥 CRUSHED IT! ${calories} calories torched in ${duration} minutes!\\n\\nThat's ${efficiency} cal/min efficiency - equivalent to ${(calories/100).toFixed(1)} miles of running!\\n\\nThe science: This intensity increases BDNF (brain fertilizer) by 32% for the next 8 hours. Your neurons are celebrating! 🧠\\n\\n#WorkoutComplete #ScienceOfSweat #ROVIApp`);
+            alert(`Generated Post:\n\n🔥 ${calories} calories in ${duration} minutes! (${efficiency} cal/min)\n\n#WorkoutComplete #ROVIApp`);
         }
-        
-        function generateProgressPost() {
-            const steps = document.getElementById('weeklySteps').value || 70000;
-            const dailyAvg = Math.floor(steps / 7);
 
-            alert(`Generated Post:\\n\\n📊 WEEKLY STATS DROP!\\n\\n${steps.toLocaleString()} total steps (${dailyAvg.toLocaleString()}/day avg)\\n\\nThis activity level reduces all-cause mortality by 65% according to Harvard research.\\n\\n#WeeklyProgress #DataDriven #HealthMetrics`);
+        function generateProgressPost() {
+            const steps = document.getElementById('weeklySteps').value;
+            if (!steps) { alert('Please enter weekly steps.'); return; }
+            const dailyAvg = Math.floor(steps / 7);
+            alert(`Generated Post:\n\n📊 WEEKLY STATS\n\n${Number(steps).toLocaleString()} total steps (${dailyAvg.toLocaleString()}/day avg)\n\n#WeeklyProgress #ROVIApp`);
         }
-        
+
         function generateNutritionPost() {
-            const protein = document.getElementById('proteinIntake').value || 120;
-            const water = document.getElementById('waterIntake').value || 3.5;
-            
-            alert(`Generated Post:\\n\\n🥗 NUTRITION NAILED!\\n\\n${protein}g protein (${(protein/70).toFixed(1)}g/kg body weight)\\n${water}L water (${(water/3.5*100).toFixed(0)}% hydration goal)\\n\\nThis protein intake supports 23% better muscle synthesis. Hydration level optimizes performance by 15%!\\n\\n#NutritionScience #FuelYourBody #ROVIApp`);
+            const protein = document.getElementById('proteinIntake').value;
+            const water = document.getElementById('waterIntake').value;
+            if (!protein || !water) { alert('Please enter protein and water intake.'); return; }
+            alert(`Generated Post:\n\n🥗 NUTRITION\n\n${protein}g protein\n${water}L water\n\n#NutritionScience #ROVIApp`);
         }
         
         // ==========================================

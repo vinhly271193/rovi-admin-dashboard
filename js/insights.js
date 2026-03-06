@@ -237,75 +237,6 @@ const ROVIInsights = (function() {
     }
 
     // ==========================================
-    // Real XP Sources Computation
-    // ==========================================
-    async function computeXPSources() {
-        const cacheKey = 'xpSources';
-        const cached = getCached(cacheKey);
-        if (cached) return cached;
-
-        const db = firebase.firestore();
-        const users = (typeof dataCache !== 'undefined' && dataCache.users) || [];
-        const today = new Date();
-        const dateStr = getLocalDateString(today);
-
-        let stepsXP = 0, workoutXP = 0, foodXP = 0, challengeXP = 0;
-
-        for (const user of users) {
-            try {
-                // Steps XP: 1 XP per 100 steps
-                const stepsDoc = await db.collection('users').doc(user.id)
-                    .collection('stepsData').doc(dateStr).get();
-                if (stepsDoc.exists) {
-                    stepsXP += Math.floor((stepsDoc.data().count || 0) / 100);
-                }
-            } catch (e) { /* skip */ }
-
-            try {
-                // Workout XP: 1 XP per 5 min of activity
-                const actSnap = await db.collection('users').doc(user.id)
-                    .collection('activityLog')
-                    .where('date', '==', dateStr)
-                    .get();
-                actSnap.forEach(doc => {
-                    workoutXP += Math.floor((doc.data().duration || 0) / 5);
-                });
-            } catch (e) { /* skip */ }
-
-            try {
-                // Food logging XP: 10 XP per meal
-                const foodDoc = await db.collection('users').doc(user.id)
-                    .collection('foodLog').doc(dateStr).get();
-                if (foodDoc.exists) {
-                    const meals = foodDoc.data().meals || foodDoc.data().entries || [];
-                    foodXP += (Array.isArray(meals) ? meals.length : 0) * 10;
-                }
-            } catch (e) { /* skip */ }
-        }
-
-        // Challenge XP is the remainder from actual user XP totals
-        const totalComputedXP = stepsXP + workoutXP + foodXP;
-        const totalActualXP = users.reduce((sum, u) => sum + (u.xp || 0), 0);
-        challengeXP = Math.max(0, totalActualXP - totalComputedXP);
-
-        const total = stepsXP + workoutXP + foodXP + challengeXP;
-        const result = {
-            raw: [stepsXP, workoutXP, foodXP, challengeXP],
-            percentages: total > 0
-                ? [
-                    Math.round(stepsXP / total * 100),
-                    Math.round(workoutXP / total * 100),
-                    Math.round(foodXP / total * 100),
-                    Math.round(challengeXP / total * 100)
-                ]
-                : [25, 25, 25, 25]
-        };
-
-        setCache(cacheKey, result, CACHE_TTLS.trend7);
-        return result;
-    }
-
-    // ==========================================
     // Real Feature Adoption
     // ==========================================
     async function computeFeatureAdoption() {
@@ -732,9 +663,9 @@ const ROVIInsights = (function() {
                     fat: totalMeals > 0 ? Math.round(totalFat / totalMeals) : 0
                 },
                 goals: {
-                    protein: goalCount > 0 ? Math.round(goalProtein / goalCount) : 120,
-                    carbs: goalCount > 0 ? Math.round(goalCarbs / goalCount) : 250,
-                    fat: goalCount > 0 ? Math.round(goalFat / goalCount) : 65
+                    protein: goalCount > 0 ? Math.round(goalProtein / goalCount) : 0,
+                    carbs: goalCount > 0 ? Math.round(goalCarbs / goalCount) : 0,
+                    fat: goalCount > 0 ? Math.round(goalFat / goalCount) : 0
                 }
             },
             dailyCalories: { labels: dailyLabels, values: dailyCalories },
@@ -854,7 +785,6 @@ const ROVIInsights = (function() {
         fetchPlatformHistoricalTrend,
         computeRealHistoricalData,
         computeTrendPercentage,
-        computeXPSources,
         computeFeatureAdoption,
         computeStreakHeatmapData,
         computeChurnRisk,
