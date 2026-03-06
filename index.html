@@ -2441,30 +2441,63 @@
                 let totalStepsToday = 0;
                 let activeUsersToday = 0;
                 
-                // Batch load steps for all users from stepsData collection
-                debugLog('STEPS', `=== Loading Steps Data for ${today} ===`);
-                debugLog('STEPS', `Fetching from ${dataCache.users.length} users...`);
-                const stepsPromises = dataCache.users.map(user => 
+                // Fire all 3 data batches in parallel (steps + activities + food)
+                debugLog('DATA', `Loading steps, activities, and food in parallel for ${dataCache.users.length} users...`);
+
+                const stepsPromises = dataCache.users.map(user =>
                     db.collection('users').doc(user.id)
                         .collection('stepsData').doc(today).get()
+                        .then(doc => ({ userId: user.id, data: doc.exists ? doc.data() : null }))
+                        .catch(() => ({ userId: user.id, data: null }))
+                );
+                const activityPromises = dataCache.users.map(user =>
+                    db.collection('users').doc(user.id)
+                        .collection('activityLog').doc(today).get()
                         .then(doc => {
                             if (doc.exists) {
-                                const steps = doc.data().steps || 0;
-                                debugLog('STEPS', `✓ ${user.email}: ${steps} steps recorded`);
-                            } else {
-                                debugLog('STEPS', `✗ ${user.email}: No steps document found for ${today}`);
+                                const data = doc.data();
+                                if (data.entries && Array.isArray(data.entries)) {
+                                    let cal = 0; data.entries.forEach(e => cal += e.caloriesBurned || 0);
+                                    return { calories: cal, sessions: data.entries.length, userId: user.id, raw: data };
+                                } else if (data.caloriesBurned !== undefined) {
+                                    return { calories: data.caloriesBurned || 0, sessions: 1, userId: user.id, raw: data };
+                                }
                             }
-                            return { userId: user.id, data: doc.exists ? doc.data() : null };
+                            return { calories: 0, sessions: 0, userId: user.id, raw: null };
                         })
-                        .catch(err => {
-                            debugLog('ERROR', `Steps failed for ${user.email}: ${err.message}`);
-                            return { userId: user.id, data: null };
-                        })
+                        .catch(() => ({ calories: 0, sessions: 0, userId: user.id, raw: null }))
                 );
-                
-                const stepsResults = await Promise.all(stepsPromises);
+                const foodPromises = dataCache.users.map(user =>
+                    db.collection('users').doc(user.id)
+                        .collection('foodLog').doc(today).get()
+                        .then(doc => {
+                            const foods = [];
+                            let rawData = null;
+                            if (doc.exists) {
+                                const data = doc.data();
+                                rawData = data;
+                                ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
+                                    if (data[mealType] && Array.isArray(data[mealType])) {
+                                        data[mealType].forEach(item => {
+                                            foods.push({ name: item.name || 'Unknown', calories: item.calories || 0, userId: user.id, mealType });
+                                        });
+                                    }
+                                });
+                            }
+                            return { foods, userId: user.id, rawData };
+                        })
+                        .catch(() => ({ foods: [], userId: user.id, rawData: null }))
+                );
+
+                // All 3 batches run simultaneously
+                const [stepsResults, activityResults, foodResults] = await Promise.all([
+                    Promise.all(stepsPromises),
+                    Promise.all(activityPromises),
+                    Promise.all(foodPromises)
+                ]);
+
+                // Process steps
                 const dailySteps = {};
-                
                 stepsResults.forEach(result => {
                     if (result.data) {
                         const steps = result.data.steps || 0;
@@ -2473,156 +2506,52 @@
                         if (steps > 0) activeUsersToday++;
                     }
                 });
-                
                 dataCache.todaySteps = dailySteps;
-                
-                // Update UI with null checks
                 updateElementText('totalStepsToday', totalStepsToday.toLocaleString());
                 updateElementText('activeToday', activeUsersToday);
-                
-                // Calculate average steps per user
                 const avgSteps = activeUsersToday > 0 ? Math.round(totalStepsToday / activeUsersToday) : 0;
                 updateElementText('avgStepsPerUser', avgSteps.toLocaleString());
-                
-                // Calculate engagement rate
                 const engagementRate = Math.round((activeUsersToday / dataCache.users.length) * 100);
                 updateElementText('engagementRate', engagementRate + '%');
-                
                 debugLog('STEPS', `Summary: ${totalStepsToday} total steps from ${activeUsersToday} active users`);
-                
-                // Load calories burned today from activityLog/{date} document (in parallel)
+
+                // Process activities
                 let totalCaloriesBurned = 0;
                 let activeSessions = 0;
-                let stepCalories = 0;
-                
-                try {
-                    debugLog('ACTIVITY', 'Loading activities for all users...');
-                    
-                    // Only count calories from real activity log data (no step-based estimation)
-                    debugLog('ACTIVITY', 'Loading real activity data only (no step conversion)');
-                    
-                    const activityPromises = dataCache.users.map(user => 
-                    db.collection('users').doc(user.id)
-                        .collection('activityLog').doc(today).get()
-                        .then(doc => {
-                            if (doc.exists) {
-                                const data = doc.data();
-                                debugLog('ACTIVITY', `${user.email} activity data:`, data);
-                                // Check if this is a single activity or has entries
-                                if (data.entries && Array.isArray(data.entries)) {
-                                    // Multiple activities in entries array
-                                    let userCalories = 0;
-                                    let userSessions = data.entries.length;
-                                    data.entries.forEach(entry => {
-                                        userCalories += entry.caloriesBurned || 0;
-                                    });
-                                    return { calories: userCalories, sessions: userSessions, userId: user.id };
-                                } else if (data.caloriesBurned !== undefined) {
-                                    // Single activity stored directly
-                                    return { 
-                                        calories: data.caloriesBurned || 0, 
-                                        sessions: 1, 
-                                        userId: user.id 
-                                    };
-                                }
-                            }
-                            return { calories: 0, sessions: 0, userId: user.id };
-                        })
-                        .catch(e => {
-                            debugLog('ERROR', `Activity load failed for ${user.email}: ${e.message}`);
-                            return { calories: 0, sessions: 0, userId: user.id };
-                        })
-                );
-                
-                const activityResults = await Promise.all(activityPromises);
-                debugLog('ACTIVITY', `Loaded activity data for ${activityResults.length} users`);
-                
+                dataCache.todayActivities = {};
                 activityResults.forEach(result => {
                     totalCaloriesBurned += result.calories;
                     activeSessions += result.sessions;
-                    if (result.calories > 0) {
-                        debugLog('ACTIVITY', `User ${result.userId}: ${result.calories} calories from activities`);
-                    }
+                    if (result.raw) dataCache.todayActivities[result.userId] = result.raw;
                 });
-                
-                    debugLog('ACTIVITY', `Total: ${totalCaloriesBurned} calories (including ${stepCalories} from steps), ${activeSessions} sessions`);
-                } catch (activityError) {
-                    debugLog('ERROR', `Activity loading failed: ${activityError.message}`, activityError);
-                }
-                
                 updateElementText('totalCaloriesBurned', totalCaloriesBurned > 0 ? totalCaloriesBurned.toLocaleString() : '0');
                 updateElementText('activeSessions', activeSessions > 0 ? activeSessions : '0');
-                
-                // Cache the calories data
                 dataCache.todayCaloriesBurned = totalCaloriesBurned;
                 dataCache.todaySessions = activeSessions;
-                
-                // Load foods logged today from foodLog/{date} document (in parallel)
+                debugLog('ACTIVITY', `Total: ${totalCaloriesBurned} calories, ${activeSessions} sessions`);
+
+                // Process food
                 let totalFoodsLogged = 0;
                 let totalCaloriesConsumed = 0;
                 let uniqueFoodsToday = new Set();
                 dataCache.loggedFoods = {};
-                
-                try {
-                    debugLog('FOOD', 'Loading food logs for all users...');
-                    
-                    const foodPromises = dataCache.users.map(user => 
-                    db.collection('users').doc(user.id)
-                        .collection('foodLog').doc(today).get()
-                        .then(doc => {
-                            const foods = [];
-                            if (doc.exists) {
-                                const data = doc.data();
-                                // Process each meal type (breakfast, lunch, dinner, snacks)
-                                ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
-                                    if (data[mealType] && Array.isArray(data[mealType])) {
-                                        data[mealType].forEach(item => {
-                                            foods.push({
-                                                name: item.name || 'Unknown',
-                                                calories: item.calories || 0,
-                                                userId: user.id,
-                                                mealType: mealType
-                                            });
-                                        });
-                                    }
-                                });
-                            }
-                            return foods;
-                        })
-                        .catch(e => {
-                            console.error(`Error loading foods for user ${user.id}:`, e);
-                            return [];
-                        })
-                );
-                
-                const foodResults = await Promise.all(foodPromises);
-                foodResults.forEach(userFoods => {
-                    userFoods.forEach(food => {
+                dataCache.todayFoods = {};
+                foodResults.forEach(r => { if (r.rawData) dataCache.todayFoods[r.userId] = r.rawData; });
+                foodResults.forEach(result => {
+                    result.foods.forEach(food => {
                         totalFoodsLogged++;
                         totalCaloriesConsumed += food.calories;
                         uniqueFoodsToday.add(food.name);
-                        
-                        // Track food frequency
                         if (!dataCache.loggedFoods[food.name]) {
-                            dataCache.loggedFoods[food.name] = {
-                                count: 0,
-                                calories: food.calories,
-                                users: new Set()
-                            };
+                            dataCache.loggedFoods[food.name] = { count: 0, calories: food.calories, users: new Set() };
                         }
                         dataCache.loggedFoods[food.name].count++;
                         dataCache.loggedFoods[food.name].users.add(food.userId);
                     });
                 });
-                
-                // Calculate users who ate (moved inside try block)
-                const usersWhoAte = foodResults.filter(foods => foods.length > 0).length;
-                dataCache.usersWhoAte = usersWhoAte; // Store for later use
-                
-                    debugLog('FOOD', `Summary: ${totalFoodsLogged} food entries, ${totalCaloriesConsumed} calories consumed`);
-                } catch (foodError) {
-                    debugLog('ERROR', `Food loading failed: ${foodError.message}`, foodError);
-                }
+                const usersWhoAte = foodResults.filter(r => r.foods.length > 0).length;
+                dataCache.usersWhoAte = usersWhoAte;
+                debugLog('FOOD', `Summary: ${totalFoodsLogged} food entries, ${totalCaloriesConsumed} calories consumed`);
                 
                 debugLog('DATA', 'Updating UI elements after food loading...');
                 debugLog('DATA', 'Setting foodsLoggedToday...');
@@ -3029,47 +2958,53 @@
         // Load food usage data from actual logs over time period
         async function loadFoodUsageData(days = 7) {
             const foodUsage = {};
-            const endDate = new Date();
-            
+            const users = dataCache.users || [];
+
+            // Build all read promises at once instead of sequential awaits
+            const readPromises = [];
             for (let i = 0; i < days; i++) {
                 const currentDate = new Date();
                 currentDate.setDate(currentDate.getDate() - i);
                 const dateStr = currentDate.toISOString().split('T')[0];
-                
-                // Load from all users' food logs
-                for (const user of dataCache.users) {
-                    try {
-                        const foodSnapshot = await db.collection('users').doc(user.id)
+
+                for (const user of users) {
+                    readPromises.push(
+                        db.collection('users').doc(user.id)
                             .collection('foodLog').doc(dateStr)
-                            .collection('entries').get();
-                        
-                        if (!foodSnapshot.empty) {
-                            foodSnapshot.forEach(doc => {
-                                const food = doc.data();
-                                const foodName = food.name || 'Unknown';
-                                
-                                if (!foodUsage[foodName]) {
-                                    foodUsage[foodName] = {
-                                        name: foodName,
-                                        totalLogs: 0,
-                                        uniqueUsers: new Set(),
-                                        totalCalories: 0,
-                                        dates: new Set()
-                                    };
-                                }
-                                
-                                foodUsage[foodName].totalLogs++;
-                                foodUsage[foodName].uniqueUsers.add(user.id);
-                                foodUsage[foodName].totalCalories += (food.calories || 0);
-                                foodUsage[foodName].dates.add(dateStr);
-                            });
-                        }
-                    } catch (e) {
-                        console.error(`Error loading food data for ${user.id} on ${dateStr}:`, e);
-                    }
+                            .collection('entries').get()
+                            .then(snap => ({ userId: user.id, dateStr, snap }))
+                            .catch(() => null)
+                    );
                 }
             }
-            
+
+            // Execute all reads in parallel
+            const results = await Promise.all(readPromises);
+
+            // Process results
+            for (const result of results) {
+                if (!result || result.snap.empty) continue;
+                result.snap.forEach(doc => {
+                    const food = doc.data();
+                    const foodName = food.name || 'Unknown';
+
+                    if (!foodUsage[foodName]) {
+                        foodUsage[foodName] = {
+                            name: foodName,
+                            totalLogs: 0,
+                            uniqueUsers: new Set(),
+                            totalCalories: 0,
+                            dates: new Set()
+                        };
+                    }
+
+                    foodUsage[foodName].totalLogs++;
+                    foodUsage[foodName].uniqueUsers.add(result.userId);
+                    foodUsage[foodName].totalCalories += (food.calories || 0);
+                    foodUsage[foodName].dates.add(result.dateStr);
+                });
+            }
+
             // Convert Sets to counts
             Object.keys(foodUsage).forEach(key => {
                 foodUsage[key].uniqueUserCount = foodUsage[key].uniqueUsers.size;
@@ -3077,7 +3012,7 @@
                 delete foodUsage[key].uniqueUsers;
                 delete foodUsage[key].dates;
             });
-            
+
             return foodUsage;
         }
 
@@ -3129,45 +3064,46 @@
             
             console.log(`Showing steps for ${usersToShow.length} users (${showTopOnly ? 'top 10' : 'all'})`);
             
-            // Get last 7 days of steps
+            // Get last 7 days of steps — all reads in one parallel batch
             const last7Days = [];
-            const stepsData = [];
-            
+            const dateList = [];
             for (let i = 6; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
-                const dayName = date.toLocaleDateString('en', { weekday: 'short' });
-                last7Days.push(dayName);
-                
-                let dayTotal = 0;
-                
-                // Use cached data if available for today
-                if (i === 0 && dataCache.todaySteps) {
-                    // Filter based on toggle
-                    if (showTopOnly) {
-                        const topUserIds = usersToShow.map(u => u.id);
-                        dayTotal = Object.entries(dataCache.todaySteps)
-                            .filter(([userId]) => topUserIds.includes(userId))
-                            .reduce((sum, [, steps]) => sum + steps, 0);
-                    } else {
-                        dayTotal = Object.values(dataCache.todaySteps).reduce((a, b) => a + b, 0);
-                    }
-                } else {
-                    // Batch load for historical data
-                    const dayPromises = usersToShow.map(user => 
+                dateList.push({ i, dateStr: date.toISOString().split('T')[0], dayName: date.toLocaleDateString('en', { weekday: 'short' }) });
+                last7Days.push(dateList[dateList.length - 1].dayName);
+            }
+
+            // Fire all historical reads at once
+            const topUserIds = usersToShow.map(u => u.id);
+            const stepsReadPromises = [];
+            for (const { i, dateStr } of dateList) {
+                if (i === 0 && dataCache.todaySteps) continue; // use cache for today
+                for (const user of usersToShow) {
+                    stepsReadPromises.push(
                         db.collection('users').doc(user.id)
                             .collection('stepsData').doc(dateStr).get()
-                            .then(doc => doc.exists ? (doc.data().steps || 0) : 0)
-                            .catch(() => 0)
+                            .then(doc => ({ dateStr, steps: doc.exists ? (doc.data().steps || 0) : 0 }))
+                            .catch(() => ({ dateStr, steps: 0 }))
                     );
-                    
-                    const dayResults = await Promise.all(dayPromises);
-                    dayTotal = dayResults.reduce((a, b) => a + b, 0);
                 }
-                
-                stepsData.push(dayTotal);
             }
+            const stepsReadResults = await Promise.all(stepsReadPromises);
+
+            // Aggregate by date
+            const stepsByDate = {};
+            dateList.forEach(d => { stepsByDate[d.dateStr] = 0; });
+            for (const r of stepsReadResults) { stepsByDate[r.dateStr] += r.steps; }
+
+            // Today from cache
+            const todayStr = dateList[dateList.length - 1].dateStr;
+            if (dataCache.todaySteps) {
+                stepsByDate[todayStr] = showTopOnly
+                    ? Object.entries(dataCache.todaySteps).filter(([id]) => topUserIds.includes(id)).reduce((s, [, v]) => s + v, 0)
+                    : Object.values(dataCache.todaySteps).reduce((a, b) => a + b, 0);
+            }
+
+            const stepsData = dateList.map(d => stepsByDate[d.dateStr]);
             
             // Destroy existing chart if it exists
             if (stepsChartInstance) {
@@ -3416,42 +3352,60 @@
             if (calorieCanvas) {
                 const calorieCtx = calorieCanvas.getContext('2d');
                 
-                // Load calorie data
+                // Load calorie data — all reads in parallel
                 const days = currentTimeFrame === 'today' ? 1 : currentTimeFrame === 'week' ? 7 : 30;
                 const burnedData = [];
                 const consumedData = [];
                 const labels = [];
-                
+                const sampleUsers = dataCache.users.slice(0, 10);
+
+                // Build date list
+                const datePairs = [];
                 for (let i = days - 1; i >= 0; i--) {
                     const date = new Date();
                     date.setDate(date.getDate() - i);
                     const dateStr = date.toISOString().split('T')[0];
                     labels.push(date.toLocaleDateString('en', { weekday: 'short', day: 'numeric' }));
-                    
-                    let dayBurned = 0;
-                    let dayConsumed = 0;
-                    
-                    for (const user of dataCache.users.slice(0, 10)) { // Sample for performance
-                        try {
-                            const activitySnapshot = await db.collection('users').doc(user.id)
-                                .collection('activityLog').doc(dateStr)
-                                .collection('entries').get();
-                            activitySnapshot.forEach(doc => {
-                                dayBurned += doc.data().caloriesBurned || 0;
-                            });
-                            
-                            const foodSnapshot = await db.collection('users').doc(user.id)
-                                .collection('foodLog').doc(dateStr)
-                                .collection('entries').get();
-                            foodSnapshot.forEach(doc => {
-                                dayConsumed += doc.data().calories || 0;
-                            });
-                        } catch (e) {}
-                    }
-                    
-                    burnedData.push(dayBurned);
-                    consumedData.push(dayConsumed);
+                    datePairs.push(dateStr);
                 }
+
+                // Fire all reads in parallel
+                const caloriePromises = [];
+                for (const dateStr of datePairs) {
+                    for (const user of sampleUsers) {
+                        caloriePromises.push(
+                            db.collection('users').doc(user.id)
+                                .collection('activityLog').doc(dateStr)
+                                .collection('entries').get()
+                                .then(snap => ({ dateStr, type: 'burned', snap }))
+                                .catch(() => null)
+                        );
+                        caloriePromises.push(
+                            db.collection('users').doc(user.id)
+                                .collection('foodLog').doc(dateStr)
+                                .collection('entries').get()
+                                .then(snap => ({ dateStr, type: 'consumed', snap }))
+                                .catch(() => null)
+                        );
+                    }
+                }
+
+                const calorieResults = await Promise.all(caloriePromises);
+
+                // Aggregate by date
+                const dayTotals = {};
+                datePairs.forEach(d => { dayTotals[d] = { burned: 0, consumed: 0 }; });
+                for (const r of calorieResults) {
+                    if (!r || r.snap.empty) continue;
+                    r.snap.forEach(doc => {
+                        if (r.type === 'burned') dayTotals[r.dateStr].burned += doc.data().caloriesBurned || 0;
+                        else dayTotals[r.dateStr].consumed += doc.data().calories || 0;
+                    });
+                }
+                datePairs.forEach(d => {
+                    burnedData.push(dayTotals[d].burned);
+                    consumedData.push(dayTotals[d].consumed);
+                });
                 
                 calorieCanvas.width = calorieCanvas.offsetWidth;
                 calorieCanvas.height = 250;
@@ -3583,103 +3537,62 @@
             return item;
         }
         
-        async function loadInitialFeedData(today) {
-            // Load existing data for today to populate feed immediately
-            debugLog('FEED', `=== Loading Initial Feed Data for ${today} ===`);
-            debugLog('FEED', `Processing ${dataCache.users.length} users for feed data`);
-            
-            for (const user of dataCache.users) {
-                debugLog('FEED', `Checking ${user.email} for activity...`);
-                try {
-                    // Load steps
-                    const stepsDoc = await db.collection('users').doc(user.id)
-                        .collection('stepsData').doc(today).get();
-                    if (stepsDoc.exists && stepsDoc.data().steps > 0) {
-                        debugLog('FEED', `  → Found ${stepsDoc.data().steps} steps for ${user.email}`);
-                        const feedKey = `${user.id}-steps-${today}`;
-                        if (!feedItemKeys.has(feedKey)) {
-                            feedItemKeys.add(feedKey);
-                            feedItems.push({
-                                type: 'steps',
-                                data: {
-                                    userId: user.id,
-                                    userEmail: user.email,
-                                    name: user.name,
-                                    value: stepsDoc.data().steps,
-                                    timestamp: new Date(),
-                                    isNew: false
-                                },
-                                timestamp: new Date()
-                            });
-                        }
-                    }
-                    
-                    // Load activities  
-                    const activityDoc = await db.collection('users').doc(user.id)
-                        .collection('activityLog').doc(today).get();
-                    debugLog('FEED', `  → Activity doc exists: ${activityDoc.exists}`);
-                    if (activityDoc.exists) {
-                        const data = activityDoc.data();
-                        debugLog('FEED', `  → Activity data:`, data);
-                        if (data.caloriesBurned > 0 && data.name) {
-                            debugLog('FEED', `  → Found activity: ${data.name} (${data.caloriesBurned} cal)`);
-                            const feedKey = `${user.id}-activity-${data.name}`;
-                            if (!feedItemKeys.has(feedKey)) {
-                                feedItemKeys.add(feedKey);
-                                feedItems.push({
-                                    type: 'activity',
-                                    data: {
-                                        userId: user.id,
-                                        userEmail: user.email,
-                                        name: user.name,
-                                        activityName: data.name,
-                                        duration: data.duration,
-                                        caloriesBurned: data.caloriesBurned,
-                                        timestamp: new Date(),
-                                        isNew: false
-                                    },
-                                    timestamp: new Date()
-                                });
-                            }
-                        }
-                    }
-                    
-                    // Load food
-                    const foodDoc = await db.collection('users').doc(user.id)
-                        .collection('foodLog').doc(today).get();
-                    if (foodDoc.exists) {
-                        const data = foodDoc.data();
-                        ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
-                            if (data[mealType] && Array.isArray(data[mealType])) {
-                                data[mealType].forEach(food => {
-                                    const feedKey = `${user.id}-${mealType}-${food.name}`;
-                                    if (!feedItemKeys.has(feedKey)) {
-                                        feedItemKeys.add(feedKey);
-                                        feedItems.push({
-                                            type: 'food',
-                                            data: {
-                                                userId: user.id,
-                                                userEmail: user.email,
-                                                name: user.name,
-                                                foodName: food.name,
-                                                calories: food.calories,
-                                                mealType: mealType,
-                                                timestamp: new Date(),
-                                                isNew: false
-                                            },
-                                            timestamp: new Date()
-                                        });
-                                    }
-                                });
-                            }
+        function loadInitialFeedData(today) {
+            // Use already-cached data instead of re-fetching from Firebase
+            debugLog('FEED', `=== Loading Initial Feed Data from cache ===`);
+            const users = dataCache.users || [];
+
+            for (const user of users) {
+                // Steps from cache
+                const steps = dataCache.todaySteps?.[user.id] || 0;
+                if (steps > 0) {
+                    const feedKey = `${user.id}-steps-${today}`;
+                    if (!feedItemKeys.has(feedKey)) {
+                        feedItemKeys.add(feedKey);
+                        feedItems.push({
+                            type: 'steps',
+                            data: { userId: user.id, userEmail: user.email, name: user.name, value: steps, timestamp: new Date(), isNew: false },
+                            timestamp: new Date()
                         });
                     }
-                } catch (e) {
-                    console.error(`Error loading initial data for ${user.email}:`, e);
+                }
+
+                // Activities from cache
+                const userActivity = dataCache.todayActivities?.[user.id];
+                if (userActivity && userActivity.name && userActivity.caloriesBurned > 0) {
+                    const feedKey = `${user.id}-activity-${userActivity.name}`;
+                    if (!feedItemKeys.has(feedKey)) {
+                        feedItemKeys.add(feedKey);
+                        feedItems.push({
+                            type: 'activity',
+                            data: { userId: user.id, userEmail: user.email, name: user.name, activityName: userActivity.name, duration: userActivity.duration, caloriesBurned: userActivity.caloriesBurned, timestamp: new Date(), isNew: false },
+                            timestamp: new Date()
+                        });
+                    }
+                }
+
+                // Foods from cache
+                const userFoods = dataCache.todayFoods?.[user.id];
+                if (userFoods) {
+                    ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
+                        if (userFoods[mealType] && Array.isArray(userFoods[mealType])) {
+                            userFoods[mealType].forEach(food => {
+                                const feedKey = `${user.id}-${mealType}-${food.name}`;
+                                if (!feedItemKeys.has(feedKey)) {
+                                    feedItemKeys.add(feedKey);
+                                    feedItems.push({
+                                        type: 'food',
+                                        data: { userId: user.id, userEmail: user.email, name: user.name, foodName: food.name, calories: food.calories, mealType: mealType, timestamp: new Date(), isNew: false },
+                                        timestamp: new Date()
+                                    });
+                                }
+                            });
+                        }
+                    });
                 }
             }
-            
-            debugLog('FEED', `Loaded ${feedItems.length} initial feed items`);
+
+            debugLog('FEED', `Loaded ${feedItems.length} initial feed items from cache`);
             updateFeedDisplay();
         }
         
@@ -4281,23 +4194,22 @@
             const today = getLocalDateString();
             let allActivities = [];
             
-            // Load activities for top 10 users to avoid too many reads
+            // Load activities for top 10 users in parallel
             const topUsers = dataCache.users.slice(0, 10);
-            
-            for (const user of topUsers) {
-                try {
-                    const entriesSnapshot = await db.collection('users').doc(user.id)
+            const activityResults = await Promise.all(
+                topUsers.map(user =>
+                    db.collection('users').doc(user.id)
                         .collection('activityLog').doc(today)
-                        .collection('entries').get();
-                    
-                    entriesSnapshot.forEach(doc => {
-                        const data = doc.data();
-                        allActivities.push({
-                            user: user.email || user.id.substring(0, 8),
-                            ...data
-                        });
-                    });
-                } catch (e) {}
+                        .collection('entries').get()
+                        .then(snap => ({ user, snap }))
+                        .catch(() => null)
+                )
+            );
+            for (const r of activityResults) {
+                if (!r || r.snap.empty) continue;
+                r.snap.forEach(doc => {
+                    allActivities.push({ user: r.user.email || r.user.id.substring(0, 8), ...doc.data() });
+                });
             }
             
             let html = `<h4>Today's Activities (${allActivities.length} total)</h4>`;
@@ -4502,77 +4414,79 @@
             try {
                 const users = dataCache.users || [];
                 const today = new Date();
-                const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
-                
-                let activeStreaks = 0;
-                let longestStreak = 0;
-                let longestStreakUser = '';
-                let atRiskUsers = [];
-                let totalStreakDays = 0;
-                let streakData = [];
-                
-                // Analyze each user
+
+                // Build all date strings for 30 days
+                const dates = [];
+                for (let i = 0; i < 30; i++) {
+                    const d = new Date(today);
+                    d.setDate(d.getDate() - i);
+                    dates.push(d.toISOString().split('T')[0]);
+                }
+
+                // Fire all reads in parallel: users x 30 dates
+                const allPromises = [];
                 for (const user of users) {
+                    for (const dateStr of dates) {
+                        allPromises.push(
+                            db.collection('users').doc(user.id)
+                                .collection('stepsData').doc(dateStr).get()
+                                .then(doc => ({ userId: user.id, dateStr, active: doc.exists && (doc.data().count || 0) > 0 }))
+                                .catch(() => ({ userId: user.id, dateStr, active: false }))
+                        );
+                    }
+                }
+                const results = await Promise.all(allPromises);
+
+                // Index results by user
+                const userDays = {};
+                for (const r of results) {
+                    if (!userDays[r.userId]) userDays[r.userId] = {};
+                    userDays[r.userId][r.dateStr] = r.active;
+                }
+
+                let activeStreaks = 0, longestStreak = 0, longestStreakUser = '';
+                let atRiskUsers = [], totalStreakDays = 0;
+
+                for (const user of users) {
+                    const days = userDays[user.id] || {};
                     let currentStreak = 0;
-                    let lastActiveDate = null;
-                    
-                    // Check last 30 days of activity
-                    for (let d = new Date(today); d >= thirtyDaysAgo; d.setDate(d.getDate() - 1)) {
-                        const dateStr = d.toISOString().split('T')[0];
-                        
-                        try {
-                            const stepsDoc = await db.collection('users').doc(user.id)
-                                .collection('stepsData').doc(dateStr).get();
-                            
-                            if (stepsDoc.exists && stepsDoc.data().count > 0) {
-                                if (!lastActiveDate || (lastActiveDate - d) === 86400000) {
-                                    currentStreak++;
-                                    lastActiveDate = new Date(d);
-                                } else {
-                                    break;
-                                }
-                            }
-                        } catch (e) {
-                            // Skip if no data
+
+                    // Count consecutive active days from today backward
+                    for (const dateStr of dates) {
+                        if (days[dateStr]) {
+                            currentStreak++;
+                        } else {
+                            break;
                         }
                     }
-                    
+
                     if (currentStreak > 0) {
                         activeStreaks++;
                         totalStreakDays += currentStreak;
-                        
                         if (currentStreak > longestStreak) {
                             longestStreak = currentStreak;
                             longestStreakUser = user.name || user.email || 'Unknown';
                         }
                     }
-                    
-                    // Check if at risk (no activity in 3+ days)
-                    const daysSinceActive = lastActiveDate ? 
-                        Math.floor((today - lastActiveDate) / (1000 * 60 * 60 * 24)) : 999;
-                    
+
+                    // Find days since last active
+                    let daysSinceActive = 999;
+                    for (let i = 0; i < dates.length; i++) {
+                        if (days[dates[i]]) { daysSinceActive = i; break; }
+                    }
+
                     if (daysSinceActive >= 3 && daysSinceActive < 30) {
-                        atRiskUsers.push({
-                            name: user.name || user.email || 'Unknown',
-                            daysInactive: daysSinceActive,
-                            lastStreak: currentStreak
-                        });
+                        atRiskUsers.push({ name: user.name || user.email || 'Unknown', daysInactive: daysSinceActive, lastStreak: currentStreak });
                     }
                 }
-                
-                // Update UI
+
                 updateElementText('activeStreaksCount', activeStreaks.toString());
                 updateElementText('longestStreak', longestStreak + ' days');
                 updateElementText('longestStreakUser', longestStreakUser);
                 updateElementText('atRiskCount', atRiskUsers.length.toString());
                 updateElementText('avgStreak', (activeStreaks > 0 ? Math.round(totalStreakDays / activeStreaks) : 0) + ' days');
-                
-                // Generate heatmap
                 generateStreakHeatmap();
-                
-                // Display at-risk users
                 displayAtRiskUsers(atRiskUsers);
-                
             } catch (error) {
                 console.error('Error loading streak analysis:', error);
             }

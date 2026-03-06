@@ -49,98 +49,79 @@ const ROVIInsights = (function() {
         const users = (typeof dataCache !== 'undefined' && dataCache.users) || [];
         const today = new Date();
         const labels = [];
-        const values = [];
+        const dateStrs = [];
 
         for (let i = days - 1; i >= 0; i--) {
             const date = new Date(today);
             date.setDate(date.getDate() - i);
             const dateStr = getLocalDateString(date);
             labels.push(dateStr);
-            let dayTotal = 0;
-
-            if (metric === 'steps') {
-                for (const user of users) {
-                    try {
-                        const doc = await db.collection('users').doc(user.id)
-                            .collection('stepsData').doc(dateStr).get();
-                        if (doc.exists) {
-                            dayTotal += doc.data().count || 0;
-                        }
-                    } catch (e) { /* skip */ }
-                }
-            } else if (metric === 'calories') {
-                for (const user of users) {
-                    try {
-                        const doc = await db.collection('users').doc(user.id)
-                            .collection('stepsData').doc(dateStr).get();
-                        if (doc.exists) {
-                            dayTotal += doc.data().caloriesBurned || 0;
-                        }
-                    } catch (e) { /* skip */ }
-                }
-            } else if (metric === 'foods') {
-                for (const user of users) {
-                    try {
-                        const doc = await db.collection('users').doc(user.id)
-                            .collection('foodLog').doc(dateStr).get();
-                        if (doc.exists) {
-                            const meals = doc.data().meals || doc.data().entries || [];
-                            dayTotal += Array.isArray(meals) ? meals.length : 0;
-                        }
-                    } catch (e) { /* skip */ }
-                }
-            } else if (metric === 'activeUsers') {
-                for (const user of users) {
-                    try {
-                        const doc = await db.collection('users').doc(user.id)
-                            .collection('stepsData').doc(dateStr).get();
-                        if (doc.exists && (doc.data().count || 0) > 0) {
-                            dayTotal++;
-                        }
-                    } catch (e) { /* skip */ }
-                }
-            } else if (metric === 'workoutMinutes') {
-                for (const user of users) {
-                    try {
-                        const snap = await db.collection('users').doc(user.id)
-                            .collection('activityLog')
-                            .where('date', '==', dateStr)
-                            .get();
-                        snap.forEach(doc => {
-                            dayTotal += doc.data().duration || 0;
-                        });
-                    } catch (e) { /* skip */ }
-                }
-            } else if (metric === 'caloriesBurned') {
-                for (const user of users) {
-                    try {
-                        const snap = await db.collection('users').doc(user.id)
-                            .collection('activityLog')
-                            .where('date', '==', dateStr)
-                            .get();
-                        snap.forEach(doc => {
-                            dayTotal += doc.data().caloriesBurned || 0;
-                        });
-                    } catch (e) { /* skip */ }
-                }
-            } else if (metric === 'caloriesConsumed') {
-                for (const user of users) {
-                    try {
-                        const doc = await db.collection('users').doc(user.id)
-                            .collection('foodLog').doc(dateStr).get();
-                        if (doc.exists) {
-                            const meals = doc.data().meals || doc.data().entries || [];
-                            if (Array.isArray(meals)) {
-                                meals.forEach(m => { dayTotal += m.calories || 0; });
-                            }
-                        }
-                    } catch (e) { /* skip */ }
-                }
-            }
-
-            values.push(dayTotal);
+            dateStrs.push(dateStr);
         }
 
+        // Determine which collection to query based on metric
+        const needsSteps = ['steps', 'calories', 'activeUsers'].includes(metric);
+        const needsFood = ['foods', 'caloriesConsumed'].includes(metric);
+        const needsActivity = ['workoutMinutes', 'caloriesBurned'].includes(metric);
+
+        // Fire ALL reads in parallel
+        const allPromises = [];
+        for (const dateStr of dateStrs) {
+            for (const user of users) {
+                if (needsSteps) {
+                    allPromises.push(
+                        db.collection('users').doc(user.id).collection('stepsData').doc(dateStr).get()
+                            .then(doc => ({ dateStr, doc, type: 'steps' }))
+                            .catch(() => null)
+                    );
+                } else if (needsFood) {
+                    allPromises.push(
+                        db.collection('users').doc(user.id).collection('foodLog').doc(dateStr).get()
+                            .then(doc => ({ dateStr, doc, type: 'food' }))
+                            .catch(() => null)
+                    );
+                } else if (needsActivity) {
+                    allPromises.push(
+                        db.collection('users').doc(user.id).collection('activityLog')
+                            .where('date', '==', dateStr).get()
+                            .then(snap => ({ dateStr, snap, type: 'activity' }))
+                            .catch(() => null)
+                    );
+                }
+            }
+        }
+
+        const results = await Promise.all(allPromises);
+
+        // Aggregate by date
+        const dayTotals = {};
+        dateStrs.forEach(d => { dayTotals[d] = 0; });
+
+        for (const r of results) {
+            if (!r) continue;
+            if (r.type === 'steps' && r.doc && r.doc.exists) {
+                const data = r.doc.data();
+                if (metric === 'steps') dayTotals[r.dateStr] += data.count || 0;
+                else if (metric === 'calories') dayTotals[r.dateStr] += data.caloriesBurned || 0;
+                else if (metric === 'activeUsers' && (data.count || 0) > 0) dayTotals[r.dateStr]++;
+            } else if (r.type === 'food' && r.doc && r.doc.exists) {
+                const data = r.doc.data();
+                if (metric === 'foods') {
+                    const meals = data.meals || data.entries || [];
+                    dayTotals[r.dateStr] += Array.isArray(meals) ? meals.length : 0;
+                } else if (metric === 'caloriesConsumed') {
+                    const meals = data.meals || data.entries || [];
+                    if (Array.isArray(meals)) meals.forEach(m => { dayTotals[r.dateStr] += m.calories || 0; });
+                }
+            } else if (r.type === 'activity' && r.snap) {
+                r.snap.forEach(doc => {
+                    if (metric === 'workoutMinutes') dayTotals[r.dateStr] += doc.data().duration || 0;
+                    else if (metric === 'caloriesBurned') dayTotals[r.dateStr] += doc.data().caloriesBurned || 0;
+                });
+            }
+        }
+
+        const values = dateStrs.map(d => dayTotals[d]);
         const result = { labels, values };
         const ttl = days <= 1 ? CACHE_TTLS.today : days <= 7 ? CACHE_TTLS.trend7 : CACHE_TTLS.trend30;
         setCache(cacheKey, result, ttl);
@@ -159,6 +140,57 @@ const ROVIInsights = (function() {
         const users = (typeof dataCache !== 'undefined' && dataCache.users) || [];
         const today = new Date();
 
+        // Build all dates
+        const dates = [];
+        for (let i = 29; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            dates.push({ i, dateStr: getLocalDateString(date) });
+        }
+
+        // Fire ALL reads in parallel (steps + food for each user x day)
+        const allPromises = [];
+        for (const { i, dateStr } of dates) {
+            for (const user of users) {
+                allPromises.push(
+                    db.collection('users').doc(user.id)
+                        .collection('stepsData').doc(dateStr).get()
+                        .then(doc => ({ type: 'steps', dayIdx: i, dateStr, doc }))
+                        .catch(() => ({ type: 'steps', dayIdx: i, dateStr, doc: null }))
+                );
+                allPromises.push(
+                    db.collection('users').doc(user.id)
+                        .collection('foodLog').doc(dateStr).get()
+                        .then(doc => ({ type: 'food', dayIdx: i, dateStr, doc }))
+                        .catch(() => ({ type: 'food', dayIdx: i, dateStr, doc: null }))
+                );
+            }
+        }
+
+        const results = await Promise.all(allPromises);
+
+        // Aggregate by day
+        const dayData = {};
+        for (const { i, dateStr } of dates) {
+            dayData[dateStr] = { steps: 0, calories: 0, foods: 0, activeUsers: 0, activeSet: new Set() };
+        }
+
+        for (const r of results) {
+            const d = dayData[r.dateStr];
+            if (!d || !r.doc || !r.doc.exists) continue;
+            if (r.type === 'steps') {
+                const data = r.doc.data();
+                const count = data.count || 0;
+                d.steps += count;
+                d.calories += data.caloriesBurned || 0;
+                if (count > 0) d.activeUsers++;
+            } else {
+                const data = r.doc.data();
+                const meals = data.meals || data.entries || [];
+                d.foods += Array.isArray(meals) ? meals.length : 0;
+            }
+        }
+
         const historicalData = {
             steps: { days7: [], days30: [], avg7: 0, avg30: 0 },
             calories: { days7: [], days30: [], avg7: 0, avg30: 0 },
@@ -166,49 +198,20 @@ const ROVIInsights = (function() {
             activeUsers: { days7: [], days30: [], avg7: 0, avg30: 0 }
         };
 
-        for (let i = 29; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            const dateStr = getLocalDateString(date);
-
-            let daySteps = 0, dayCalories = 0, dayFoods = 0, dayActiveUsers = 0;
-
-            for (const user of users) {
-                try {
-                    const stepsDoc = await db.collection('users').doc(user.id)
-                        .collection('stepsData').doc(dateStr).get();
-                    if (stepsDoc.exists) {
-                        const count = stepsDoc.data().count || 0;
-                        daySteps += count;
-                        dayCalories += stepsDoc.data().caloriesBurned || 0;
-                        if (count > 0) dayActiveUsers++;
-                    }
-                } catch (e) { /* skip */ }
-
-                try {
-                    const foodDoc = await db.collection('users').doc(user.id)
-                        .collection('foodLog').doc(dateStr).get();
-                    if (foodDoc.exists) {
-                        const meals = foodDoc.data().meals || foodDoc.data().entries || [];
-                        dayFoods += Array.isArray(meals) ? meals.length : 0;
-                    }
-                } catch (e) { /* skip */ }
-            }
-
-            historicalData.steps.days30.push(daySteps);
-            historicalData.calories.days30.push(dayCalories);
-            historicalData.foods.days30.push(dayFoods);
-            historicalData.activeUsers.days30.push(dayActiveUsers);
-
+        for (const { i, dateStr } of dates) {
+            const d = dayData[dateStr];
+            historicalData.steps.days30.push(d.steps);
+            historicalData.calories.days30.push(d.calories);
+            historicalData.foods.days30.push(d.foods);
+            historicalData.activeUsers.days30.push(d.activeUsers);
             if (i < 7) {
-                historicalData.steps.days7.push(daySteps);
-                historicalData.calories.days7.push(dayCalories);
-                historicalData.foods.days7.push(dayFoods);
-                historicalData.activeUsers.days7.push(dayActiveUsers);
+                historicalData.steps.days7.push(d.steps);
+                historicalData.calories.days7.push(d.calories);
+                historicalData.foods.days7.push(d.foods);
+                historicalData.activeUsers.days7.push(d.activeUsers);
             }
         }
 
-        // Calculate averages
         const avg = (arr) => arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
         historicalData.steps.avg7 = avg(historicalData.steps.days7);
         historicalData.steps.avg30 = avg(historicalData.steps.days30);
@@ -266,15 +269,24 @@ const ROVIInsights = (function() {
             ['customBarcodes', 'Custom Barcodes']
         ];
 
+        // Fire ALL user x collection reads in parallel
+        const allPromises = [];
         for (const user of users) {
             for (const [collName, featureName] of collections) {
-                try {
-                    const snap = await db.collection('users').doc(user.id)
-                        .collection(collName).limit(1).get();
-                    if (!snap.empty) {
-                        features[featureName]++;
-                    }
-                } catch (e) { /* skip */ }
+                allPromises.push(
+                    db.collection('users').doc(user.id)
+                        .collection(collName).limit(1).get()
+                        .then(snap => ({ featureName, hasData: !snap.empty }))
+                        .catch(() => ({ featureName, hasData: false }))
+                );
+            }
+        }
+
+        const results = await Promise.all(allPromises);
+
+        for (const r of results) {
+            if (r.hasData) {
+                features[r.featureName]++;
             }
         }
 
@@ -308,15 +320,25 @@ const ROVIInsights = (function() {
             activityByDate[dateStr] = 0;
         }
 
+        // Fire ALL user x date reads in parallel
+        const allPromises = [];
+        const dateKeys = Object.keys(activityByDate);
         for (const user of users) {
-            for (const dateStr of Object.keys(activityByDate)) {
-                try {
-                    const doc = await db.collection('users').doc(user.id)
-                        .collection('stepsData').doc(dateStr).get();
-                    if (doc.exists && (doc.data().count || 0) > 0) {
-                        activityByDate[dateStr]++;
-                    }
-                } catch (e) { /* skip */ }
+            for (const dateStr of dateKeys) {
+                allPromises.push(
+                    db.collection('users').doc(user.id)
+                        .collection('stepsData').doc(dateStr).get()
+                        .then(doc => ({ dateStr, doc }))
+                        .catch(() => ({ dateStr, doc: null }))
+                );
+            }
+        }
+
+        const results = await Promise.all(allPromises);
+
+        for (const r of results) {
+            if (r.doc && r.doc.exists && (r.doc.data().count || 0) > 0) {
+                activityByDate[r.dateStr]++;
             }
         }
 
@@ -522,34 +544,55 @@ const ROVIInsights = (function() {
         const dailyCalories = [];
         const dailyLabels = [];
 
+        // Build date list and fire ALL day x user reads in parallel
+        const dateStrs = [];
         for (let i = 6; i >= 0; i--) {
             const date = new Date(today);
             date.setDate(date.getDate() - i);
             const dateStr = getLocalDateString(date);
             dailyLabels.push(dateStr);
-            let dayMin = 0, dayCal = 0;
+            dateStrs.push(dateStr);
+        }
 
+        const allPromises = [];
+        for (const dateStr of dateStrs) {
             for (const user of users) {
-                try {
-                    const snap = await db.collection('users').doc(user.id)
+                allPromises.push(
+                    db.collection('users').doc(user.id)
                         .collection('activityLog')
                         .where('date', '==', dateStr)
-                        .get();
-                    snap.forEach(doc => {
-                        const d = doc.data();
-                        const name = d.name || d.type || 'Other';
-                        activityTypes[name] = (activityTypes[name] || 0) + 1;
-                        totalSessions++;
-                        totalDuration += d.duration || 0;
-                        totalCalBurned += d.caloriesBurned || 0;
-                        dayMin += d.duration || 0;
-                        dayCal += d.caloriesBurned || 0;
-                    });
-                } catch (e) { /* skip */ }
+                        .get()
+                        .then(snap => ({ dateStr, snap }))
+                        .catch(() => ({ dateStr, snap: null }))
+                );
             }
+        }
 
-            dailyMinutes.push(dayMin);
-            dailyCalories.push(dayCal);
+        const results = await Promise.all(allPromises);
+
+        // Aggregate results by date
+        const dayMinMap = {};
+        const dayCalMap = {};
+        dateStrs.forEach(d => { dayMinMap[d] = 0; dayCalMap[d] = 0; });
+
+        for (const r of results) {
+            if (r.snap) {
+                r.snap.forEach(doc => {
+                    const d = doc.data();
+                    const name = d.name || d.type || 'Other';
+                    activityTypes[name] = (activityTypes[name] || 0) + 1;
+                    totalSessions++;
+                    totalDuration += d.duration || 0;
+                    totalCalBurned += d.caloriesBurned || 0;
+                    dayMinMap[r.dateStr] += d.duration || 0;
+                    dayCalMap[r.dateStr] += d.caloriesBurned || 0;
+                });
+            }
+        }
+
+        for (const dateStr of dateStrs) {
+            dailyMinutes.push(dayMinMap[dateStr]);
+            dailyCalories.push(dayCalMap[dateStr]);
         }
 
         // Sort activity types by count
@@ -606,48 +649,66 @@ const ROVIInsights = (function() {
             }
         });
 
+        // Build date list and fire ALL day x user reads in parallel
+        const dateStrs = [];
         for (let i = 6; i >= 0; i--) {
             const date = new Date(today);
             date.setDate(date.getDate() - i);
             const dateStr = getLocalDateString(date);
             dailyLabels.push(dateStr);
-            let dayCal = 0;
+            dateStrs.push(dateStr);
+        }
 
+        const allPromises = [];
+        for (const dateStr of dateStrs) {
             for (const user of users) {
-                try {
-                    const doc = await db.collection('users').doc(user.id)
-                        .collection('foodLog').doc(dateStr).get();
-                    if (doc.exists) {
-                        const meals = doc.data().meals || doc.data().entries || [];
-                        if (Array.isArray(meals) && meals.length > 0) {
-                            totalLogDays++;
-                            daysWithLogs++;
-                            meals.forEach(meal => {
-                                totalMeals++;
-                                const cal = meal.calories || 0;
-                                dayCal += cal;
-                                totalCalories += cal;
-                                totalProtein += meal.protein || 0;
-                                totalCarbs += meal.carbs || 0;
-                                totalFat += meal.fat || 0;
-
-                                // Count food names
-                                const fname = meal.name || meal.foodName || 'Unknown';
-                                foodCounts[fname] = (foodCounts[fname] || 0) + 1;
-
-                                // Classify meal type
-                                const mealType = (meal.mealType || meal.type || '').toLowerCase();
-                                if (mealType.includes('breakfast')) mealTypes.breakfast++;
-                                else if (mealType.includes('lunch')) mealTypes.lunch++;
-                                else if (mealType.includes('dinner')) mealTypes.dinner++;
-                                else mealTypes.snacks++;
-                            });
-                        }
-                    }
-                } catch (e) { /* skip */ }
+                allPromises.push(
+                    db.collection('users').doc(user.id)
+                        .collection('foodLog').doc(dateStr).get()
+                        .then(doc => ({ dateStr, doc }))
+                        .catch(() => ({ dateStr, doc: null }))
+                );
             }
+        }
 
-            dailyCalories.push(dayCal);
+        const results = await Promise.all(allPromises);
+
+        // Aggregate results by date
+        const dayCalMap = {};
+        dateStrs.forEach(d => { dayCalMap[d] = 0; });
+
+        for (const r of results) {
+            if (r.doc && r.doc.exists) {
+                const meals = r.doc.data().meals || r.doc.data().entries || [];
+                if (Array.isArray(meals) && meals.length > 0) {
+                    totalLogDays++;
+                    daysWithLogs++;
+                    meals.forEach(meal => {
+                        totalMeals++;
+                        const cal = meal.calories || 0;
+                        dayCalMap[r.dateStr] += cal;
+                        totalCalories += cal;
+                        totalProtein += meal.protein || 0;
+                        totalCarbs += meal.carbs || 0;
+                        totalFat += meal.fat || 0;
+
+                        // Count food names
+                        const fname = meal.name || meal.foodName || 'Unknown';
+                        foodCounts[fname] = (foodCounts[fname] || 0) + 1;
+
+                        // Classify meal type
+                        const mealType = (meal.mealType || meal.type || '').toLowerCase();
+                        if (mealType.includes('breakfast')) mealTypes.breakfast++;
+                        else if (mealType.includes('lunch')) mealTypes.lunch++;
+                        else if (mealType.includes('dinner')) mealTypes.dinner++;
+                        else mealTypes.snacks++;
+                    });
+                }
+            }
+        }
+
+        for (const dateStr of dateStrs) {
+            dailyCalories.push(dayCalMap[dateStr]);
         }
 
         // Top 15 foods
@@ -705,56 +766,64 @@ const ROVIInsights = (function() {
             'Gained 5kg+': 0
         };
 
+        // Fire ALL first/last weight reads in parallel (2 queries per user)
+        const allPromises = [];
         for (const user of users) {
-            try {
-                // Get first and last weight entry
-                const firstSnap = await db.collection('users').doc(user.id)
-                    .collection('weightLog')
-                    .orderBy('date', 'asc')
-                    .limit(1)
-                    .get();
+            allPromises.push(
+                Promise.all([
+                    db.collection('users').doc(user.id)
+                        .collection('weightLog')
+                        .orderBy('date', 'asc')
+                        .limit(1)
+                        .get(),
+                    db.collection('users').doc(user.id)
+                        .collection('weightLog')
+                        .orderBy('date', 'desc')
+                        .limit(1)
+                        .get()
+                ]).then(([firstSnap, lastSnap]) => ({ user, firstSnap, lastSnap }))
+                  .catch(() => ({ user, firstSnap: null, lastSnap: null }))
+            );
+        }
 
-                const lastSnap = await db.collection('users').doc(user.id)
-                    .collection('weightLog')
-                    .orderBy('date', 'desc')
-                    .limit(1)
-                    .get();
+        const results = await Promise.all(allPromises);
 
-                if (!firstSnap.empty && !lastSnap.empty) {
-                    usersTracking++;
-                    const firstWeight = firstSnap.docs[0].data().weight || firstSnap.docs[0].data().value || 0;
-                    const lastWeight = lastSnap.docs[0].data().weight || lastSnap.docs[0].data().value || 0;
-                    const delta = lastWeight - firstWeight;
-                    totalChange += delta;
+        for (const r of results) {
+            if (!r.firstSnap || !r.lastSnap) continue;
+            if (!r.firstSnap.empty && !r.lastSnap.empty) {
+                usersTracking++;
+                const firstWeight = r.firstSnap.docs[0].data().weight || r.firstSnap.docs[0].data().value || 0;
+                const lastWeight = r.lastSnap.docs[0].data().weight || r.lastSnap.docs[0].data().value || 0;
+                const delta = lastWeight - firstWeight;
+                totalChange += delta;
 
-                    if (delta < biggestLoss) biggestLoss = delta;
-                    if (delta > biggestGain) biggestGain = delta;
+                if (delta < biggestLoss) biggestLoss = delta;
+                if (delta > biggestGain) biggestGain = delta;
 
-                    userWeights.push({
-                        name: user.name || user.email || 'Unknown',
-                        startWeight: firstWeight,
-                        currentWeight: lastWeight,
-                        delta: Math.round(delta * 10) / 10,
-                        startDate: firstSnap.docs[0].data().date || ''
-                    });
+                userWeights.push({
+                    name: r.user.name || r.user.email || 'Unknown',
+                    startWeight: firstWeight,
+                    currentWeight: lastWeight,
+                    delta: Math.round(delta * 10) / 10,
+                    startDate: r.firstSnap.docs[0].data().date || ''
+                });
 
-                    // Categorize
-                    if (delta <= -5) distribution['Lost 5kg+']++;
-                    else if (delta <= -2) distribution['Lost 2-5kg']++;
-                    else if (delta < 2) distribution['Maintained']++;
-                    else if (delta < 5) distribution['Gained 2-5kg']++;
-                    else distribution['Gained 5kg+']++;
+                // Categorize
+                if (delta <= -5) distribution['Lost 5kg+']++;
+                else if (delta <= -2) distribution['Lost 2-5kg']++;
+                else if (delta < 2) distribution['Maintained']++;
+                else if (delta < 5) distribution['Gained 2-5kg']++;
+                else distribution['Gained 5kg+']++;
 
-                    // Weekly averages from last entry's date
-                    const lastDate = lastSnap.docs[0].data().date || '';
-                    if (lastDate) {
-                        const weekKey = lastDate.substring(0, 7); // YYYY-MM
-                        if (!weeklyAvgs[weekKey]) weeklyAvgs[weekKey] = { total: 0, count: 0 };
-                        weeklyAvgs[weekKey].total += lastWeight;
-                        weeklyAvgs[weekKey].count++;
-                    }
+                // Weekly averages from last entry's date
+                const lastDate = r.lastSnap.docs[0].data().date || '';
+                if (lastDate) {
+                    const weekKey = lastDate.substring(0, 7); // YYYY-MM
+                    if (!weeklyAvgs[weekKey]) weeklyAvgs[weekKey] = { total: 0, count: 0 };
+                    weeklyAvgs[weekKey].total += lastWeight;
+                    weeklyAvgs[weekKey].count++;
                 }
-            } catch (e) { /* skip */ }
+            }
         }
 
         // Build weekly trend
