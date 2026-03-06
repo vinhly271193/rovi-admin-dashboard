@@ -9,7 +9,7 @@
     <style>
         /* Theme Variables */
         :root {
-            --primary-color: #FF6B00;
+            --primary-color: #FA4218;
             --success-color: #22d3a5;
             --warning-color: #FF9500;
             --danger-color: #FF3B30;
@@ -20,20 +20,20 @@
         /* Export Button Styles */
         .export-btn {
             padding: 0.5rem 1rem;
-            background: rgba(255, 107, 0, 0.1);
-            border: 1px solid #FF6B00;
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.12);
             border-radius: 8px;
-            color: #FF6B00;
+            color: #6E6E73;
             cursor: pointer;
             font-size: 0.875rem;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             margin: 0.5rem;
             display: inline-block;
         }
-        
+
         .export-btn:hover {
-            background: #FF6B00;
-            color: white;
+            background: #F2F2F7;
+            color: #1C1C1E;
         }
         
         /* Theme toggle removed - permanent light mode */
@@ -44,8 +44,8 @@
             bottom: 2rem;
             right: 2rem;
             width: 40px;
-            height: 50px;
-            background: #FF6B00;
+            height: 40px;
+            background: #1C1C1E;
             color: white;
             border: none;
             border-radius: 50%;
@@ -54,14 +54,13 @@
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
-        
+
         .back-to-top:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: #333;
         }
         
         .back-to-top.show {
@@ -75,8 +74,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
             z-index: 9999;
             display: none;
             animation: fadeIn 0.2s ease;
@@ -91,10 +90,10 @@
             max-width: 600px;
             background: #ffffff;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             animation: slideDown 0.3s ease;
-            border: 1px solid rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.06);
         }
 
         .command-input {
@@ -123,7 +122,7 @@
         }
         
         .command-item:hover, .command-item.selected {
-            background: rgba(255, 107, 0, 0.1);
+            background: #F2F2F7;
         }
         
         .command-item-icon {
@@ -162,21 +161,20 @@
         
         .quick-action-btn {
             padding: 8px 16px;
-            background: rgba(255, 107, 0, 0.1);
-            border: 1px solid rgba(255, 107, 0, 0.3);
+            background: #F2F2F7;
+            border: 1px solid rgba(0, 0, 0, 0.06);
             border-radius: 8px;
-            color: #FF6B00;
+            color: #1C1C1E;
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .quick-action-btn:hover {
-            background: rgba(255, 107, 0, 0.3);
-            transform: translateY(-2px);
+            background: #E5E5EA;
         }
-        
+
         .selected-count {
-            color: #FF6B00;
+            color: #1C1C1E;
             font-weight: 600;
             margin-right: 12px;
         }
@@ -196,9 +194,9 @@
             padding: 16px;
             margin-bottom: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            border-left: 4px solid #FF6B00;
+            border-left: 4px solid #FA4218;
             border: 1px solid rgba(0, 0, 0, 0.06);
-            border-left: 4px solid #FF6B00;
+            border-left: 4px solid #FA4218;
             animation: slideInRight 0.3s ease;
             display: flex;
             align-items: start;
@@ -238,7 +236,7 @@
         
         .alert-action {
             font-size: 12px;
-            color: #FF6B00;
+            color: #FA4218;
             cursor: pointer;
             text-decoration: underline;
         }
@@ -258,7 +256,7 @@
             position: absolute;
             width: 20px;
             height: 20px;
-            background: #FF6B00;
+            background: #FA4218;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
@@ -296,7 +294,7 @@
         }
         
         .comparison-panel {
-            border: 2px solid rgba(255, 107, 0, 0.3);
+            border: 2px solid rgba(250, 66, 24, 0.3);
             border-radius: 12px;
             padding: 20px;
             position: relative;
@@ -308,7 +306,7 @@
             left: 20px;
             background: #ffffff;
             padding: 0 8px;
-            color: #FF6B00;
+            color: #FA4218;
             font-weight: 600;
             font-size: 12px;
         }
@@ -319,7 +317,7 @@
             right: 20px;
             padding: 10px 16px;
             background: #ffffff;
-            border: 1px solid rgba(255, 107, 0, 0.3);
+            border: 1px solid rgba(0, 0, 0, 0.08);
             border-radius: 8px;
             color: #1d1d1f;
             cursor: pointer;
@@ -327,11 +325,12 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
-        
+
         .comparison-toggle.active {
-            background: #FF6B00;
+            background: #1C1C1E;
+            color: white;
         }
         
         /* Keyboard Shortcuts Modal */
@@ -424,8 +423,8 @@
         }
         
         .selectable-row.selected {
-            background: rgba(255, 107, 0, 0.2) !important;
-            outline: 2px solid rgba(255, 107, 0, 0.5);
+            background: rgba(250, 66, 24, 0.2) !important;
+            outline: 2px solid rgba(250, 66, 24, 0.5);
         }
         
         /* Print Styles */
@@ -535,7 +534,7 @@
         }
         
         .feed-filter.active {
-            background: var(--gradient-primary);
+            background: #1C1C1E;
             color: white;
             border-color: transparent;
         }
@@ -581,8 +580,7 @@
         
         .feed-item:hover {
             background: #f9f9f9;
-            border-color: rgba(0, 122, 255, 0.15);
-            transform: translateX(5px);
+            border-color: rgba(0, 0, 0, 0.06);
         }
         
         .feed-item.new-item {
@@ -731,20 +729,14 @@
         }
 
         .food-item:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
             background: #f9f9f9;
         }
-        
+
         .food-emoji {
             font-size: 1.6rem;
             margin-bottom: 0.5rem;
-            animation: float-emoji 3s ease-in-out infinite;
-        }
-        
-        @keyframes float-emoji {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
         }
         
         .food-name {
@@ -801,13 +793,13 @@
         }
 
         .data-table th {
-            padding: 0.8rem;
+            padding: 10px 16px;
             text-align: left;
-            font-weight: 600;
-            color: #86868b;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
+            font-weight: 500;
+            color: #6E6E73;
+            text-transform: none;
+            font-size: 0.8125rem;
+            letter-spacing: 0;
         }
 
         .data-table td {
@@ -832,28 +824,27 @@
         .stat-card {
             position: relative;
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
         }
-        
+
         .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
-        
+
         .stat-change {
             display: flex;
             align-items: center;
             gap: 0.25rem;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             margin: 0.25rem 0;
         }
-        
+
         .stat-change.positive {
-            color: #22c55e;
+            color: #248A3D;
         }
-        
+
         .stat-change.negative {
-            color: #ef4444;
+            color: #D70015;
         }
         
         .stat-change .trend-arrow {
@@ -872,18 +863,18 @@
         }
         
         .trend-up {
-            background: rgba(34, 197, 94, 0.1);
-            color: #22c55e;
+            background: rgba(52, 199, 89, 0.12);
+            color: #248A3D;
         }
-        
+
         .trend-down {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
+            background: rgba(255, 59, 48, 0.12);
+            color: #D70015;
         }
-        
+
         .trend-neutral {
-            background: rgba(156, 163, 175, 0.1);
-            color: #9ca3af;
+            background: #f2f2f7;
+            color: #86868b;
         }
     </style>
 </head>
@@ -979,45 +970,20 @@
                 <span id="userEmail" style="font-size: 0.75rem; color: #718096;"></span>
             </div>
             <ul class="nav-menu">
-                <li class="nav-item active" data-page="overview">
-                    <span class="icon">📊</span> Overview
-                </li>
-                <li class="nav-item" data-page="leaderboards">
-                    <span class="icon">🏆</span> Leaderboards
-                </li>
-                <li class="nav-item" data-page="foods">
-                    <span class="icon">🍎</span> Food Data
-                </li>
-                <li class="nav-item" data-page="activities">
-                    <span class="icon">🏃</span> Activities
-                </li>
-                <li class="nav-item" data-page="users">
-                    <span class="icon">👥</span> Users
-                </li>
-                <li class="nav-item" data-page="xpadmin">
-                    <span class="icon">⭐</span> XP Admin
-                </li>
-                <li class="nav-item" data-page="analytics">
-                    <span class="icon">📈</span> Analytics
-                </li>
-                <li class="nav-item" data-page="growth">
-                    <span class="icon">📈</span> Growth
-                </li>
-                <li class="nav-item" data-page="workouts">
-                    <span class="icon">💪</span> Workouts
-                </li>
-                <li class="nav-item" data-page="nutrition">
-                    <span class="icon">🥗</span> Nutrition
-                </li>
-                <li class="nav-item" data-page="weight">
-                    <span class="icon">⚖️</span> Weight
-                </li>
-                <li class="nav-item" data-page="socialmedia">
-                    <span class="icon">📱</span> Social Media
-                </li>
+                <li class="nav-item active" data-page="overview">Overview</li>
+                <li class="nav-item" data-page="leaderboards">Leaderboards</li>
+                <li class="nav-item" data-page="foods">Food Data</li>
+                <li class="nav-item" data-page="activities">Activities</li>
+                <li class="nav-item" data-page="users">Users</li>
+                <li class="nav-item" data-page="analytics">Analytics</li>
+                <li class="nav-item" data-page="growth">Growth</li>
+                <li class="nav-item" data-page="workouts">Workouts</li>
+                <li class="nav-item" data-page="nutrition">Nutrition</li>
+                <li class="nav-item" data-page="weight">Weight</li>
+                <li class="nav-item" data-page="socialmedia">Social Media</li>
             </ul>
             <div class="sidebar-footer">
-                <button id="refreshBtn" class="btn-refresh">🔄 Refresh</button>
+                <button id="refreshBtn" class="btn-refresh">Refresh</button>
                 <button id="signOutBtn" class="btn-logout">Sign Out</button>
                 <div class="cache-info">
                     Cache: <span id="cacheStatus">Empty</span>
@@ -1201,7 +1167,7 @@
                     <!-- Weekly Progress Chart -->
                     <div class="chart-card">
                         <div class="chart-title">
-                            📊 Weekly Progress Overview
+                            Weekly Progress Overview
                             <span class="data-scope">LAST 7 DAYS</span>
                         </div>
                         <div class="chart-description">
@@ -1217,7 +1183,7 @@
                     <!-- User Activity Heatmap -->
                     <div class="chart-card">
                         <div class="chart-title">
-                            🗓️ Activity Heatmap
+                            Activity Heatmap
                             <span class="data-scope">LAST 30 DAYS</span>
                         </div>
                         <div class="chart-description">
@@ -1231,7 +1197,7 @@
                     <!-- Goal Progress -->
                     <div class="chart-card">
                         <div class="chart-title">
-                            🎯 Daily Goals Progress
+                            Daily Goals Progress
                             <span class="data-scope">TODAY</span>
                         </div>
                         <div class="chart-description">
@@ -1250,7 +1216,7 @@
                     <!-- Steps Trend -->
                     <div class="chart-card">
                         <div class="chart-title">
-                            📈 Steps Trend
+                            Steps Trend
                             <span class="trend-indicator trend-up" id="stepsTrendPct">--</span>
                         </div>
                         <div class="chart-description">
@@ -1265,7 +1231,7 @@
                     <!-- Calories Trend -->
                     <div class="chart-card">
                         <div class="chart-title">
-                            🔥 Calories Trend
+                            Calories Trend
                             <span class="trend-indicator trend-neutral" id="caloriesTrendPct">--</span>
                         </div>
                         <div class="chart-description">
@@ -1280,7 +1246,7 @@
                     <!-- Engagement Trend -->
                     <div class="chart-card">
                         <div class="chart-title">
-                            👥 User Engagement
+                            User Engagement
                             <span class="trend-indicator trend-down" id="engagementTrendPct">--</span>
                         </div>
                         <div class="chart-description">
@@ -1295,7 +1261,7 @@
                     <!-- Food Logging Trend -->
                     <div class="chart-card">
                         <div class="chart-title">
-                            🍽️ Food Logging
+                            Food Logging
                             <span class="trend-indicator trend-up" id="foodTrendPct">--</span>
                         </div>
                         <div class="chart-description">
@@ -1331,8 +1297,8 @@
                 <div class="insights-grid">
                     <div class="chart-card">
                         <div class="chart-title">
-                            📊 Steps Trend
-                            <span class="data-scope" id="stepsScope">7-DAY AGGREGATE</span>
+                            Steps Trend
+                            <span class="data-scope" id="stepsScope">7-day aggregate</span>
                         </div>
                         <div class="chart-description">
                             <strong>Insight:</strong> <span id="stepsInsight">Loading...</span>
@@ -1343,8 +1309,8 @@
                     </div>
                     <div class="chart-card">
                         <div class="chart-title">
-                            🏃 Activity Distribution
-                            <span class="data-scope" id="activityScope">TODAY</span>
+                            Activity Distribution
+                            <span class="data-scope" id="activityScope">Today</span>
                         </div>
                         <div class="chart-description">
                             <strong>Insight:</strong> <span id="activityInsight">Loading...</span>
@@ -1359,8 +1325,8 @@
                 <div class="insights-grid">
                     <div class="chart-card">
                         <div class="chart-title">
-                            🍽️ Food Trends
-                            <span class="data-scope" id="foodScope">ACTUAL LOGS</span>
+                            Food Trends
+                            <span class="data-scope" id="foodScope">Actual logs</span>
                         </div>
                         <div class="chart-description">
                             <strong>Insight:</strong> <span id="foodInsight">Loading...</span>
@@ -1371,8 +1337,8 @@
                     </div>
                     <div class="chart-card">
                         <div class="chart-title">
-                            🔥 Calorie Balance
-                            <span class="data-scope" id="calorieScope">7-DAY</span>
+                            Calorie Balance
+                            <span class="data-scope" id="calorieScope">7-day</span>
                         </div>
                         <div class="chart-description">
                             <strong>Insight:</strong> <span id="calorieInsight">Loading...</span>
@@ -1386,8 +1352,8 @@
                 <!-- Quick Leaderboard -->
                 <div class="chart-card">
                     <div class="chart-title">
-                        🏆 Today's Top Performers
-                        <span class="data-scope">INDIVIDUAL USERS</span>
+                        Today's Top Performers
+                        <span class="data-scope">Individual users</span>
                     </div>
                     <div class="chart-description">
                         <strong>Purpose:</strong> Recognizes today's most active users to drive competition and motivation<br>
@@ -1403,10 +1369,10 @@
             <!-- Leaderboards Page -->
             <div id="leaderboardsPage" class="page-content" style="display: none;">
                 <div class="tab-buttons">
-                    <button class="tab-button active" data-tab="steps">👣 Steps</button>
-                    <button class="tab-button" data-tab="calories">🔥 Calories</button>
-                    <button class="tab-button" data-tab="activities">🏃 Activities</button>
-                    <button class="tab-button" data-tab="consistency">📅 Consistency</button>
+                    <button class="tab-button active" data-tab="steps">Steps</button>
+                    <button class="tab-button" data-tab="calories">Calories</button>
+                    <button class="tab-button" data-tab="activities">Activities</button>
+                    <button class="tab-button" data-tab="consistency">Consistency</button>
                 </div>
 
                 <div id="leaderboardContent">
@@ -1420,7 +1386,7 @@
             <!-- Foods Page -->
             <div id="foodsPage" class="page-content" style="display: none;">
                 <div class="chart-card">
-                    <h3>🍎 Food Data Statistics</h3>
+                    <h3>Food Data Statistics</h3>
                     <div id="foodStats">
                         <p>Total Unique Foods: <strong id="uniqueFoodsCount">-</strong></p>
                         <p>Categories: <strong id="categoriesCount">-</strong></p>
@@ -1429,10 +1395,10 @@
                 </div>
 
                 <div class="tab-buttons">
-                    <button class="tab-button active" data-tab="popular">🔥 Most Popular</button>
-                    <button class="tab-button" data-tab="recent">🕐 Recently Added</button>
-                    <button class="tab-button" data-tab="all">📚 All Foods</button>
-                    <button class="tab-button" data-tab="search">🔍 Search</button>
+                    <button class="tab-button active" data-tab="popular">Most Popular</button>
+                    <button class="tab-button" data-tab="recent">Recently Added</button>
+                    <button class="tab-button" data-tab="all">All Foods</button>
+                    <button class="tab-button" data-tab="search">Search</button>
                 </div>
 
                 <div id="foodsContent">
@@ -1446,7 +1412,7 @@
             <!-- Activities Page -->
             <div id="activitiesPage" class="page-content" style="display: none;">
                 <div class="chart-card">
-                    <h3>🏃 Recent Activities</h3>
+                    <h3>Recent Activities</h3>
                     <div id="activitiesContent">
                         <div class="loading-message">
                             <div class="loading-spinner"></div>
@@ -1459,7 +1425,7 @@
             <!-- Users Page -->
             <div id="usersPage" class="page-content" style="display: none;">
                 <div class="chart-card">
-                    <h3>👥 All Users</h3>
+                    <h3>All Users</h3>
                     <div id="usersContent">
                         <div class="loading-message">
                             <div class="loading-spinner"></div>
@@ -1469,121 +1435,17 @@
                 </div>
             </div>
             
-            <!-- XP Admin Page -->
-            <div id="xpadminPage" class="page-content" style="display: none;">
-                <div class="chart-card">
-                    <h3>⭐ XP Administration</h3>
-                    
-                    <!-- Stats Overview -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; margin-bottom: 2rem;">
-                        <div class="stat-card">
-                            <div>Total Users</div>
-                            <div style="font-size: 1.2rem; font-weight: bold;" id="xpAdminTotalUsers">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div>Total XP</div>
-                            <div style="font-size: 1.2rem; font-weight: bold;" id="xpAdminTotalXP">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div>Flagged Users</div>
-                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--warning-color);" id="xpAdminFlaggedUsers">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div>Active Anomalies</div>
-                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--danger-color);" id="xpAdminAnomalies">0</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Tabs -->
-                    <div class="tab-buttons">
-                        <button class="tab-button active" data-xptab="leaderboard">🏆 XP Leaderboard</button>
-                        <button class="tab-button" data-xptab="transactions">💰 XP Transactions</button>
-                        <button class="tab-button" data-xptab="investigate">🔍 Investigate User</button>
-                        <button class="tab-button" data-xptab="flagged">⚠️ Flagged Users</button>
-                        <button class="tab-button" data-xptab="anomalies">🚨 Anomalies</button>
-                        <button class="tab-button" data-xptab="reports">📊 Reports</button>
-                    </div>
-                    
-                    <!-- Tab Content -->
-                    <div id="xpTabContent">
-                        <!-- XP Leaderboard Tab -->
-                        <div id="xpLeaderboardTab" class="xp-tab-content">
-                            <div id="xpLeaderboardList">
-                                <div class="loading-message">
-                                    <div class="loading-spinner"></div>
-                                    <span>Loading XP leaderboard...</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- XP Transactions Tab -->
-                        <div id="xpTransactionsTab" class="xp-tab-content" style="display: none;">
-                            <div id="xpTransactionsList">
-                                <div class="loading-message">
-                                    <div class="loading-spinner"></div>
-                                    <span>Loading XP transactions...</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Investigate Tab -->
-                        <div id="xpInvestigateTab" class="xp-tab-content" style="display: none;">
-                            <div style="margin-bottom: 2rem;">
-                                <input type="text" 
-                                       id="xpUserSearchInput" 
-                                       placeholder="Enter User ID to investigate..." 
-                                       style="width: 100%; padding: 0.75rem; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; color: #1d1d1f;"
-                                       onkeypress="if(event.key==='Enter') investigateXPUser()">
-                                <button class="btn-primary" style="margin-top: 1rem; width: 100%;" onclick="investigateXPUser()">
-                                    🔍 Investigate User
-                                </button>
-                            </div>
-                            <div id="xpInvestigationResults"></div>
-                        </div>
-                        
-                        <!-- Flagged Users Tab -->
-                        <div id="xpFlaggedTab" class="xp-tab-content" style="display: none;">
-                            <div id="xpFlaggedUsersList">
-                                <div class="loading-message">
-                                    <div class="loading-spinner"></div>
-                                    <span>Loading flagged users...</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Anomalies Tab -->
-                        <div id="xpAnomaliesTab" class="xp-tab-content" style="display: none;">
-                            <div id="xpAnomaliesList">
-                                <div class="loading-message">
-                                    <div class="loading-spinner"></div>
-                                    <span>Loading anomalies...</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Reports Tab -->
-                        <div id="xpReportsTab" class="xp-tab-content" style="display: none;">
-                            <div style="height: 300px; margin-bottom: 2rem;">
-                                <canvas id="xpDistributionChart"></canvas>
-                            </div>
-                            <button class="btn-danger" style="width: 100%;" onclick="if(confirm('This will recalculate XP for all users. Are you sure?')) recalculateAllXP()">
-                                ⚠️ Recalculate All User XP
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </div>
             
             <!-- Analytics Page -->
             <div id="analyticsPage" class="page-content" style="display: none;">
                 <!-- Streak & Momentum Tracker -->
                 <div class="chart-card">
-                    <h3>🔥 Streak & Momentum Tracker</h3>
+                    <h3>Streak & Momentum Tracker</h3>
                     <div class="tab-buttons">
                         <button class="tab-button active" data-analytictab="streaks">Streak Analysis</button>
                         <button class="tab-button" data-analytictab="funnel">Engagement Funnel</button>
                         <button class="tab-button" data-analytictab="goals">Goal Intelligence</button>
-                        <button class="tab-button" data-analytictab="xphealth">XP Economy</button>
                         <button class="tab-button" data-analytictab="predictions">Predictions</button>
                     </div>
                     
@@ -1634,7 +1496,7 @@
                             
                             <!-- At Risk Users -->
                             <div style="margin-top: 2rem;">
-                                <h4 style="margin-bottom: 1rem;">⚠️ Users at Risk of Churning</h4>
+                                <h4 style="margin-bottom: 1rem;">Users at Risk of Churning</h4>
                                 <div id="atRiskUsers" style="max-height: 300px; overflow-y: auto;">
                                     <!-- Will be populated by JavaScript -->
                                 </div>
@@ -1683,46 +1545,11 @@
                             </div>
                         </div>
                         
-                        <!-- XP Health Tab -->
-                        <div id="xphealthTab" class="analytics-tab-content" style="display: none;">
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; margin: 1.6rem 0;">
-                                <div class="stat-card">
-                                    <div style="font-size: 0.875rem; color: #86868b;">Daily XP Rate</div>
-                                    <div style="font-size: 1.6rem; font-weight: bold;" id="dailyXPRate">0</div>
-                                    <div style="font-size: 0.75rem; color: #aeaeb2;">XP/user/day</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div style="font-size: 0.875rem; color: #86868b;">XP Inflation</div>
-                                    <div style="font-size: 1.6rem; font-weight: bold; color: #FF9500;" id="xpInflation">+0%</div>
-                                    <div style="font-size: 0.75rem; color: #aeaeb2;">vs. last month</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div style="font-size: 0.875rem; color: #86868b;">Avg Level</div>
-                                    <div style="font-size: 1.6rem; font-weight: bold;" id="avgLevel">1</div>
-                                    <div style="font-size: 0.75rem; color: #aeaeb2;">Platform average</div>
-                                </div>
-                            </div>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                                <div>
-                                    <h4 style="margin-bottom: 1rem;">XP Sources</h4>
-                                    <div style="height: 250px; max-height: 250px; overflow: hidden; position: relative;">
-                                        <canvas id="xpSourcesChart"></canvas>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 style="margin-bottom: 1rem;">Level Distribution</h4>
-                                    <div style="height: 250px; max-height: 250px; overflow: hidden; position: relative;">
-                                        <canvas id="levelDistributionChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         
                         <!-- Predictions Tab -->
                         <div id="predictionsTab" class="analytics-tab-content" style="display: none;">
                             <div style="margin: 1.6rem 0;">
-                                <h4 style="margin-bottom: 1rem;">🔮 Churn Risk Analysis</h4>
+                                <h4 style="margin-bottom: 1rem;">Churn Risk Analysis</h4>
                                 <div id="churnRiskList">
                                     <!-- Will be populated by JavaScript -->
                                 </div>
@@ -1965,30 +1792,31 @@
                 <style>
                     .social-tabs {
                         display: flex;
-                        gap: 10px;
+                        gap: 0;
                         margin-bottom: 25px;
-                        background: #f5f5f7;
-                        padding: 10px;
-                        border-radius: 12px;
+                        background: #F0F0F5;
+                        padding: 3px;
+                        border-radius: 10px;
                     }
-                    
+
                     .social-tab {
                         flex: 1;
-                        padding: 12px;
+                        padding: 8px 14px;
                         text-align: center;
                         border-radius: 8px;
                         cursor: pointer;
                         background: transparent;
-                        color: #86868b;
+                        color: #6E6E73;
                         border: none;
-                        font-size: 14px;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
+                        font-size: 0.8125rem;
+                        font-weight: 500;
+                        transition: all 0.2s ease;
                     }
-                    
+
                     .social-tab.active {
-                        background: var(--primary-color);
-                        color: white;
+                        background: #FFFFFF;
+                        color: #1C1C1E;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
                     }
                     
                     .social-content-section {
@@ -2016,7 +1844,7 @@
                     }
                     
                     .post-preview-card:hover {
-                        transform: translateY(-5px);
+                        transform: translateY(-2px);
                     }
                     
                     /* Instagram Preview */
@@ -2054,7 +1882,7 @@
                     .instagram-image {
                         width: 100%;
                         height: 400px;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        background: linear-gradient(135deg, #FA4218 0%, #FF6B3C 100%);
                         display: flex;
                         align-items: center;
                         justify-content: center;
@@ -2226,7 +2054,7 @@
                     }
                     
                     .science-badge {
-                        background: linear-gradient(135deg, rgba(0,122,255,0.1), rgba(255,107,0,0.1));
+                        background: linear-gradient(135deg, rgba(250,66,24,0.08), rgba(255,107,60,0.08));
                         padding: 12px;
                         border-radius: 8px;
                         margin-top: 12px;
@@ -2256,9 +2084,9 @@
                 </style>
                 
                 <div class="social-tabs">
-                    <button class="social-tab active" onclick="switchSocialTab('ready', this)">📝 Ready Posts</button>
-                    <button class="social-tab" onclick="switchSocialTab('generator', this)">🧪 Post Generator</button>
-                    <button class="social-tab" onclick="switchSocialTab('schedule', this)">📅 Schedule</button>
+                    <button class="social-tab active" onclick="switchSocialTab('ready', this)">Ready Posts</button>
+                    <button class="social-tab" onclick="switchSocialTab('generator', this)">Post Generator</button>
+                    <button class="social-tab" onclick="switchSocialTab('schedule', this)">Schedule</button>
                 </div>
                 
                 <div id="readyPosts" class="social-content-section active">
@@ -2270,7 +2098,7 @@
                     <h3 style="margin-bottom: 20px;">Generate Custom Posts from User Data</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
                         <div class="chart-card">
-                            <h4>🏃 Workout Achievement Post</h4>
+                            <h4>Workout Achievement Post</h4>
                             <p style="color: #86868b; font-size: 14px; margin-bottom: 15px;">Generate motivational post based on workout data</p>
                             <input type="number" id="caloriesBurned" placeholder="Calories Burned (e.g., 500)" style="width: 100%; padding: 10px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1d1d1f; margin-bottom: 10px;">
                             <input type="number" id="workoutDuration" placeholder="Duration in minutes (e.g., 45)" style="width: 100%; padding: 10px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1d1d1f; margin-bottom: 10px;">
@@ -2278,15 +2106,14 @@
                         </div>
                         
                         <div class="chart-card">
-                            <h4>📊 Weekly Progress Report</h4>
+                            <h4>Weekly Progress Report</h4>
                             <p style="color: #86868b; font-size: 14px; margin-bottom: 15px;">Create data-driven progress update</p>
                             <input type="number" id="weeklySteps" placeholder="Total Weekly Steps (e.g., 70000)" style="width: 100%; padding: 10px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1d1d1f; margin-bottom: 10px;">
-                            <input type="number" id="xpEarned" placeholder="XP Earned (e.g., 1200)" style="width: 100%; padding: 10px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1d1d1f; margin-bottom: 10px;">
                             <button class="btn-copy" onclick="generateProgressPost()">Generate Post</button>
                         </div>
                         
                         <div class="chart-card">
-                            <h4>🥗 Nutrition Insights</h4>
+                            <h4>Nutrition Insights</h4>
                             <p style="color: #86868b; font-size: 14px; margin-bottom: 15px;">Share science-backed nutrition facts</p>
                             <input type="number" id="proteinIntake" placeholder="Protein in grams (e.g., 120)" style="width: 100%; padding: 10px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1d1d1f; margin-bottom: 10px;">
                             <input type="number" id="waterIntake" placeholder="Water in liters (e.g., 3.5)" style="width: 100%; padding: 10px; background: #f5f5f7; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1d1d1f; margin-bottom: 10px;">
@@ -2530,23 +2357,29 @@
         let feedItemKeys = new Set();
         let currentFeedFilter = 'all';
 
-        // Chart.js Global Defaults
+        // Chart.js Global Defaults — Minimal Apple style
         function initChartDefaults() {
-            Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-            Chart.defaults.font.size = 12;
-            Chart.defaults.color = '#86868b';
-            Chart.defaults.plugins.tooltip.backgroundColor = '#ffffff';
-            Chart.defaults.plugins.tooltip.titleColor = '#1d1d1f';
-            Chart.defaults.plugins.tooltip.bodyColor = '#86868b';
-            Chart.defaults.plugins.tooltip.borderColor = 'rgba(0,0,0,0.1)';
-            Chart.defaults.plugins.tooltip.borderWidth = 1;
-            Chart.defaults.plugins.tooltip.cornerRadius = 8;
-            Chart.defaults.plugins.tooltip.padding = 10;
-            Chart.defaults.plugins.tooltip.titleFont = { weight: '600' };
+            Chart.defaults.font.family = "'Inter', -apple-system, sans-serif";
+            Chart.defaults.font.size = 11;
+            Chart.defaults.color = '#AEAEB2';
             Chart.defaults.plugins.legend.labels.usePointStyle = true;
             Chart.defaults.plugins.legend.labels.padding = 16;
-            Chart.defaults.elements.bar.borderRadius = 6;
-            Chart.defaults.scale.grid = { color: 'rgba(0,0,0,0.06)' };
+            Chart.defaults.plugins.legend.labels.font = { size: 11, weight: '500' };
+            Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(28,28,30,0.92)';
+            Chart.defaults.plugins.tooltip.titleColor = '#F5F5F7';
+            Chart.defaults.plugins.tooltip.bodyColor = '#D1D1D6';
+            Chart.defaults.plugins.tooltip.borderColor = 'rgba(255,255,255,0.08)';
+            Chart.defaults.plugins.tooltip.borderWidth = 1;
+            Chart.defaults.plugins.tooltip.padding = 10;
+            Chart.defaults.plugins.tooltip.cornerRadius = 8;
+            Chart.defaults.plugins.tooltip.displayColors = false;
+            Chart.defaults.elements.line.borderWidth = 1.5;
+            Chart.defaults.elements.point.radius = 0;
+            Chart.defaults.elements.point.hoverRadius = 4;
+            Chart.defaults.elements.bar.borderRadius = 4;
+            Chart.defaults.scale.grid.color = 'rgba(0,0,0,0.03)';
+            Chart.defaults.scale.grid.drawBorder = false;
+            Chart.defaults.scale.ticks.font = { size: 10 };
         }
         initChartDefaults();
 
@@ -2714,9 +2547,6 @@
                         case 'users':
                             loadUsersPage();
                             break;
-                        case 'xpadmin':
-                            loadXPAdminPage();
-                            break;
                         case 'analytics':
                             loadAnalyticsPage();
                             break;
@@ -2748,15 +2578,12 @@
                 e.target.classList.add('active');
                 
                 const tab = e.target.dataset.tab;
-                const xptab = e.target.dataset.xptab;
                 const page = document.querySelector('.page-content:not([style*="display: none"])').id;
-                
+
                 if (page === 'leaderboardsPage') {
                     loadLeaderboardTab(tab);
                 } else if (page === 'foodsPage') {
                     loadFoodTab(tab);
-                } else if (page === 'xpadminPage' && xptab) {
-                    switchXPTab(xptab);
                 }
             }
         });
@@ -3149,10 +2976,10 @@
             updateElement('activeUsersMonthAvg', historical.activeUsers.avg30);
             
             // Create sparkline charts
-            createSparklineChart('stepsSparkline', historical.steps.days7.reverse(), '#22c55e');
-            createSparklineChart('caloriesSparkline', historical.calories.days7.reverse(), '#ef4444');
-            createSparklineChart('foodsSparkline', historical.foods.days7.reverse(), '#3b82f6');
-            createSparklineChart('activeUsersSparkline', historical.activeUsers.days7.reverse(), '#a855f7');
+            createSparklineChart('stepsSparkline', historical.steps.days7.reverse(), '#7DCEA0');
+            createSparklineChart('caloriesSparkline', historical.calories.days7.reverse(), '#D4847C');
+            createSparklineChart('foodsSparkline', historical.foods.days7.reverse(), '#7EB8DA');
+            createSparklineChart('activeUsersSparkline', historical.activeUsers.days7.reverse(), '#B8A9CC');
             
             // Create trend charts
             createTrendCharts(historical);
@@ -3179,11 +3006,11 @@
                     datasets: [{
                         data: data,
                         borderColor: color,
-                        borderWidth: 2,
+                        borderWidth: 1.5,
                         fill: true,
                         backgroundColor: gradient,
                         pointRadius: 0,
-                        pointHoverRadius: 4,
+                        pointHoverRadius: 3,
                         pointHoverBackgroundColor: color,
                         tension: 0.4
                     }]
@@ -3217,11 +3044,11 @@
                     datasets: [{
                         data: data,
                         borderColor: color,
-                        borderWidth: 2,
+                        borderWidth: 1.5,
                         fill: true,
                         backgroundColor: gradient,
-                        pointRadius: 2,
-                        pointHoverRadius: 5,
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
                         pointBackgroundColor: color,
                         tension: 0.4
                     }]
@@ -3271,16 +3098,18 @@
                             {
                                 label: 'Steps',
                                 data: historical.steps.days7,
-                                backgroundColor: 'rgba(34,211,165,0.5)',
-                                borderColor: '#22d3a5',
-                                borderWidth: 1
+                                backgroundColor: 'rgba(125,206,160,0.5)',
+                                borderColor: '#7DCEA0',
+                                borderWidth: 0,
+                                borderRadius: 4
                             },
                             {
                                 label: 'Calories',
                                 data: historical.calories.days7.map(v => v * 10),
-                                backgroundColor: 'rgba(239,68,68,0.5)',
-                                borderColor: '#ef4444',
-                                borderWidth: 1
+                                backgroundColor: 'rgba(212,132,124,0.5)',
+                                borderColor: '#D4847C',
+                                borderWidth: 0,
+                                borderRadius: 4
                             }
                         ]
                     },
@@ -3309,8 +3138,9 @@
                         labels: ['Completed', 'Remaining'],
                         datasets: [{
                             data: [progress, 100 - progress],
-                            backgroundColor: ['rgba(34,211,165,0.8)', 'rgba(0,0,0,0.06)'],
-                            borderWidth: 0
+                            backgroundColor: ['#7DCEA0', 'rgba(0,0,0,0.04)'],
+                            borderColor: '#FFFFFF',
+                            borderWidth: 2
                         }]
                     },
                     options: {
@@ -3326,10 +3156,10 @@
             }
 
             // Initialize the 4 trend charts with real data
-            createMiniTrendChart('stepsTrendChart', historical.steps.days7, dayLabels, '#22d3a5');
-            createMiniTrendChart('caloriesTrendChart', historical.calories.days7, dayLabels, '#ef4444');
-            createMiniTrendChart('engagementTrendChart', historical.activeUsers.days7, dayLabels, '#a855f7');
-            createMiniTrendChart('foodTrendChart', historical.foods.days7, dayLabels, '#3b82f6');
+            createMiniTrendChart('stepsTrendChart', historical.steps.days7, dayLabels, '#7DCEA0');
+            createMiniTrendChart('caloriesTrendChart', historical.calories.days7, dayLabels, '#D4847C');
+            createMiniTrendChart('engagementTrendChart', historical.activeUsers.days7, dayLabels, '#B8A9CC');
+            createMiniTrendChart('foodTrendChart', historical.foods.days7, dayLabels, '#7EB8DA');
 
             // Update trend percentage badges
             updateTrendBadge('stepsTrendPct', ROVIInsights.computeTrendPercentage(historical.steps.days7));
@@ -3591,16 +3421,14 @@
                     datasets: [{
                         label: 'Total Steps',
                         data: stepsData,
-                        borderColor: '#a78bfa',
-                        backgroundColor: 'rgba(167, 139, 250, 0.1)',
+                        borderColor: '#E8856C',
+                        backgroundColor: 'rgba(232, 133, 108, 0.08)',
                         tension: 0.4,
                         fill: true,
-                        borderWidth: 2,
-                        pointBackgroundColor: '#a78bfa',
-                        pointBorderColor: '#1a1a1a',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        pointHoverBackgroundColor: '#E8856C'
                     }]
                 },
                 options: {
@@ -3615,13 +3443,6 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleColor: '#f9fafb',
-                            bodyColor: '#d1d5db',
-                            borderColor: 'rgba(0, 0, 0, 0.06)',
-                            borderWidth: 1,
-                            padding: 12,
-                            displayColors: false,
                             callbacks: {
                                 label: function(context) {
                                     return 'Steps: ' + context.parsed.y.toLocaleString();
@@ -3633,28 +3454,24 @@
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                color: '#9ca3af',
-                                font: {
-                                    size: 11
-                                },
+                                color: '#AEAEB2',
+                                font: { size: 10 },
                                 callback: function(value) {
                                     return value.toLocaleString();
                                 }
                             },
                             grid: {
-                                color: 'rgba(0, 0, 0, 0.04)',
+                                color: 'rgba(0, 0, 0, 0.03)',
                                 drawBorder: false
                             }
                         },
                         x: {
                             ticks: {
-                                color: '#9ca3af',
-                                font: {
-                                    size: 11
-                                }
+                                color: '#AEAEB2',
+                                font: { size: 10 }
                             },
                             grid: {
-                                color: 'rgba(0, 0, 0, 0.04)',
+                                color: 'rgba(0, 0, 0, 0.03)',
                                 drawBorder: false
                             }
                         }
@@ -3702,13 +3519,13 @@
                     datasets: [{
                         data: [activeUsers, inactiveUsers],
                         backgroundColor: [
-                            '#34d399',
+                            '#7DCEA0',
                             'rgba(0, 0, 0, 0.04)'
                         ],
-                        borderColor: 'rgba(0, 0, 0, 0.06)',
+                        borderColor: '#FFFFFF',
                         borderWidth: 2,
                         hoverBackgroundColor: [
-                            '#10b981',
+                            '#6BBF8E',
                             'rgba(0, 0, 0, 0.06)'
                         ]
                     }]
@@ -3727,19 +3544,10 @@
                             display: true,
                             position: 'bottom',
                             labels: {
-                                color: '#9ca3af',
-                                padding: 15,
-                                font: {
-                                    size: 12
-                                }
+                                color: '#AEAEB2',
+                                padding: 16,
+                                font: { size: 11, weight: '500' }
                             }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleColor: '#f9fafb',
-                            bodyColor: '#d1d5db',
-                            borderColor: 'rgba(0, 0, 0, 0.06)',
-                            borderWidth: 1
                         }
                     },
                     onResize: function(chart, size) {
@@ -3779,9 +3587,9 @@
                         datasets: [{
                             label: 'Times Logged',
                             data: topFoods.map(f => f.totalLogs),
-                            backgroundColor: '#8b5cf6',
-                            borderColor: '#7c3aed',
-                            borderWidth: 1
+                            backgroundColor: '#E8856C',
+                            borderWidth: 0,
+                            borderRadius: 4
                         }]
                     },
                     options: {
@@ -3801,11 +3609,11 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                ticks: { color: '#9ca3af' },
-                                grid: { color: 'rgba(0, 0, 0, 0.04)' }
+                                ticks: { color: '#AEAEB2' },
+                                grid: { color: 'rgba(0, 0, 0, 0.03)' }
                             },
                             x: {
-                                ticks: { color: '#9ca3af', maxRotation: 45, minRotation: 45 },
+                                ticks: { color: '#AEAEB2', maxRotation: 45, minRotation: 45 },
                                 grid: { display: false }
                             }
                         }
@@ -3872,15 +3680,21 @@
                         datasets: [{
                             label: 'Burned',
                             data: burnedData,
-                            borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            tension: 0.4
+                            borderColor: '#D4847C',
+                            backgroundColor: 'rgba(212, 132, 124, 0.08)',
+                            tension: 0.4,
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
                         }, {
                             label: 'Consumed',
                             data: consumedData,
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.4
+                            borderColor: '#7EB8DA',
+                            backgroundColor: 'rgba(126, 184, 218, 0.08)',
+                            tension: 0.4,
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
                         }]
                     },
                     options: {
@@ -3890,17 +3704,17 @@
                             legend: {
                                 display: true,
                                 position: 'bottom',
-                                labels: { color: '#9ca3af' }
+                                labels: { color: '#AEAEB2', font: { size: 11, weight: '500' } }
                             }
                         },
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                ticks: { color: '#9ca3af' },
-                                grid: { color: 'rgba(0, 0, 0, 0.04)' }
+                                ticks: { color: '#AEAEB2' },
+                                grid: { color: 'rgba(0, 0, 0, 0.03)' }
                             },
                             x: {
-                                ticks: { color: '#9ca3af' },
+                                ticks: { color: '#AEAEB2' },
                                 grid: { display: false }
                             }
                         }
@@ -4570,7 +4384,7 @@
                             const avgCalories = food.totalLogs > 0 ? Math.round(food.totalCalories / food.totalLogs) : 0;
                             html += `
                                 <tr>
-                                    <td style="color: #8b5cf6; font-weight: bold;">#${index + 1}</td>
+                                    <td style="color: #FA4218; font-weight: bold;">#${index + 1}</td>
                                     <td>${food.name}</td>
                                     <td>${avgCalories}</td>
                                     <td>${food.totalLogs}</td>
@@ -4752,612 +4566,6 @@
             content.innerHTML = html;
         }
 
-        // XP Admin Functions
-        async function loadXPAdminPage() {
-            debugLog('XP_ADMIN', 'Loading XP Admin page');
-            await loadXPAdminStats();
-            // Load default tab (leaderboard)
-            loadXPLeaderboard();
-        }
-
-        async function loadXPLeaderboard() {
-            const container = document.getElementById('xpLeaderboardList');
-            container.innerHTML = '<div class="loading-message"><div class="loading-spinner"></div><span>Loading XP leaderboard...</span></div>';
-            
-            try {
-                // Get all users with their XP data
-                const usersSnapshot = await db.collection('users').get();
-                let leaderboardData = [];
-                
-                // Get today's date for calculating XP from activities
-                const today = new Date().toISOString().split('T')[0];
-                
-                for (const doc of usersSnapshot.docs) {
-                    const userData = doc.data();
-                    let calculatedXP = 0;
-                    
-                    // Calculate XP from today's steps
-                    try {
-                        const stepsDoc = await db.collection('users').doc(doc.id)
-                            .collection('stepsData').doc(today).get();
-                        if (stepsDoc.exists && stepsDoc.data().count > 0) {
-                            calculatedXP += Math.floor(stepsDoc.data().count / 100);
-                        }
-                    } catch (e) {
-                        console.log('Error getting steps for XP calculation');
-                    }
-                    
-                    // Use either calculated XP or stored XP (whichever is higher)
-                    const xp = Math.max(userData.xp || 0, calculatedXP);
-                    const level = Math.max(1, Math.floor(xp / 1000) + 1);
-                    
-                    // Calculate XP progress for current level
-                    const xpForCurrentLevel = (level - 1) * 1000;
-                    const xpForNextLevel = level * 1000;
-                    const levelProgress = xp - xpForCurrentLevel;
-                    const levelRequirement = xpForNextLevel - xpForCurrentLevel;
-                    const progressPercent = (levelProgress / levelRequirement) * 100;
-                    
-                    leaderboardData.push({
-                        id: doc.id,
-                        name: userData.displayName || userData.name || userData.email || 'Unknown User',
-                        email: userData.email || 'N/A',
-                        xp: xp,
-                        level: level,
-                        levelProgress: levelProgress,
-                        levelRequirement: levelRequirement,
-                        progressPercent: Math.min(progressPercent, 100),
-                        createdAt: userData.createdAt
-                    });
-                }
-                
-                // Sort by XP descending
-                leaderboardData.sort((a, b) => b.xp - a.xp);
-                
-                // Display leaderboard
-                if (leaderboardData.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #aeaeb2;">No users found</p>';
-                    return;
-                }
-                
-                // Add export button
-                let html = '<div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">';
-                html += '<button class="export-btn" onclick="exportXPLeaderboard()">📥 Export CSV</button>';
-                html += '</div>';
-                
-                // Store data globally for export
-                window.xpLeaderboardData = leaderboardData;
-                
-                html += '<div style="overflow-x: auto;"><table class="data-table">';
-                html += '<thead><tr><th>Rank</th><th>User</th><th>Level</th><th>XP Progress</th><th>Total XP</th><th>Actions</th></tr></thead><tbody>';
-                
-                leaderboardData.forEach((user, index) => {
-                    const rank = index + 1;
-                    const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
-                    
-                    html += `
-                        <tr>
-                            <td style="font-size: 0.96rem; font-weight: bold;">${rankEmoji}</td>
-                            <td>
-                                <div>
-                                    <div style="font-weight: 600;">${user.name}</div>
-                                    <div style="font-size: 0.75rem; color: #aeaeb2;">${user.email}</div>
-                                </div>
-                            </td>
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 0.4rem;">
-                                    <span style="font-size: 1.2rem; font-weight: bold; color: #FFD700;">Lv ${user.level}</span>
-                                </div>
-                            </td>
-                            <td>
-                                <div style="width: 200px;">
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                                        <span style="font-size: 0.75rem; color: #86868b;">Progress</span>
-                                        <span style="font-size: 0.75rem; color: #86868b;">${user.levelProgress}/${user.levelRequirement} XP</span>
-                                    </div>
-                                    <div style="background: #f2f2f7; border-radius: 8px; height: 20px; overflow: hidden; position: relative;">
-                                        <div style="background: linear-gradient(90deg, #FFD700, #FFA500); height: 100%; width: ${user.progressPercent}%; transition: width 0.3s ease;">
-                                        </div>
-                                        <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.75rem; font-weight: bold; text-shadow: 0 0 4px rgba(0,0,0,0.5);">
-                                            ${Math.round(user.progressPercent)}%
-                                        </span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span style="font-size: 0.96rem; font-weight: bold; color: #FFD700;">${user.xp.toLocaleString()} XP</span>
-                            </td>
-                            <td>
-                                <button class="btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;" onclick="document.querySelector('[data-xptab=\\"investigate\\"]').click(); document.getElementById('xpUserSearchInput').value='${user.id}';">
-                                    View Details
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                html += '</tbody></table></div>';
-                
-                // Add summary stats
-                const avgXP = Math.round(leaderboardData.reduce((sum, u) => sum + u.xp, 0) / leaderboardData.length);
-                const maxLevel = Math.max(...leaderboardData.map(u => u.level));
-                
-                html += `
-                    <div style="margin-top: 2rem; padding: 0.8rem; background: #f5f5f7; border-radius: 8px;">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; text-align: center;">
-                            <div>
-                                <div style="font-size: 0.875rem; color: #86868b;">Total Users</div>
-                                <div style="font-size: 1.2rem; font-weight: bold;">${leaderboardData.length}</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.875rem; color: #86868b;">Average XP</div>
-                                <div style="font-size: 1.2rem; font-weight: bold; color: #FFD700;">${avgXP.toLocaleString()}</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.875rem; color: #86868b;">Highest Level</div>
-                                <div style="font-size: 1.2rem; font-weight: bold; color: #FFA500;">Lv ${maxLevel}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                container.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Error loading XP leaderboard:', error);
-                container.innerHTML = '<p style="color: var(--danger-color);">Error loading XP leaderboard</p>';
-            }
-        }
-
-        async function loadXPAdminStats() {
-            try {
-                // Get total users and XP
-                const usersSnapshot = await db.collection('users').get();
-                let totalXP = 0;
-                usersSnapshot.forEach(doc => {
-                    totalXP += doc.data().xp || 0;
-                });
-                
-                updateElementText('xpAdminTotalUsers', usersSnapshot.size.toString());
-                updateElementText('xpAdminTotalXP', formatNumber(totalXP));
-                
-                // Get flagged users count
-                const flaggedSnapshot = await db.collection('flagged_users').get();
-                updateElementText('xpAdminFlaggedUsers', flaggedSnapshot.size.toString());
-                
-                // Get active anomalies count
-                const anomaliesSnapshot = await db.collection('xp_anomalies')
-                    .where('resolved', '==', false)
-                    .get();
-                updateElementText('xpAdminAnomalies', anomaliesSnapshot.size.toString());
-            } catch (error) {
-                console.error('Error loading XP admin stats:', error);
-            }
-        }
-
-        async function loadXPTransactions() {
-            const container = document.getElementById('xpTransactionsList');
-            container.innerHTML = '<div class="loading-message"><div class="loading-spinner"></div><span>Loading XP transactions...</span></div>';
-            
-            try {
-                // Get recent XP earning activities from all users
-                const users = dataCache.users || [];
-                let allTransactions = [];
-                
-                // Get today's date string
-                const today = new Date().toISOString().split('T')[0];
-                const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-                const twoDaysAgo = new Date(Date.now() - 172800000).toISOString().split('T')[0];
-                
-                // Collect recent activities from users
-                for (const user of users.slice(0, 20)) { // Limit to first 20 users for performance
-                    try {
-                        // Check today's activities
-                        const dates = [today, yesterday, twoDaysAgo];
-                        for (const date of dates) {
-                            // Get steps data
-                            const stepsDoc = await db.collection('users').doc(user.id)
-                                .collection('stepsData').doc(date).get();
-                            if (stepsDoc.exists) {
-                                const stepsData = stepsDoc.data();
-                                if (stepsData.count > 0) {
-                                    // For today's data, use current time minus a small random offset
-                                    // For older data, use the date
-                                    let timestamp;
-                                    if (date === today) {
-                                        // For today, use current time with a random offset (0-4 hours ago)
-                                        const hoursAgo = Math.random() * 4;
-                                        timestamp = new Date(Date.now() - (hoursAgo * 60 * 60 * 1000));
-                                    } else {
-                                        // For past dates, use noon of that day
-                                        timestamp = new Date(date + 'T12:00:00');
-                                    }
-                                    
-                                    allTransactions.push({
-                                        userId: user.id,
-                                        userName: user.name || user.email || 'Unknown',
-                                        type: 'steps',
-                                        description: `Walked ${stepsData.count.toLocaleString()} steps`,
-                                        xpEarned: Math.floor(stepsData.count / 100), // 1 XP per 100 steps
-                                        timestamp: timestamp,
-                                        icon: '👣'
-                                    });
-                                }
-                            }
-                            
-                            // Get activity log entries
-                            const activityDoc = await db.collection('users').doc(user.id)
-                                .collection('activityLog').doc(date).get();
-                            if (activityDoc.exists) {
-                                const entriesSnapshot = await db.collection('users').doc(user.id)
-                                    .collection('activityLog').doc(date)
-                                    .collection('entries').limit(5).get();
-                                
-                                entriesSnapshot.forEach(doc => {
-                                    const activity = doc.data();
-                                    
-                                    // For activities, use the date they were logged
-                                    let activityTimestamp;
-                                    if (date === today) {
-                                        // For today, use current time with a random offset (0-6 hours ago)
-                                        const hoursAgo = Math.random() * 6;
-                                        activityTimestamp = new Date(Date.now() - (hoursAgo * 60 * 60 * 1000));
-                                    } else {
-                                        // For past dates, use that date
-                                        activityTimestamp = new Date(date + 'T12:00:00');
-                                    }
-                                    
-                                    allTransactions.push({
-                                        userId: user.id,
-                                        userName: user.name || user.email || 'Unknown',
-                                        type: 'activity',
-                                        description: activity.name || 'Workout completed',
-                                        xpEarned: Math.floor((activity.duration || 30) / 5), // 1 XP per 5 minutes
-                                        timestamp: activityTimestamp,
-                                        icon: '🏃'
-                                    });
-                                });
-                            }
-                            
-                            // Get food log entries
-                            const foodDoc = await db.collection('users').doc(user.id)
-                                .collection('foodLog').doc(date).get();
-                            if (foodDoc.exists && foodDoc.data().totalCalories > 0) {
-                                const foodData = foodDoc.data();
-                                // Use lastUpdated timestamp if available
-                                let timestamp = foodData.lastUpdated?.toDate() || 
-                                               foodData.timestamp?.toDate() || 
-                                               new Date(date + 'T18:00:00');
-                                allTransactions.push({
-                                    userId: user.id,
-                                    userName: user.name || user.email || 'Unknown',
-                                    type: 'food',
-                                    description: `Logged ${foodData.mealCount || 1} meals (${foodData.totalCalories} cal)`,
-                                    xpEarned: 10, // Fixed XP for food logging
-                                    timestamp: timestamp,
-                                    icon: '🍎'
-                                });
-                            }
-                        }
-                    } catch (err) {
-                        console.log('Error fetching user transactions:', err);
-                    }
-                }
-                
-                // Sort by timestamp descending
-                allTransactions.sort((a, b) => b.timestamp - a.timestamp);
-                
-                // Display transactions
-                if (allTransactions.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #aeaeb2;">No recent XP transactions found</p>';
-                    return;
-                }
-                
-                let html = '<div style="overflow-x: auto;"><table class="data-table">';
-                html += '<thead><tr><th>User</th><th>Activity</th><th>XP Earned</th><th>Time</th></tr></thead><tbody>';
-                
-                allTransactions.slice(0, 50).forEach(transaction => {
-                    const timeAgo = getTimeAgo(transaction.timestamp);
-                    html += `
-                        <tr>
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 0.4rem;">
-                                    <span>${transaction.icon}</span>
-                                    <div>
-                                        <div style="font-weight: 600;">${transaction.userName}</div>
-                                        <div style="font-size: 0.75rem; color: #aeaeb2;">${transaction.userId.substring(0, 8)}...</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>${transaction.description}</td>
-                            <td><span style="color: #FFD700; font-weight: bold;">+${transaction.xpEarned} XP</span></td>
-                            <td>${timeAgo}</td>
-                        </tr>
-                    `;
-                });
-                
-                html += '</tbody></table></div>';
-                container.innerHTML = html;
-                
-            } catch (error) {
-                console.error('Error loading XP transactions:', error);
-                container.innerHTML = '<p style="color: var(--danger-color);">Error loading XP transactions</p>';
-            }
-        }
-        
-        function getTimeAgo(date) {
-            const seconds = Math.floor((new Date() - date) / 1000);
-            if (seconds < 60) return 'just now';
-            const minutes = Math.floor(seconds / 60);
-            if (minutes < 60) return `${minutes}m ago`;
-            const hours = Math.floor(minutes / 60);
-            if (hours < 24) return `${hours}h ago`;
-            const days = Math.floor(hours / 24);
-            if (days === 1) return 'yesterday';
-            if (days < 7) return `${days}d ago`;
-            return date.toLocaleDateString();
-        }
-
-        function switchXPTab(tabName) {
-            // Update tab buttons
-            document.querySelectorAll('[data-xptab]').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-xptab="${tabName}"]`).classList.add('active');
-            
-            // Hide all tab content
-            document.querySelectorAll('.xp-tab-content').forEach(content => {
-                content.style.display = 'none';
-            });
-            
-            // Show selected tab
-            const tabId = 'xp' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Tab';
-            const tabElement = document.getElementById(tabId);
-            if (tabElement) {
-                tabElement.style.display = 'block';
-            }
-            
-            // Load data for specific tabs
-            if (tabName === 'leaderboard') {
-                loadXPLeaderboard();
-            } else if (tabName === 'transactions') {
-                loadXPTransactions();
-            } else if (tabName === 'flagged') {
-                loadXPFlaggedUsers();
-            } else if (tabName === 'anomalies') {
-                loadXPAnomalies();
-            } else if (tabName === 'reports') {
-                initXPCharts();
-            }
-        }
-
-        async function investigateXPUser() {
-            const userId = document.getElementById('xpUserSearchInput').value.trim();
-            if (!userId) {
-                alert('Please enter a User ID');
-                return;
-            }
-            
-            const resultsContainer = document.getElementById('xpInvestigationResults');
-            resultsContainer.innerHTML = '<div class="loading-message"><div class="loading-spinner"></div><span>Investigating user...</span></div>';
-            
-            try {
-                const userDoc = await db.collection('users').doc(userId).get();
-                if (!userDoc.exists) {
-                    resultsContainer.innerHTML = '<p style="color: var(--danger-color);">User not found</p>';
-                    return;
-                }
-                
-                const userData = userDoc.data();
-                
-                // Get XP transactions if they exist
-                let transactionCount = 0;
-                try {
-                    const transactionsSnapshot = await db.collection('xp_transactions')
-                        .where('userId', '==', userId)
-                        .orderBy('timestamp', 'desc')
-                        .limit(100)
-                        .get();
-                    transactionCount = transactionsSnapshot.size;
-                } catch (e) {
-                    console.log('XP transactions collection not found');
-                }
-                
-                resultsContainer.innerHTML = `
-                    <div style="background: #f5f5f7; padding: 1.2rem; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-                            <div>
-                                <h4>${userData.displayName || userData.name || 'Unknown User'}</h4>
-                                <p style="color: #86868b;">User ID: ${userId}</p>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 1.2rem; font-weight: bold;">${formatNumber(userData.xp || 0)} XP</div>
-                                <p style="color: #86868b;">Level ${userData.level || 1}</p>
-                            </div>
-                        </div>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; margin: 1.2rem 0;">
-                            <div>
-                                <strong>Transactions:</strong> ${transactionCount}
-                            </div>
-                            <div>
-                                <strong>Created:</strong> ${userData.createdAt ? new Date(userData.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}
-                            </div>
-                            <div>
-                                <strong>Email:</strong> ${userData.email || 'N/A'}
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem;">
-                            <button class="btn-primary" onclick="adjustUserXP('${userId}', ${userData.xp || 0})">
-                                Adjust XP
-                            </button>
-                            <button class="btn-danger" onclick="flagUser('${userId}')">
-                                Flag User
-                            </button>
-                        </div>
-                    </div>
-                `;
-            } catch (error) {
-                console.error('Error investigating user:', error);
-                resultsContainer.innerHTML = '<p style="color: var(--danger-color);">Error investigating user</p>';
-            }
-        }
-
-        async function loadXPFlaggedUsers() {
-            const container = document.getElementById('xpFlaggedUsersList');
-            container.innerHTML = '<div class="loading-message"><div class="loading-spinner"></div><span>Loading...</span></div>';
-            
-            try {
-                const snapshot = await db.collection('flagged_users')
-                    .orderBy('flaggedDate', 'desc')
-                    .limit(50)
-                    .get();
-                
-                if (snapshot.empty) {
-                    container.innerHTML = '<p style="text-align: center; color: #aeaeb2;">No flagged users found</p>';
-                    return;
-                }
-                
-                let html = '<div style="display: grid; gap: 0.8rem;">';
-                snapshot.forEach(doc => {
-                    const user = doc.data();
-                    html += `
-                        <div style="background: #f5f5f7; padding: 0.8rem; border-radius: 8px;">
-                            <div style="display: flex; justify-content: space-between;">
-                                <div>
-                                    <strong>${user.userName || 'Unknown User'}</strong>
-                                    <p style="color: #86868b; font-size: 0.875rem;">
-                                        ID: ${user.userId}<br>
-                                        Reason: ${user.flagReason}<br>
-                                        Date: ${user.flaggedDate ? new Date(user.flaggedDate.seconds * 1000).toLocaleDateString() : 'Unknown'}
-                                    </p>
-                                </div>
-                                <div style="text-align: right;">
-                                    <div style="font-size: 1.25rem; font-weight: bold;">${formatNumber(user.totalXP || 0)} XP</div>
-                                    <span style="padding: 0.25rem 0.5rem; background: rgba(255,152,0,0.2); border-radius: 4px; font-size: 0.75rem;">
-                                        ${user.severity || 'Low'}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                container.innerHTML = html;
-            } catch (error) {
-                console.error('Error loading flagged users:', error);
-                container.innerHTML = '<p style="color: var(--danger-color);">Error loading flagged users</p>';
-            }
-        }
-
-        async function loadXPAnomalies() {
-            const container = document.getElementById('xpAnomaliesList');
-            container.innerHTML = '<div class="loading-message"><div class="loading-spinner"></div><span>Loading...</span></div>';
-            
-            try {
-                const snapshot = await db.collection('xp_anomalies')
-                    .orderBy('detectedDate', 'desc')
-                    .limit(50)
-                    .get();
-                
-                if (snapshot.empty) {
-                    container.innerHTML = '<p style="text-align: center; color: #aeaeb2;">No anomalies detected</p>';
-                    return;
-                }
-                
-                let html = '<div style="display: grid; gap: 0.8rem;">';
-                snapshot.forEach(doc => {
-                    const anomaly = doc.data();
-                    html += `
-                        <div style="background: #f5f5f7; padding: 0.8rem; border-radius: 8px;">
-                            <div style="display: flex; justify-content: space-between;">
-                                <div>
-                                    <strong>${anomaly.anomalyType}</strong>
-                                    <p style="color: #86868b; font-size: 0.875rem;">
-                                        ${anomaly.description}<br>
-                                        User: ${anomaly.userId}<br>
-                                        XP: ${anomaly.xpAmount}<br>
-                                        Date: ${anomaly.detectedDate ? new Date(anomaly.detectedDate.seconds * 1000).toLocaleDateString() : 'Unknown'}
-                                    </p>
-                                </div>
-                                <span style="padding: 0.25rem 0.5rem; background: ${anomaly.resolved ? 'rgba(52,199,89,0.2)' : 'rgba(255,59,48,0.2)'}; border-radius: 4px; font-size: 0.75rem;">
-                                    ${anomaly.resolved ? 'Resolved' : 'Active'}
-                                </span>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                container.innerHTML = html;
-            } catch (error) {
-                console.error('Error loading anomalies:', error);
-                container.innerHTML = '<p style="color: var(--danger-color);">Error loading anomalies</p>';
-            }
-        }
-
-        function initXPCharts() {
-            const canvas = document.getElementById('xpDistributionChart');
-            if (!canvas || canvas.chartInstance) return;
-            
-            const ctx = canvas.getContext('2d');
-            canvas.chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{
-                        label: 'XP Distributed',
-                        data: [12000, 15000, 13000, 18000, 20000, 17000, 19000],
-                        borderColor: '#FF6B00',
-                        backgroundColor: 'rgba(255, 107, 0, 0.1)',
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#FFFFFF' }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            ticks: { color: '#86868b' },
-                            grid: { color: 'rgba(0,0,0,0.06)' }
-                        },
-                        x: {
-                            ticks: { color: '#86868b' },
-                            grid: { color: 'rgba(0,0,0,0.06)' }
-                        }
-                    }
-                }
-            });
-        }
-
-        function adjustUserXP(userId, currentXP) {
-            const newXP = prompt(`Adjust XP for user ${userId}\nCurrent XP: ${currentXP}\nEnter new XP amount:`);
-            if (newXP !== null && !isNaN(newXP)) {
-                const reason = prompt('Enter reason for adjustment:');
-                if (reason) {
-                    // Here you would update the database
-                    alert(`XP adjustment recorded:\nUser: ${userId}\nNew XP: ${newXP}\nReason: ${reason}`);
-                }
-            }
-        }
-
-        function flagUser(userId) {
-            const reason = prompt(`Flag user ${userId}\nEnter reason for flagging:`);
-            if (reason) {
-                // Here you would update the database
-                alert(`User flagged:\nUser: ${userId}\nReason: ${reason}`);
-            }
-        }
-
-        async function recalculateAllXP() {
-            alert('XP recalculation would be performed here');
-            // Implementation would go here
-        }
 
         function formatNumber(num) {
             if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -5419,25 +4627,6 @@
         // Light theme is permanent - remove any saved dark theme
         document.body.removeAttribute('data-theme');
         localStorage.removeItem('dashboardTheme');
-        
-        // Export Functions for specific data
-        function exportXPLeaderboard() {
-            if (!window.xpLeaderboardData) {
-                alert('No data to export');
-                return;
-            }
-            
-            const exportData = window.xpLeaderboardData.map((user, index) => ({
-                Rank: index + 1,
-                Name: user.name,
-                Email: user.email,
-                Level: user.level,
-                'Total XP': user.xp,
-                'Progress %': Math.round(user.progressPercent)
-            }));
-            
-            exportToCSV(exportData, `xp_leaderboard_${new Date().toISOString().split('T')[0]}.csv`);
-        }
         
         function exportStepsLeaderboard() {
             const data = [];
@@ -5616,10 +4805,10 @@
 
                 heatmapData.forEach(day => {
                     let color = 'rgba(0,0,0,0.06)';
-                    if (day.intensity > 0.8) color = '#22d3a5';
-                    else if (day.intensity > 0.6) color = 'rgba(34,211,165,0.9)';
-                    else if (day.intensity > 0.4) color = 'rgba(34,211,165,0.6)';
-                    else if (day.intensity > 0.2) color = 'rgba(34,211,165,0.3)';
+                    if (day.intensity > 0.8) color = '#7DCEA0';
+                    else if (day.intensity > 0.6) color = 'rgba(125,206,160,0.9)';
+                    else if (day.intensity > 0.4) color = 'rgba(125,206,160,0.6)';
+                    else if (day.intensity > 0.2) color = 'rgba(125,206,160,0.3)';
 
                     html += `
                         <div style="
@@ -5715,9 +4904,6 @@
                         case 'goals':
                             loadGoalIntelligence();
                             break;
-                        case 'xphealth':
-                            loadXPHealth();
-                            break;
                         case 'predictions':
                             loadPredictions();
                             break;
@@ -5741,7 +4927,7 @@
                 { stage: 'Opened App Today', count: activeUsers, percent: (activeUsers/totalUsers*100).toFixed(1) },
                 { stage: 'Logged Steps', count: stepsUsers, percent: (stepsUsers/totalUsers*100).toFixed(1) },
                 { stage: 'Logged Food', count: foodUsers, percent: (foodUsers/totalUsers*100).toFixed(1) },
-                { stage: 'Earned XP', count: stepsUsers, percent: (stepsUsers/totalUsers*100).toFixed(1) }
+                { stage: 'Completed Activity', count: stepsUsers, percent: (stepsUsers/totalUsers*100).toFixed(1) }
             ];
             
             let html = '';
@@ -5757,7 +4943,7 @@
                         </div>
                         <div style="background: #f2f2f7; border-radius: 8px; height: 32px; overflow: hidden;">
                             <div style="
-                                background: linear-gradient(90deg, #667eea, #764ba2);
+                                background: linear-gradient(90deg, #FA4218, #FF6B3C);
                                 height: 100%;
                                 width: ${width}%;
                                 transition: width 0.5s ease;
@@ -5795,7 +4981,7 @@
                             datasets: [{
                                 label: 'Adoption %',
                                 data: adoption.percentages,
-                                backgroundColor: ['#667eea','#22d3a5','#FF9500','#a855f7','#3b82f6','#ef4444'],
+                                backgroundColor: ['#E8856C','#7DCEA0','#D4A574','#B8A9CC','#7EB8DA','#D4847C'],
                                 borderRadius: 6
                             }]
                         },
@@ -5861,54 +5047,6 @@
             container.innerHTML = html || '<p>No prediction data available</p>';
         }
         
-        async function loadXPHealth() {
-            // Calculate XP metrics
-            const users = dataCache.users || [];
-            let totalXP = 0;
-            let totalLevels = 0;
-            
-            users.forEach(user => {
-                totalXP += user.xp || 0;
-                totalLevels += user.level || 1;
-            });
-            
-            const avgXPPerUser = users.length > 0 ? Math.round(totalXP / users.length) : 0;
-            const avgLevel = users.length > 0 ? (totalLevels / users.length).toFixed(1) : 1;
-            
-            updateElementText('dailyXPRate', avgXPPerUser.toString());
-            updateElementText('avgLevel', avgLevel.toString());
-            
-            // Create XP sources chart with real data
-            const xpSourcesCtx = document.getElementById('xpSourcesChart');
-            if (xpSourcesCtx) {
-                const existing = Chart.getChart(xpSourcesCtx);
-                if (existing) existing.destroy();
-
-                try {
-                    const xpData = await ROVIInsights.computeXPSources();
-                    new Chart(xpSourcesCtx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Steps', 'Workouts', 'Food Logging', 'Challenges'],
-                            datasets: [{
-                                data: xpData.percentages,
-                                backgroundColor: ['#667eea', '#22d3a5', '#FF9500', '#FF3B30'],
-                                borderWidth: 2,
-                                borderColor: 'rgba(0,0,0,0.3)'
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            cutout: '55%',
-                            plugins: { legend: { labels: { color: '#FFFFFF' } } }
-                        }
-                    });
-                } catch (e) {
-                    console.error('XP sources error:', e);
-                }
-            }
-        }
         
         async function loadPredictions() {
             const churnContainer = document.getElementById('churnRiskList');
@@ -5968,7 +5106,7 @@
                         </div>
                         <div>
                             <div style="font-size: 0.875rem; color: #86868b;">Based On</div>
-                            <div style="font-size: 1.2rem; font-weight: bold; color: #667eea;">Recent trends</div>
+                            <div style="font-size: 1.2rem; font-weight: bold; color: #FA4218;">Recent trends</div>
                         </div>
                     </div>
                 `;
@@ -6002,19 +5140,23 @@
                                 {
                                     label: 'New Signups',
                                     data: data.monthValues,
-                                    borderColor: '#FF6B00',
-                                    backgroundColor: 'rgba(255,107,0,0.1)',
+                                    borderColor: '#E8856C',
+                                    backgroundColor: 'rgba(232,133,108,0.1)',
                                     fill: true,
                                     tension: 0.3,
+                                    borderWidth: 1.5,
+                                    pointRadius: 0,
                                     yAxisID: 'y'
                                 },
                                 {
                                     label: 'Cumulative Users',
                                     data: data.cumulativeValues,
-                                    borderColor: '#667eea',
-                                    backgroundColor: 'rgba(102,126,234,0.1)',
+                                    borderColor: '#7EB8DA',
+                                    backgroundColor: 'rgba(126,184,218,0.1)',
                                     fill: true,
                                     tension: 0.3,
+                                    borderWidth: 1.5,
+                                    pointRadius: 0,
                                     yAxisID: 'y1'
                                 }
                             ]
@@ -6049,8 +5191,8 @@
                                     'rgba(102,126,234,0.5)', 'rgba(102,126,234,0.5)', 'rgba(102,126,234,0.5)',
                                     'rgba(255,107,0,0.4)'
                                 ],
-                                borderColor: '#667eea',
-                                borderWidth: 1
+                                borderColor: '#E8856C',
+                                borderWidth: 0
                             }]
                         },
                         options: {
@@ -6112,7 +5254,7 @@
                     const existing = Chart.getChart(typesCtx);
                     if (existing) existing.destroy();
 
-                    const colors = ['#667eea', '#22d3a5', '#FF9500', '#FF3B30', '#a855f7', '#3b82f6', '#ec4899', '#f97316', '#14b8a6', '#8b5cf6'];
+                    const colors = ['#E8856C', '#7DCEA0', '#D4A574', '#D4847C', '#B8A9CC', '#7EB8DA', '#D4A0B8', '#D4A574', '#7DBDB5', '#A99CC7'];
                     new Chart(typesCtx, {
                         type: 'doughnut',
                         data: {
@@ -6120,7 +5262,7 @@
                             datasets: [{
                                 data: data.activityTypes.values.slice(0, 8),
                                 backgroundColor: colors.slice(0, 8),
-                                borderWidth: 2,
+                                borderWidth: 0,
                                 borderColor: 'rgba(0,0,0,0.3)'
                             }]
                         },
@@ -6146,9 +5288,9 @@
                             datasets: [{
                                 label: 'Sessions',
                                 data: data.topActivities.values,
-                                backgroundColor: 'rgba(255,107,0,0.5)',
-                                borderColor: '#FF6B00',
-                                borderWidth: 1
+                                backgroundColor: 'rgba(232,133,108,0.5)',
+                                borderColor: '#E8856C',
+                                borderWidth: 0
                             }]
                         },
                         options: {
@@ -6174,9 +5316,9 @@
                             datasets: [{
                                 label: 'Minutes',
                                 data: data.dailyMinutes.values,
-                                backgroundColor: 'rgba(102,126,234,0.5)',
-                                borderColor: '#667eea',
-                                borderWidth: 1
+                                backgroundColor: 'rgba(126,184,218,0.5)',
+                                borderColor: '#7EB8DA',
+                                borderWidth: 0
                             }]
                         },
                         options: {
@@ -6206,11 +5348,12 @@
                             datasets: [{
                                 label: 'Calories Burned',
                                 data: data.dailyCalories.values,
-                                borderColor: '#ef4444',
+                                borderColor: '#D4847C',
                                 backgroundColor: gradient,
                                 fill: true,
                                 tension: 0.4,
-                                pointRadius: 4,
+                                borderWidth: 1.5,
+                                pointRadius: 0,
                                 pointHoverRadius: 6
                             }]
                         },
@@ -6254,9 +5397,9 @@
                             datasets: [{
                                 label: 'Times Logged',
                                 data: data.topFoods.values,
-                                backgroundColor: 'rgba(255,107,0,0.5)',
-                                borderColor: '#FF6B00',
-                                borderWidth: 1
+                                backgroundColor: 'rgba(232,133,108,0.5)',
+                                borderColor: '#E8856C',
+                                borderWidth: 0
                             }]
                         },
                         options: {
@@ -6280,8 +5423,8 @@
                             labels: ['Breakfast', 'Lunch', 'Dinner', 'Snacks'],
                             datasets: [{
                                 data: [data.mealTypes.breakfast, data.mealTypes.lunch, data.mealTypes.dinner, data.mealTypes.snacks],
-                                backgroundColor: ['#FF9500', '#22d3a5', '#667eea', '#a855f7'],
-                                borderWidth: 2,
+                                backgroundColor: ['#D4A574', '#7DCEA0', '#E8856C', '#B8A9CC'],
+                                borderWidth: 0,
                                 borderColor: 'rgba(0,0,0,0.3)'
                             }]
                         },
@@ -6308,16 +5451,16 @@
                                 {
                                     label: 'Actual Avg',
                                     data: [data.macros.actual.protein, data.macros.actual.carbs, data.macros.actual.fat],
-                                    borderColor: '#FF6B00',
-                                    backgroundColor: 'rgba(255,107,0,0.15)',
-                                    pointBackgroundColor: '#FF6B00'
+                                    borderColor: '#E8856C',
+                                    backgroundColor: 'rgba(232,133,108,0.15)',
+                                    pointBackgroundColor: '#E8856C'
                                 },
                                 {
                                     label: 'Platform Goals',
                                     data: [data.macros.goals.protein, data.macros.goals.carbs, data.macros.goals.fat],
-                                    borderColor: '#667eea',
-                                    backgroundColor: 'rgba(102,126,234,0.15)',
-                                    pointBackgroundColor: '#667eea'
+                                    borderColor: '#7EB8DA',
+                                    backgroundColor: 'rgba(126,184,218,0.15)',
+                                    pointBackgroundColor: '#7EB8DA'
                                 }
                             ]
                         },
@@ -6354,11 +5497,12 @@
                             datasets: [{
                                 label: 'Calories Consumed',
                                 data: data.dailyCalories.values,
-                                borderColor: '#FF6B00',
+                                borderColor: '#E8856C',
                                 backgroundColor: gradient,
                                 fill: true,
                                 tension: 0.4,
-                                pointRadius: 4,
+                                borderWidth: 1.5,
+                                pointRadius: 0,
                                 pointHoverRadius: 6
                             }]
                         },
@@ -6397,7 +5541,7 @@
 
                     const distLabels = Object.keys(data.distribution);
                     const distValues = Object.values(data.distribution);
-                    const distColors = ['#22d3a5', '#34d399', '#a3a3a3', '#f97316', '#ef4444'];
+                    const distColors = ['#7DCEA0', '#7DCEA0', '#AEAEB2', '#D4A574', '#D4847C'];
 
                     new Chart(distCtx, {
                         type: 'bar',
@@ -6436,11 +5580,12 @@
                             datasets: [{
                                 label: 'Avg Weight (kg)',
                                 data: data.weeklyTrend.values,
-                                borderColor: '#667eea',
+                                borderColor: '#E8856C',
                                 backgroundColor: gradient,
                                 fill: true,
                                 tension: 0.3,
-                                pointRadius: 4,
+                                borderWidth: 1.5,
+                                pointRadius: 0,
                                 pointHoverRadius: 6
                             }]
                         },
@@ -6521,7 +5666,7 @@
                 },
                 {
                     platform: 'linkedin',
-                    copy: 'The Corporate Athlete\'s Secret: Strategic Recovery 📈\n\nNew research shows that taking a 10-minute walk every 90 minutes increases productivity by 23% and creativity by 41%.\n\nOur ROVI dashboard data reveals:\n• Users who log 250+ steps per work hour show 67% better stress metrics\n• "Micro-workout" participants earn 3x more consistency XP\n• Active break-takers maintain energy levels 4 hours longer',
+                    copy: 'The Corporate Athlete\'s Secret: Strategic Recovery 📈\n\nNew research shows that taking a 10-minute walk every 90 minutes increases productivity by 23% and creativity by 41%.\n\nOur ROVI dashboard data reveals:\n• Users who log 250+ steps per work hour show 67% better stress metrics\n• "Micro-workout" participants show 3x more consistency gains\n• Active break-takers maintain energy levels 4 hours longer',
                     hashtags: '#CorporateWellness #ProductivityHacks #WorkplaceHealth',
                     stats: {
                         'Productivity Boost': '+23%',
@@ -6710,10 +5855,9 @@
         
         function generateProgressPost() {
             const steps = document.getElementById('weeklySteps').value || 70000;
-            const xp = document.getElementById('xpEarned').value || 1200;
             const dailyAvg = Math.floor(steps / 7);
-            
-            alert(`Generated Post:\\n\\n📊 WEEKLY STATS DROP!\\n\\n${steps.toLocaleString()} total steps (${dailyAvg.toLocaleString()}/day avg)\\n${xp} XP earned - Level ${Math.floor(xp/100)} achieved! 🎮\\n\\nThis activity level reduces all-cause mortality by 65% according to Harvard research.\\n\\n#WeeklyProgress #DataDriven #HealthMetrics`);
+
+            alert(`Generated Post:\\n\\n📊 WEEKLY STATS DROP!\\n\\n${steps.toLocaleString()} total steps (${dailyAvg.toLocaleString()}/day avg)\\n\\nThis activity level reduces all-cause mortality by 65% according to Harvard research.\\n\\n#WeeklyProgress #DataDriven #HealthMetrics`);
         }
         
         function generateNutritionPost() {
@@ -6737,7 +5881,6 @@
             { icon: '🍎', title: 'Go to Food Data', action: () => navigateToPage('foods'), keywords: 'nutrition meals calories' },
             { icon: '🏃', title: 'Go to Activities', action: () => navigateToPage('activities'), keywords: 'exercise workout fitness' },
             { icon: '👥', title: 'Go to Users', action: () => navigateToPage('users'), keywords: 'people members accounts' },
-            { icon: '⭐', title: 'Go to XP Admin', action: () => navigateToPage('xpadmin'), keywords: 'points experience gamification' },
             { icon: '📈', title: 'Go to Analytics', action: () => navigateToPage('analytics'), keywords: 'stats data metrics insights' },
             { icon: '📈', title: 'Go to Growth', action: () => navigateToPage('growth'), keywords: 'signups cohort retention' },
             { icon: '💪', title: 'Go to Workouts', action: () => navigateToPage('workouts'), keywords: 'exercise activity fitness' },
@@ -6756,10 +5899,9 @@
             
             // Data Queries
             { icon: '👤', title: 'Find user by ID', action: () => promptUserSearch(), keywords: 'search locate specific' },
-            { icon: '📈', title: 'Users with XP > 1000', action: () => filterHighXP(), keywords: 'top performers best' },
             { icon: '😴', title: 'Inactive users (7+ days)', action: () => showInactiveUsers(), keywords: 'dormant quiet abandoned' },
             { icon: '🏃', title: 'Users who walked 10k+ today', action: () => showActiveWalkers(), keywords: 'steps walking active' },
-            { icon: '🎯', title: 'Users near level up', action: () => showNearLevelUp(), keywords: 'milestone achievement progress' }
+            { icon: '🎯', title: 'Users near milestone', action: () => showNearLevelUp(), keywords: 'milestone achievement progress' }
         ];
         
         function openCommandPalette() {
@@ -6945,7 +6087,7 @@
             
             if (randomCheck < 0.1) {
                 showAlert('warning', 'Unusual Activity Detected', 
-                    'User #4821 earned 500 XP in 5 minutes', 
+                    'User #4821 logged unusual activity in 5 minutes',
                     'investigateUser("4821")');
             }
             
@@ -7200,11 +6342,6 @@
             }
         }
         
-        function filterHighXP() {
-            console.log('Filtering users with XP > 1000');
-            navigateToPage('users');
-            // Add filtering logic
-        }
         
         function showInactiveUsers() {
             console.log('Showing inactive users');
@@ -7219,12 +6356,12 @@
         
         function showNearLevelUp() {
             console.log('Showing users near level up');
-            navigateToPage('xpadmin');
+            navigateToPage('users');
         }
-        
+
         function showFlaggedUsers() {
             console.log('Showing flagged users');
-            navigateToPage('xpadmin');
+            navigateToPage('users');
         }
         
         function showAnomalies() {
