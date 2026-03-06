@@ -2680,39 +2680,39 @@
                 );
                 const activityPromises = dataCache.users.map(user =>
                     db.collection('users').doc(user.id)
-                        .collection('activityLog').doc(today).get()
-                        .then(doc => {
-                            if (doc.exists) {
-                                const data = doc.data();
-                                if (data.entries && Array.isArray(data.entries)) {
-                                    let cal = 0; data.entries.forEach(e => cal += e.caloriesBurned || 0);
-                                    return { calories: cal, sessions: data.entries.length, userId: user.id, raw: data };
-                                } else if (data.caloriesBurned !== undefined) {
-                                    return { calories: data.caloriesBurned || 0, sessions: 1, userId: user.id, raw: data };
-                                }
-                            }
-                            return { calories: 0, sessions: 0, userId: user.id, raw: null };
+                        .collection('activityLog').doc(today)
+                        .collection('entries').get()
+                        .then(snap => {
+                            let cal = 0, sessions = 0;
+                            const entries = [];
+                            snap.forEach(doc => {
+                                const d = doc.data();
+                                cal += d.caloriesBurned || 0;
+                                sessions++;
+                                entries.push(d);
+                            });
+                            return { calories: cal, sessions, userId: user.id, raw: { entries } };
                         })
                         .catch(() => ({ calories: 0, sessions: 0, userId: user.id, raw: null }))
                 );
                 const foodPromises = dataCache.users.map(user =>
                     db.collection('users').doc(user.id)
-                        .collection('foodLog').doc(today).get()
-                        .then(doc => {
+                        .collection('foodLog').doc(today)
+                        .collection('entries').get()
+                        .then(snap => {
                             const foods = [];
-                            let rawData = null;
-                            if (doc.exists) {
-                                const data = doc.data();
-                                rawData = data;
-                                ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
-                                    if (data[mealType] && Array.isArray(data[mealType])) {
-                                        data[mealType].forEach(item => {
-                                            foods.push({ name: item.name || 'Unknown', calories: item.calories || 0, userId: user.id, mealType });
-                                        });
-                                    }
+                            const rawEntries = [];
+                            snap.forEach(doc => {
+                                const item = doc.data();
+                                rawEntries.push(item);
+                                foods.push({
+                                    name: item.name || item.foodName || 'Unknown',
+                                    calories: item.calories || 0,
+                                    userId: user.id,
+                                    mealType: item.mealType || 'snacks'
                                 });
-                            }
-                            return { foods, userId: user.id, rawData };
+                            });
+                            return { foods, userId: user.id, rawData: rawEntries.length > 0 ? { entries: rawEntries } : null };
                         })
                         .catch(() => ({ foods: [], userId: user.id, rawData: null }))
                 );
@@ -3785,35 +3785,39 @@
                     }
                 }
 
-                // Activities from cache
+                // Activities from cache (entries subcollection format)
                 const userActivity = dataCache.todayActivities?.[user.id];
-                if (userActivity && userActivity.name && userActivity.caloriesBurned > 0) {
-                    const feedKey = `${user.id}-activity-${userActivity.name}`;
-                    if (!feedItemKeys.has(feedKey)) {
-                        feedItemKeys.add(feedKey);
-                        feedItems.push({
-                            type: 'activity',
-                            data: { userId: user.id, userEmail: user.email, name: user.name, activityName: userActivity.name, duration: userActivity.duration, caloriesBurned: userActivity.caloriesBurned, timestamp: new Date(), isNew: false },
-                            timestamp: new Date()
-                        });
-                    }
+                if (userActivity && userActivity.entries && Array.isArray(userActivity.entries)) {
+                    userActivity.entries.forEach(entry => {
+                        const actName = entry.name || entry.activityName || 'Workout';
+                        const actCal = entry.caloriesBurned || 0;
+                        if (actCal > 0) {
+                            const feedKey = `${user.id}-activity-${actName}`;
+                            if (!feedItemKeys.has(feedKey)) {
+                                feedItemKeys.add(feedKey);
+                                feedItems.push({
+                                    type: 'activity',
+                                    data: { userId: user.id, userEmail: user.email, name: user.name, activityName: actName, duration: entry.duration || 0, caloriesBurned: actCal, timestamp: new Date(), isNew: false },
+                                    timestamp: new Date()
+                                });
+                            }
+                        }
+                    });
                 }
 
-                // Foods from cache
+                // Foods from cache (entries subcollection format)
                 const userFoods = dataCache.todayFoods?.[user.id];
-                if (userFoods) {
-                    ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
-                        if (userFoods[mealType] && Array.isArray(userFoods[mealType])) {
-                            userFoods[mealType].forEach(food => {
-                                const feedKey = `${user.id}-${mealType}-${food.name}`;
-                                if (!feedItemKeys.has(feedKey)) {
-                                    feedItemKeys.add(feedKey);
-                                    feedItems.push({
-                                        type: 'food',
-                                        data: { userId: user.id, userEmail: user.email, name: user.name, foodName: food.name, calories: food.calories, mealType: mealType, timestamp: new Date(), isNew: false },
-                                        timestamp: new Date()
-                                    });
-                                }
+                if (userFoods && userFoods.entries && Array.isArray(userFoods.entries)) {
+                    userFoods.entries.forEach(food => {
+                        const foodName = food.name || food.foodName || 'Unknown';
+                        const mealType = food.mealType || 'snacks';
+                        const feedKey = `${user.id}-food-${foodName}-${food.calories || 0}`;
+                        if (!feedItemKeys.has(feedKey)) {
+                            feedItemKeys.add(feedKey);
+                            feedItems.push({
+                                type: 'food',
+                                data: { userId: user.id, userEmail: user.email, name: user.name, foodName: foodName, calories: food.calories || 0, mealType: mealType, timestamp: new Date(), isNew: false },
+                                timestamp: new Date()
                             });
                         }
                     });
@@ -3905,52 +3909,47 @@
                     });
                 feedListeners.push(stepsListener);
                 
-                // Listen to food logs (stored in document fields)
+                // Listen to food log entries subcollection
                 const foodListener = db.collection('users').doc(user.id)
                     .collection('foodLog').doc(today)
-                    .onSnapshot(doc => {
-                        if (doc.exists) {
-                            const data = doc.data();
-                            // Check each meal type for new entries
-                            ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(mealType => {
-                                if (data[mealType] && Array.isArray(data[mealType])) {
-                                    data[mealType].forEach(food => {
-                                        // Check if this food item is already in feed
-                                        const feedKey = `${user.id}-${mealType}-${food.name}`;
-                                        if (!feedItemKeys.has(feedKey)) {
-                                            feedItemKeys.add(feedKey);
-                                            feedItems.push({
-                                                type: 'food',
-                                                data: {
-                                                    userId: user.id,
-                                                    userEmail: user.email,
-                                                    name: user.name,
-                                                    foodName: food.name,
-                                                    calories: food.calories,
-                                                    mealType: mealType,
-                                                    timestamp: new Date(),
-                                                    isNew: true
-                                                },
-                                                timestamp: new Date()
-                                            });
-                                        }
+                    .collection('entries')
+                    .onSnapshot(snap => {
+                        snap.docChanges().forEach(change => {
+                            if (change.type === 'added') {
+                                const food = change.doc.data();
+                                const feedKey = `${user.id}-food-${change.doc.id}`;
+                                if (!feedItemKeys.has(feedKey)) {
+                                    feedItemKeys.add(feedKey);
+                                    feedItems.push({
+                                        type: 'food',
+                                        data: {
+                                            userId: user.id,
+                                            userEmail: user.email,
+                                            name: user.name,
+                                            foodName: food.name || food.foodName || 'Unknown',
+                                            calories: food.calories || 0,
+                                            mealType: food.mealType || 'snacks',
+                                            timestamp: new Date(),
+                                            isNew: true
+                                        },
+                                        timestamp: new Date()
                                     });
                                 }
-                            });
-                            updateFeedDisplay();
-                        }
+                            }
+                        });
+                        updateFeedDisplay();
                     });
                 feedListeners.push(foodListener);
                 
-                // Listen to activities (stored in document fields)
+                // Listen to activity log entries subcollection
                 const activityListener = db.collection('users').doc(user.id)
                     .collection('activityLog').doc(today)
-                    .onSnapshot(doc => {
-                        if (doc.exists) {
-                            const data = doc.data();
-                            if (data.caloriesBurned !== undefined && data.name) {
-                                // Single activity stored directly
-                                const feedKey = `${user.id}-activity-${data.name}`;
+                    .collection('entries')
+                    .onSnapshot(snap => {
+                        snap.docChanges().forEach(change => {
+                            if (change.type === 'added') {
+                                const activity = change.doc.data();
+                                const feedKey = `${user.id}-activity-${change.doc.id}`;
                                 if (!feedItemKeys.has(feedKey)) {
                                     feedItemKeys.add(feedKey);
                                     feedItems.push({
@@ -3959,40 +3958,18 @@
                                             userId: user.id,
                                             userEmail: user.email,
                                             name: user.name,
-                                            activityName: data.name,
-                                            duration: data.duration,
-                                            caloriesBurned: data.caloriesBurned,
-                                            timestamp: data.dateCreated || new Date(),
+                                            activityName: activity.name || activity.type || 'Activity',
+                                            duration: activity.duration || 0,
+                                            caloriesBurned: activity.caloriesBurned || 0,
+                                            timestamp: activity.dateCreated || new Date(),
                                             isNew: true
                                         },
                                         timestamp: new Date()
                                     });
                                 }
-                            } else if (data.entries && Array.isArray(data.entries)) {
-                                // Multiple activities in entries array
-                                data.entries.forEach(activity => {
-                                    const feedKey = `${user.id}-activity-${activity.name}`;
-                                    if (!feedItemKeys.has(feedKey)) {
-                                        feedItemKeys.add(feedKey);
-                                        feedItems.push({
-                                            type: 'activity',
-                                            data: {
-                                                userId: user.id,
-                                                userEmail: user.email,
-                                                name: user.name,
-                                                activityName: activity.name,
-                                                duration: activity.duration,
-                                                caloriesBurned: activity.caloriesBurned,
-                                                timestamp: activity.dateCreated || new Date(),
-                                                isNew: true
-                                            },
-                                            timestamp: new Date()
-                                        });
-                                    }
-                                });
                             }
-                            updateFeedDisplay();
-                        }
+                        });
+                        updateFeedDisplay();
                     });
                 feedListeners.push(activityListener);
             }

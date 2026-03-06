@@ -76,8 +76,8 @@ const ROVIInsights = (function() {
                     );
                 } else if (needsFood) {
                     allPromises.push(
-                        db.collection('users').doc(user.id).collection('foodLog').doc(dateStr).get()
-                            .then(doc => ({ dateStr, doc, type: 'food' }))
+                        db.collection('users').doc(user.id).collection('foodLog').doc(dateStr).collection('entries').get()
+                            .then(snap => ({ dateStr, snap, type: 'food' }))
                             .catch(() => null)
                     );
                 } else if (needsActivity) {
@@ -104,14 +104,11 @@ const ROVIInsights = (function() {
                 if (metric === 'steps') dayTotals[r.dateStr] += data.count || 0;
                 else if (metric === 'calories') dayTotals[r.dateStr] += data.caloriesBurned || 0;
                 else if (metric === 'activeUsers' && (data.count || 0) > 0) dayTotals[r.dateStr]++;
-            } else if (r.type === 'food' && r.doc && r.doc.exists) {
-                const data = r.doc.data();
+            } else if (r.type === 'food' && r.snap && !r.snap.empty) {
                 if (metric === 'foods') {
-                    const meals = data.meals || data.entries || [];
-                    dayTotals[r.dateStr] += Array.isArray(meals) ? meals.length : 0;
+                    dayTotals[r.dateStr] += r.snap.size;
                 } else if (metric === 'caloriesConsumed') {
-                    const meals = data.meals || data.entries || [];
-                    if (Array.isArray(meals)) meals.forEach(m => { dayTotals[r.dateStr] += m.calories || 0; });
+                    r.snap.forEach(doc => { dayTotals[r.dateStr] += doc.data().calories || 0; });
                 }
             } else if (r.type === 'activity' && r.snap) {
                 r.snap.forEach(doc => {
@@ -160,9 +157,9 @@ const ROVIInsights = (function() {
                 );
                 allPromises.push(
                     db.collection('users').doc(user.id)
-                        .collection('foodLog').doc(dateStr).get()
-                        .then(doc => ({ type: 'food', dayIdx: i, dateStr, doc }))
-                        .catch(() => ({ type: 'food', dayIdx: i, dateStr, doc: null }))
+                        .collection('foodLog').doc(dateStr).collection('entries').get()
+                        .then(snap => ({ type: 'food', dayIdx: i, dateStr, snap }))
+                        .catch(() => ({ type: 'food', dayIdx: i, dateStr, snap: null }))
                 );
             }
         }
@@ -184,10 +181,10 @@ const ROVIInsights = (function() {
                 d.steps += count;
                 d.calories += data.caloriesBurned || 0;
                 if (count > 0) d.activeUsers++;
-            } else {
-                const data = r.doc.data();
-                const meals = data.meals || data.entries || [];
-                d.foods += Array.isArray(meals) ? meals.length : 0;
+            } else if (r.type === 'food') {
+                if (r.snap && !r.snap.empty) {
+                    d.foods += r.snap.size;
+                }
             }
         }
 
@@ -664,9 +661,9 @@ const ROVIInsights = (function() {
             for (const user of users) {
                 allPromises.push(
                     db.collection('users').doc(user.id)
-                        .collection('foodLog').doc(dateStr).get()
-                        .then(doc => ({ dateStr, doc }))
-                        .catch(() => ({ dateStr, doc: null }))
+                        .collection('foodLog').doc(dateStr).collection('entries').get()
+                        .then(snap => ({ dateStr, snap }))
+                        .catch(() => ({ dateStr, snap: null }))
                 );
             }
         }
@@ -678,32 +675,30 @@ const ROVIInsights = (function() {
         dateStrs.forEach(d => { dayCalMap[d] = 0; });
 
         for (const r of results) {
-            if (r.doc && r.doc.exists) {
-                const meals = r.doc.data().meals || r.doc.data().entries || [];
-                if (Array.isArray(meals) && meals.length > 0) {
-                    totalLogDays++;
-                    daysWithLogs++;
-                    meals.forEach(meal => {
-                        totalMeals++;
-                        const cal = meal.calories || 0;
-                        dayCalMap[r.dateStr] += cal;
-                        totalCalories += cal;
-                        totalProtein += meal.protein || 0;
-                        totalCarbs += meal.carbs || 0;
-                        totalFat += meal.fat || 0;
+            if (r.snap && !r.snap.empty) {
+                totalLogDays++;
+                daysWithLogs++;
+                r.snap.forEach(doc => {
+                    const meal = doc.data();
+                    totalMeals++;
+                    const cal = meal.calories || 0;
+                    dayCalMap[r.dateStr] += cal;
+                    totalCalories += cal;
+                    totalProtein += meal.protein || 0;
+                    totalCarbs += meal.carbs || 0;
+                    totalFat += meal.fat || 0;
 
-                        // Count food names
-                        const fname = meal.name || meal.foodName || 'Unknown';
-                        foodCounts[fname] = (foodCounts[fname] || 0) + 1;
+                    // Count food names
+                    const fname = meal.name || meal.foodName || 'Unknown';
+                    foodCounts[fname] = (foodCounts[fname] || 0) + 1;
 
-                        // Classify meal type
-                        const mealType = (meal.mealType || meal.type || '').toLowerCase();
-                        if (mealType.includes('breakfast')) mealTypes.breakfast++;
-                        else if (mealType.includes('lunch')) mealTypes.lunch++;
-                        else if (mealType.includes('dinner')) mealTypes.dinner++;
-                        else mealTypes.snacks++;
-                    });
-                }
+                    // Classify meal type
+                    const mealType = (meal.mealType || meal.type || '').toLowerCase();
+                    if (mealType.includes('breakfast')) mealTypes.breakfast++;
+                    else if (mealType.includes('lunch')) mealTypes.lunch++;
+                    else if (mealType.includes('dinner')) mealTypes.dinner++;
+                    else mealTypes.snacks++;
+                });
             }
         }
 
