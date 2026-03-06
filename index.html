@@ -1987,20 +1987,20 @@
         function initializeApp() {
             console.log('DOM ready, initializing app...');
             setupEventListeners();
-        }
-        
-        // Global function for inline onclick
-        window.handleSignIn = async function() {
-            console.log('handleSignIn called');
-            try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: 'select_account' });
-                const result = await auth.signInWithPopup(provider);
-                console.log('Sign in successful:', result.user.email);
-            } catch (error) {
-                console.error('Sign in error:', error);
-                alert('Sign in failed: ' + error.message);
-            }
+
+            // Set up global sign-in handler (must be after Firebase init)
+            window.handleSignIn = async function() {
+                console.log('handleSignIn called');
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.setCustomParameters({ prompt: 'select_account' });
+                    const result = await auth.signInWithPopup(provider);
+                    console.log('Sign in successful:', result.user.email);
+                } catch (error) {
+                    console.error('Sign in error:', error);
+                    document.getElementById('loginError').textContent = 'Sign in failed: ' + error.message;
+                }
+            };
         }
         
         // Firebase Configuration
@@ -2264,29 +2264,7 @@
         function setupEventListeners() {
             console.log('Setting up event listeners...');
             
-            // Sign In
-            const signInBtn = document.getElementById('googleSignInBtn');
-            console.log('Sign in button element:', signInBtn);
-            if (signInBtn) {
-                signInBtn.addEventListener('click', async () => {
-                console.log('Sign in button clicked');
-                debugLog('AUTH', 'Sign in button clicked');
-            try {
-                debugLog('AUTH', 'Creating Google Auth Provider...');
-                const provider = new firebase.auth.GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: 'select_account' });
-                debugLog('AUTH', 'Attempting sign in with popup...');
-                const result = await auth.signInWithPopup(provider);
-                debugLog('AUTH', 'Sign in successful', { user: result.user.email });
-            } catch (error) {
-                console.error('Sign in error:', error);
-                debugLog('ERROR', `Sign in failed: ${error.message}`, error);
-                showError(error.message);
-            }
-            });
-            } else {
-                console.error('Sign in button not found!');
-            }
+            // Sign In - handled by window.handleSignIn via onclick attribute
 
             // Sign Out
             const signOutBtn = document.getElementById('signOutBtn');
