@@ -2674,6 +2674,14 @@
                 card.offsetHeight;
                 card.classList.add('card-animate-in');
             });
+            // Safety: ensure all cards visible after max animation time
+            const maxDelay = cards.length * 50 + 600;
+            setTimeout(() => {
+                cards.forEach(card => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'none';
+                });
+            }, maxDelay);
         }
 
         // --- Scroll Reveal ---
@@ -2683,7 +2691,9 @@
             if (scrollObserver) scrollObserver.disconnect();
 
             const cards = pageElement.querySelectorAll('.stat-card, .chart-card, .kpi-card, .metric-card');
-            const revealTargets = Array.from(cards).slice(4);
+            // Only apply to pages with many cards; skip first 6 (covered by stagger)
+            if (cards.length <= 6) return;
+            const revealTargets = Array.from(cards).slice(6);
             revealTargets.forEach(card => {
                 card.classList.add('scroll-reveal');
                 card.classList.remove('revealed');
@@ -2696,7 +2706,7 @@
                         scrollObserver.unobserve(entry.target);
                     }
                 });
-            }, { threshold: 0.1, rootMargin: '-60px 0px' });
+            }, { threshold: 0.05, rootMargin: '0px' });
 
             revealTargets.forEach(card => scrollObserver.observe(card));
         }
@@ -2737,10 +2747,15 @@
                 document.getElementById('pageTitle').textContent = label || page;
                 currentPageId = page;
 
-                triggerStaggeredCards(pageElement);
-                applyScrollReveal(pageElement);
+                // Load content first, then animate after a tick
                 loadPageContent(page);
                 updatePillIndicator();
+
+                // Delay animations so dynamically-loaded content is in DOM
+                requestAnimationFrame(() => {
+                    triggerStaggeredCards(pageElement);
+                    applyScrollReveal(pageElement);
+                });
             }
 
             if (outgoing && outgoing !== pageElement && !prefersReducedMotion) {
