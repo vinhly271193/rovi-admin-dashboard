@@ -2747,6 +2747,11 @@
                 document.getElementById('pageTitle').textContent = label || page;
                 currentPageId = page;
 
+                // Scroll to top on page switch
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) mainContent.scrollTop = 0;
+                window.scrollTo(0, 0);
+
                 // Load content first, then animate after a tick
                 loadPageContent(page);
                 updatePillIndicator();
