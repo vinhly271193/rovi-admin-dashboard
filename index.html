@@ -2763,12 +2763,12 @@
                 });
             }
 
-            if (outgoing && outgoing !== pageElement && !prefersReducedMotion) {
-                outgoing.classList.add('exiting');
-                setTimeout(enterPage, 200);
-            } else {
-                enterPage();
+            // Hide outgoing immediately — no exit delay (prevents layout gap)
+            if (outgoing && outgoing !== pageElement) {
+                outgoing.style.display = 'none';
+                outgoing.classList.remove('exiting');
             }
+            enterPage();
         }
 
         function setupEventListeners() {
